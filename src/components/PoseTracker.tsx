@@ -16,6 +16,7 @@ interface PoseTrackerProps {
 
 export interface PoseTrackerRef {
   capture: (memberName: string) => void;
+  getScreenshot: () => string | null;
 }
 
 const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGrid = false, facingMode = 'user' }, ref) => {
@@ -54,6 +55,22 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       link.download = `${name}-${dateStr}-${timeStr}.png`;
       link.href = dataUrl;
       link.click();
+    },
+    getScreenshot: () => {
+      if (!webcamRef.current || !webcamRef.current.video || !canvasRef.current) return null;
+      const video = webcamRef.current.video;
+      const overlayCanvas = canvasRef.current;
+      
+      const offCanvas = document.createElement('canvas');
+      offCanvas.width = video.videoWidth;
+      offCanvas.height = video.videoHeight;
+      const ctx = offCanvas.getContext('2d');
+      if (!ctx) return null;
+      
+      ctx.drawImage(video, 0, 0, offCanvas.width, offCanvas.height);
+      ctx.drawImage(overlayCanvas, 0, 0, offCanvas.width, offCanvas.height);
+      
+      return offCanvas.toDataURL('image/jpeg', 0.8);
     }
   }));
 
@@ -79,13 +96,28 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
     if (showGrid) {
       canvasCtx.save();
       canvasCtx.strokeStyle = 'rgba(255, 255, 255, 0.4)'; // Slightly more visible white
-      const gridLineWidth = Math.max(4, Math.floor(videoWidth / 200));
+      
+      // 화면의 실제 크기(해상도)에 맞춰 그리드 간격과 굵기 동적 계산
+      const canvasRect = canvasRef.current.getBoundingClientRect();
+      const scaleX = canvasRect.width > 0 ? videoWidth / canvasRect.width : 1;
+      const scaleY = canvasRect.height > 0 ? videoHeight / canvasRect.height : 1;
+      
+      // 화면 기준 간격 (화면이 커지면 간격도 넓어짐, 최소 50px 보장)
+      const visualSpacingX = Math.max(50, canvasRect.width / 8); 
+      const visualSpacingY = Math.max(50, canvasRect.height / 6);
+      
+      const colWidth = visualSpacingX * scaleX;
+      const rowHeight = visualSpacingY * scaleY;
+      
+      // 화면 기준 선 굵기 (화면 크기에 관계없이 항상 일정한 두께 유지, 또는 화면이 커지면 살짝 두꺼워지게)
+      // 화면 너비의 0.2% 두께, 최소 1px, 최대 4px
+      const visualLineWidth = Math.max(1, Math.min(4, canvasRect.width * 0.002));
+      const gridLineWidth = visualLineWidth * scaleX;
       canvasCtx.lineWidth = gridLineWidth;
 
       // Draw vertical lines
-      const cols = 8;
-      const colWidth = videoWidth / cols;
-      for (let i = 1; i < cols; i++) {
+      const cols = Math.floor(videoWidth / colWidth);
+      for (let i = 1; i <= cols; i++) {
         canvasCtx.beginPath();
         canvasCtx.moveTo(i * colWidth, 0);
         canvasCtx.lineTo(i * colWidth, videoHeight);
@@ -93,9 +125,8 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       }
 
       // Draw horizontal lines
-      const rows = 6;
-      const rowHeight = videoHeight / rows;
-      for (let i = 1; i < rows; i++) {
+      const rows = Math.floor(videoHeight / rowHeight);
+      for (let i = 1; i <= rows; i++) {
         canvasCtx.beginPath();
         canvasCtx.moveTo(0, i * rowHeight);
         canvasCtx.lineTo(videoWidth, i * rowHeight);
@@ -104,7 +135,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
 
       // Draw strong center vertical line for symmetry check
       canvasCtx.strokeStyle = 'rgba(0, 255, 255, 0.6)'; // Cyan
-      canvasCtx.lineWidth = gridLineWidth;
+      canvasCtx.lineWidth = gridLineWidth * 1.5;
       canvasCtx.beginPath();
       canvasCtx.moveTo(videoWidth / 2, 0);
       canvasCtx.lineTo(videoWidth / 2, videoHeight);
