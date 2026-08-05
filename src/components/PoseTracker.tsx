@@ -104,7 +104,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
 
       // Draw strong center vertical line for symmetry check
       canvasCtx.strokeStyle = 'rgba(0, 255, 255, 0.6)'; // Cyan
-      canvasCtx.lineWidth = gridLineWidth * 2;
+      canvasCtx.lineWidth = gridLineWidth;
       canvasCtx.beginPath();
       canvasCtx.moveTo(videoWidth / 2, 0);
       canvasCtx.lineTo(videoWidth / 2, videoHeight);
