@@ -4,7 +4,7 @@ import { OrbitControls, Sphere, Line } from '@react-three/drei';
 import type { LandmarkList } from '@mediapipe/pose';
 
 // MediaPipe POSE_CONNECTIONS (fallback if global is not available)
-const POSE_CONNECTIONS = (window as any).POSE_CONNECTIONS || [
+const POSE_CONNECTIONS: [number, number][] = (window as any).POSE_CONNECTIONS || [
   [0, 1], [1, 2], [2, 3], [3, 7], [0, 4], [4, 5], [5, 6], [6, 8], [9, 10], 
   [11, 12], [11, 13], [13, 15], [15, 17], [15, 19], [15, 21], [17, 19], 
   [12, 14], [14, 16], [16, 18], [16, 20], [16, 22], [18, 20], [11, 23], 
