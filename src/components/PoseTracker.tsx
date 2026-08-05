@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useCallback, useImperativeHandle, forwardRef } from 'react';
+import { useRef, useEffect, useState, useCallback, useImperativeHandle, forwardRef } from 'react';
 import Webcam from 'react-webcam';
 import type { Results } from '@mediapipe/pose';
 import { calculateAngle, type Point } from '../utils/angleUtils';
@@ -380,11 +380,11 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
   }, [mode, showGrid]);
 
   useEffect(() => {
-    let camera: Camera | null = null;
+    let camera: any = null;
     let isComponentMounted = true;
 
     const pose = new Pose({
-      locateFile: (file) => {
+      locateFile: (file: string) => {
         return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
       },
     });
@@ -399,7 +399,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       selfieMode: true, // Acts like a mirror
     });
 
-    pose.onResults((results) => {
+    pose.onResults((results: Results) => {
       if (isComponentMounted) {
         onResults(results);
       }
