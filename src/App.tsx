@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import PoseTracker, { type PoseTrackerRef } from './components/PoseTracker';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import ReactMarkdown from 'react-markdown';
-import html2canvas from 'html2canvas';
+import * as htmlToImage from 'html-to-image';
 
 export type ExerciseMode = 'squat' | 'deadlift' | 'turtle' | 'asymmetry' | 'plank';
 
@@ -43,12 +43,10 @@ function App() {
   const handleSaveReport = async () => {
     if (!reportRef.current) return;
     try {
-      const canvas = await html2canvas(reportRef.current, {
+      const dataUrl = await htmlToImage.toPng(reportRef.current, {
         backgroundColor: '#111827', // bg-gray-900
-        scale: 2,
-        useCORS: true,
+        pixelRatio: 2,
       });
-      const dataUrl = canvas.toDataURL('image/png');
       const link = document.createElement('a');
       const now = new Date();
       const dateStr = now.getFullYear().toString().slice(-2) + 
@@ -135,10 +133,10 @@ function App() {
       
       const prompt = `전문 헬스 트레이너로서 첨부된 사진 속 회원의 '${currentModeLabel}' 자세를 분석해 주세요. 
 화면에 표시된 관절의 각도와 위치 가이드라인을 참고하여 다음 내용을 포함해 주세요:
-1. 현재 자세에서 잘된 점 (칭찬)
-2. 개선이 필요한 점과 그 이유
-3. 올바른 자세를 위한 구체적인 수정 팁 (3~4줄로 명확하고 친절하게)
-마크다운 형식으로 보기 좋게 작성해 주세요.`;
+### 1. 현재 자세에서 잘된 점 (칭찬)
+### 2. 개선이 필요한 점과 그 이유
+### 3. 올바른 자세를 위한 구체적인 수정 팁 (3~4줄로 명확하고 친절하게)
+반드시 위 3개의 소제목을 마크다운 h3(###) 태그로 시작해서 작성해 주세요. 마크다운 형식으로 보기 좋게 작성해 주세요.`;
 
       const imagePart = {
         inlineData: {
@@ -299,7 +297,30 @@ function App() {
                   </div>
                 )}
                 <div className="text-white prose prose-invert max-w-none">
-                  <ReactMarkdown>{analysisResult}</ReactMarkdown>
+                  <ReactMarkdown
+                    components={{
+                      h3: ({node, ...props}) => (
+                        <h3 
+                          className="bg-gradient-to-r from-purple-900/80 to-indigo-900/80 text-purple-200 px-4 py-3 rounded-xl text-lg md:text-xl font-extrabold mt-8 mb-4 shadow-lg border border-purple-500/30" 
+                          {...props} 
+                        />
+                      ),
+                      h2: ({node, ...props}) => (
+                        <h2 
+                          className="bg-gradient-to-r from-purple-900/80 to-indigo-900/80 text-purple-200 px-4 py-3 rounded-xl text-lg md:text-xl font-extrabold mt-8 mb-4 shadow-lg border border-purple-500/30" 
+                          {...props} 
+                        />
+                      ),
+                      h1: ({node, ...props}) => (
+                        <h1 
+                          className="bg-gradient-to-r from-purple-900/80 to-indigo-900/80 text-purple-200 px-4 py-3 rounded-xl text-lg md:text-xl font-extrabold mt-8 mb-4 shadow-lg border border-purple-500/30" 
+                          {...props} 
+                        />
+                      )
+                    }}
+                  >
+                    {analysisResult}
+                  </ReactMarkdown>
                 </div>
               </div>
             </div>
