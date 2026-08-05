@@ -12,6 +12,7 @@ interface PoseTrackerProps {
   mode: 'squat' | 'deadlift' | 'turtle' | 'asymmetry' | 'plank';
   showGrid?: boolean;
   facingMode?: 'user' | 'environment';
+  imageSrc?: string | null;
 }
 
 export interface PoseTrackerRef {
@@ -19,7 +20,7 @@ export interface PoseTrackerRef {
   getScreenshot: () => string | null;
 }
 
-const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGrid = false, facingMode = 'user' }, ref) => {
+const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGrid = false, facingMode = 'user', imageSrc = null }, ref) => {
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [feedback, setFeedback] = useState<string>('');
@@ -27,20 +28,10 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
 
   useImperativeHandle(ref, () => ({
     capture: (memberName: string) => {
-      if (!webcamRef.current || !webcamRef.current.video || !canvasRef.current) return;
-      const video = webcamRef.current.video;
+      if (!canvasRef.current) return;
       const overlayCanvas = canvasRef.current;
       
-      const offCanvas = document.createElement('canvas');
-      offCanvas.width = video.videoWidth;
-      offCanvas.height = video.videoHeight;
-      const ctx = offCanvas.getContext('2d');
-      if (!ctx) return;
-      
-      ctx.drawImage(video, 0, 0, offCanvas.width, offCanvas.height);
-      ctx.drawImage(overlayCanvas, 0, 0, offCanvas.width, offCanvas.height);
-      
-      const dataUrl = offCanvas.toDataURL('image/png');
+      const dataUrl = overlayCanvas.toDataURL('image/png');
       const link = document.createElement('a');
       
       const now = new Date();
@@ -57,28 +48,16 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       link.click();
     },
     getScreenshot: () => {
-      if (!webcamRef.current || !webcamRef.current.video || !canvasRef.current) return null;
-      const video = webcamRef.current.video;
-      const overlayCanvas = canvasRef.current;
-      
-      const offCanvas = document.createElement('canvas');
-      offCanvas.width = video.videoWidth;
-      offCanvas.height = video.videoHeight;
-      const ctx = offCanvas.getContext('2d');
-      if (!ctx) return null;
-      
-      ctx.drawImage(video, 0, 0, offCanvas.width, offCanvas.height);
-      ctx.drawImage(overlayCanvas, 0, 0, offCanvas.width, offCanvas.height);
-      
-      return offCanvas.toDataURL('image/jpeg', 0.8);
+      if (!canvasRef.current) return null;
+      return canvasRef.current.toDataURL('image/jpeg', 0.8);
     }
   }));
 
   const onResults = useCallback((results: Results) => {
-    if (!canvasRef.current || !webcamRef.current?.video) return;
+    if (!canvasRef.current) return;
 
-    const videoWidth = webcamRef.current.video.videoWidth;
-    const videoHeight = webcamRef.current.video.videoHeight;
+    const videoWidth = (results.image as any).videoWidth || (results.image as any).naturalWidth || results.image.width;
+    const videoHeight = (results.image as any).videoHeight || (results.image as any).naturalHeight || results.image.height;
 
     canvasRef.current.width = videoWidth;
     canvasRef.current.height = videoHeight;
@@ -428,32 +407,42 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       }
     });
 
-    const processFrame = async () => {
-      if (!isComponentMounted) return;
-
-      const video = webcamRef.current?.video;
-      // readyState >= 2 means HAVE_CURRENT_DATA
-      if (video && video.readyState >= 2 && !isProcessing) {
-        isProcessing = true;
+    if (imageSrc) {
+      const img = new Image();
+      img.onload = async () => {
+        if (!isComponentMounted) return;
         try {
-          await pose.send({ image: video });
+          await pose.send({ image: img });
         } catch (error) {
-          console.warn("Pose send error:", error);
-        } finally {
-          isProcessing = false;
+          console.warn("Pose send error for image:", error);
         }
-      }
-      animationFrameId = requestAnimationFrame(processFrame);
-    };
-
-    processFrame();
+      };
+      img.src = imageSrc;
+    } else {
+      const processFrame = async () => {
+        if (!isComponentMounted) return;
+        const video = webcamRef.current?.video;
+        if (video && video.readyState >= 2 && !isProcessing) {
+          isProcessing = true;
+          try {
+            await pose.send({ image: video });
+          } catch (error) {
+            console.warn("Pose send error:", error);
+          } finally {
+            isProcessing = false;
+          }
+        }
+        animationFrameId = requestAnimationFrame(processFrame);
+      };
+      processFrame();
+    }
 
     return () => {
       isComponentMounted = false;
       cancelAnimationFrame(animationFrameId);
       pose.close();
     };
-  }, [onResults, facingMode]);
+  }, [onResults, facingMode, imageSrc]);
 
   return (
     <div className="relative w-full h-full flex flex-col items-center justify-center bg-black">
@@ -466,21 +455,23 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
         </div>
       </div>
 
-      <Webcam
-        key={facingMode}
-        ref={webcamRef}
-        mirrored={facingMode === 'user'}
-        className="absolute w-full h-full object-cover z-0"
-        videoConstraints={{
-          facingMode: facingMode === 'environment' ? { exact: 'environment' } : 'user',
-          width: facingMode === 'environment' ? { ideal: 3840 } : { ideal: 1920 },
-          height: facingMode === 'environment' ? { ideal: 2160 } : { ideal: 1080 }
-        }}
-        onUserMediaError={(err) => console.error("Webcam access error:", err)}
-      />
+      {!imageSrc && (
+        <Webcam
+          key={facingMode}
+          ref={webcamRef}
+          mirrored={facingMode === 'user'}
+          className="absolute w-full h-full object-cover z-0"
+          videoConstraints={{
+            facingMode: facingMode === 'environment' ? { exact: 'environment' } : 'user',
+            width: facingMode === 'environment' ? { ideal: 3840 } : { ideal: 1920 },
+            height: facingMode === 'environment' ? { ideal: 2160 } : { ideal: 1080 }
+          }}
+          onUserMediaError={(err) => console.error("Webcam access error:", err)}
+        />
+      )}
       <canvas
         ref={canvasRef}
-        className="absolute w-full h-full object-cover z-10"
+        className={`absolute w-full h-full z-10 ${!imageSrc ? 'object-cover' : 'object-contain bg-black'}`}
       />
     </div>
   );

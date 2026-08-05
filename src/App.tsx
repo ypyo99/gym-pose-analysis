@@ -3,7 +3,7 @@ import PoseTracker, { type PoseTrackerRef } from './components/PoseTracker';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import ReactMarkdown from 'react-markdown';
 import * as htmlToImage from 'html-to-image';
-import { Sparkles, Grid3X3, SwitchCamera, Camera, Loader2, Settings } from 'lucide-react';
+import { Sparkles, Grid3X3, SwitchCamera, Camera, Loader2, Settings, Image as ImageIcon } from 'lucide-react';
 
 export type ExerciseMode = 'squat' | 'deadlift' | 'turtle' | 'asymmetry' | 'plank';
 
@@ -21,6 +21,8 @@ function App() {
   const [showGrid, setShowGrid] = useState<boolean>(false);
   const [showModes, setShowModes] = useState<boolean>(false);
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
+  const [inputMode, setInputMode] = useState<'camera' | 'photo'>('camera');
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [analysisResult, setAnalysisResult] = useState<string | null>(null);
   const [currentScreenshot, setCurrentScreenshot] = useState<string | null>(null);
@@ -28,6 +30,7 @@ function App() {
   const [apiKeyInput, setApiKeyInput] = useState<string>('');
   const trackerRef = useRef<PoseTrackerRef>(null);
   const reportRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const savedKey = localStorage.getItem('gemini_api_key');
@@ -69,6 +72,27 @@ function App() {
   const handleCapture = () => {
     if (trackerRef.current) {
       trackerRef.current.capture(memberName);
+    }
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setUploadedImage(event.target?.result as string);
+        setInputMode('photo');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleToggleMode = () => {
+    if (inputMode === 'camera') {
+      fileInputRef.current?.click();
+    } else {
+      setInputMode('camera');
+      setUploadedImage(null);
     }
   };
 
@@ -163,8 +187,18 @@ function App() {
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-gray-900 font-sans">
-      {/* Tracker Component */}
-      <PoseTracker ref={trackerRef} mode={mode} showGrid={showGrid} facingMode={facingMode} />
+      {/* Pose Tracker Component */}
+      <div className="absolute inset-0 z-0">
+        <PoseTracker ref={trackerRef} mode={mode} showGrid={showGrid} facingMode={facingMode} imageSrc={uploadedImage} />
+      </div>
+
+      <input 
+        type="file" 
+        accept="image/*" 
+        ref={fileInputRef} 
+        onChange={handleImageUpload} 
+        className="hidden" 
+      />
 
       {/* Clickable Overlay for toggling mode buttons */}
       <div 
@@ -215,14 +249,25 @@ function App() {
           <Grid3X3 className="w-6 h-6 md:w-8 md:h-8" />
         </button>
         
-        {/* Camera Toggle Button */}
+        {/* Mode Toggle Button */}
         <button
-          onClick={() => setFacingMode(prev => prev === 'user' ? 'environment' : 'user')}
-          className="w-14 h-14 md:w-16 md:h-16 flex items-center justify-center bg-white/20 backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] transition-transform active:scale-90 hover:bg-white/30 text-white"
-          title="카메라 전/후면 전환"
+          onClick={handleToggleMode}
+          className={`w-14 h-14 md:w-16 md:h-16 flex items-center justify-center backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] transition-transform active:scale-90 ${inputMode === 'photo' ? 'bg-green-500/80 text-white' : 'bg-white/20 text-white hover:bg-white/30'}`}
+          title="앨범 사진 불러오기"
         >
-          <SwitchCamera className="w-6 h-6 md:w-8 md:h-8" />
+          {inputMode === 'camera' ? <ImageIcon className="w-6 h-6 md:w-8 md:h-8" /> : <Camera className="w-6 h-6 md:w-8 md:h-8" />}
         </button>
+        
+        {/* Camera Toggle Button */}
+        {inputMode === 'camera' && (
+          <button
+            onClick={() => setFacingMode(prev => prev === 'user' ? 'environment' : 'user')}
+            className="w-14 h-14 md:w-16 md:h-16 flex items-center justify-center bg-white/20 backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] transition-transform active:scale-90 hover:bg-white/30 text-white"
+            title="카메라 전/후면 전환"
+          >
+            <SwitchCamera className="w-6 h-6 md:w-8 md:h-8" />
+          </button>
+        )}
         
         {/* Capture Button */}
         <button
