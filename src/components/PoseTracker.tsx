@@ -126,15 +126,19 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
         return lm;
       });
 
+      // Dynamically scale sizes based on video resolution (so it looks bold even in 4K)
+      const lineThickness = Math.max(8, Math.floor(videoWidth / 120));
+      const dotRadius = Math.max(12, Math.floor(videoWidth / 80));
+
       // Draw skeleton
       drawConnectors(canvasCtx, landmarksToDraw, POSE_CONNECTIONS, {
         color: '#00FF00',
-        lineWidth: 4,
+        lineWidth: lineThickness,
       });
       drawLandmarks(canvasCtx, landmarksToDraw, {
         color: '#FF0000',
-        lineWidth: 2,
-        radius: 4,
+        lineWidth: Math.max(3, Math.floor(lineThickness / 2)),
+        radius: dotRadius,
       });
 
       const baseFontSize = Math.max(18, Math.floor(videoWidth / 30));
