@@ -54,7 +54,7 @@ function App() {
       </div>
 
       {/* Side Action Buttons */}
-      <div className="absolute bottom-40 md:bottom-32 right-4 md:right-6 z-40 flex flex-col gap-3 md:gap-4">
+      <div className={`absolute bottom-40 md:bottom-32 right-4 md:right-6 z-40 flex flex-col gap-3 md:gap-4 transition-all duration-300 ${showModes ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8 pointer-events-none'}`}>
         {/* Grid Toggle Button */}
         <button
           onClick={() => setShowGrid(!showGrid)}
