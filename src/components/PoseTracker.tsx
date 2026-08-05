@@ -30,37 +30,62 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
   const [feedbackColor, setFeedbackColor] = useState<string>('text-white');
   const [worldLandmarks, setWorldLandmarks] = useState<any>(null);
   const [poseLandmarksData, setPoseLandmarksData] = useState<{landmarks: any, width: number, height: number} | null>(null);
+  const lastImageRef = useRef<HTMLImageElement | HTMLVideoElement | HTMLCanvasElement | null>(null);
 
-  useImperativeHandle(ref, () => ({
-    capture: (memberName: string) => {
-      if (!canvasRef.current) return;
-      const overlayCanvas = canvasRef.current;
+  useImperativeHandle(ref, () => {
+    const createCompositeImage = (mimeType = 'image/png', quality = 1.0) => {
+      if (!canvasRef.current || !lastImageRef.current) return null;
       
-      const dataUrl = overlayCanvas.toDataURL('image/png');
-      const link = document.createElement('a');
+      const img = lastImageRef.current;
+      const width = canvasRef.current.width;
+      const height = canvasRef.current.height;
       
-      const now = new Date();
-      const dateStr = now.getFullYear().toString().slice(-2) + 
-                      String(now.getMonth() + 1).padStart(2, '0') + 
-                      String(now.getDate()).padStart(2, '0');
-      const timeStr = String(now.getHours()).padStart(2, '0') + 
-                      String(now.getMinutes()).padStart(2, '0') + 
-                      String(now.getSeconds()).padStart(2, '0');
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = width;
+      tempCanvas.height = height;
+      const ctx = tempCanvas.getContext('2d');
+      if (!ctx) return null;
       
-      const name = memberName.trim() || '회원';
-      link.download = `${name}-${dateStr}-${timeStr}.png`;
-      link.href = dataUrl;
-      link.click();
-    },
-    getScreenshot: () => {
-      if (!canvasRef.current) return null;
-      return canvasRef.current.toDataURL('image/jpeg', 0.8);
-    }
-  }));
+      // Draw the original camera/photo image first
+      ctx.drawImage(img, 0, 0, width, height);
+      
+      // Draw the 2D canvas on top (which contains skeletons, angles, grids)
+      ctx.drawImage(canvasRef.current, 0, 0, width, height);
+      
+      return tempCanvas.toDataURL(mimeType, quality);
+    };
+
+    return {
+      capture: (memberName: string) => {
+        const dataUrl = createCompositeImage('image/png');
+        if (!dataUrl) return;
+        
+        const link = document.createElement('a');
+        
+        const now = new Date();
+        const dateStr = now.getFullYear().toString().slice(-2) + 
+                        String(now.getMonth() + 1).padStart(2, '0') + 
+                        String(now.getDate()).padStart(2, '0');
+        const timeStr = String(now.getHours()).padStart(2, '0') + 
+                        String(now.getMinutes()).padStart(2, '0') + 
+                        String(now.getSeconds()).padStart(2, '0');
+        
+        const name = memberName.trim() || '회원';
+        link.download = `${name}-${dateStr}-${timeStr}.png`;
+        link.href = dataUrl;
+        link.click();
+      },
+      getScreenshot: () => {
+        return createCompositeImage('image/jpeg', 0.8);
+      }
+    };
+  });
 
   const onResults = useCallback((results: Results) => {
     if (!canvasRef.current) return;
     
+    lastImageRef.current = results.image as any;
+
     const videoWidth = (results.image as any).videoWidth || (results.image as any).naturalWidth || results.image.width;
     const videoHeight = (results.image as any).videoHeight || (results.image as any).naturalHeight || results.image.height;
 
