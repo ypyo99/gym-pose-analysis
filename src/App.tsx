@@ -6,9 +6,9 @@ export type ExerciseMode = 'squat' | 'deadlift' | 'turtle' | 'asymmetry' | 'plan
 const MODE_CONFIGS: { id: ExerciseMode; label: string; color: string; shadow: string }[] = [
   { id: 'squat', label: '스쿼트', color: 'bg-blue-500', shadow: 'shadow-[0_0_15px_rgba(59,130,246,0.5)]' },
   { id: 'deadlift', label: '데드리프트', color: 'bg-purple-500', shadow: 'shadow-[0_0_15px_rgba(168,85,247,0.5)]' },
+  { id: 'plank', label: '플랭크', color: 'bg-red-500', shadow: 'shadow-[0_0_15px_rgba(239,68,68,0.5)]' },
   { id: 'turtle', label: '거북목', color: 'bg-green-500', shadow: 'shadow-[0_0_15px_rgba(34,197,94,0.5)]' },
   { id: 'asymmetry', label: '좌우균형', color: 'bg-orange-500', shadow: 'shadow-[0_0_15px_rgba(249,115,22,0.5)]' },
-  { id: 'plank', label: '플랭크', color: 'bg-red-500', shadow: 'shadow-[0_0_15px_rgba(239,68,68,0.5)]' },
 ];
 
 function App() {
