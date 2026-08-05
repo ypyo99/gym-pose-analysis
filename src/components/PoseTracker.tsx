@@ -5,7 +5,6 @@ import { calculateAngle, type Point } from '../utils/angleUtils';
 
 const Pose = (window as any).Pose;
 const POSE_CONNECTIONS = (window as any).POSE_CONNECTIONS;
-const Camera = (window as any).Camera;
 const drawConnectors = (window as any).drawConnectors;
 const drawLandmarks = (window as any).drawLandmarks;
 
@@ -380,8 +379,9 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
   }, [mode, showGrid]);
 
   useEffect(() => {
-    let camera: any = null;
     let isComponentMounted = true;
+    let animationFrameId: number;
+    let isProcessing = false;
 
     const pose = new Pose({
       locateFile: (file: string) => {
@@ -405,33 +405,29 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       }
     });
 
-    if (
-      typeof webcamRef.current !== 'undefined' &&
-      webcamRef.current !== null &&
-      webcamRef.current.video
-    ) {
-      camera = new Camera(webcamRef.current.video, {
-        onFrame: async () => {
-          if (!isComponentMounted) return;
-          if (webcamRef.current && webcamRef.current.video) {
-            try {
-              await pose.send({ image: webcamRef.current.video });
-            } catch (error) {
-              console.warn("Pose send error:", error);
-            }
-          }
-        },
-        width: 1280,
-        height: 720,
-      });
-      camera.start();
-    }
+    const processFrame = async () => {
+      if (!isComponentMounted) return;
+
+      const video = webcamRef.current?.video;
+      // readyState >= 2 means HAVE_CURRENT_DATA
+      if (video && video.readyState >= 2 && !isProcessing) {
+        isProcessing = true;
+        try {
+          await pose.send({ image: video });
+        } catch (error) {
+          console.warn("Pose send error:", error);
+        } finally {
+          isProcessing = false;
+        }
+      }
+      animationFrameId = requestAnimationFrame(processFrame);
+    };
+
+    processFrame();
 
     return () => {
       isComponentMounted = false;
-      if (camera) {
-        camera.stop();
-      }
+      cancelAnimationFrame(animationFrameId);
       pose.close();
     };
   }, [onResults]);
@@ -454,6 +450,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
         videoConstraints={{
           facingMode: 'user', // or 'environment' for rear camera
         }}
+        onUserMediaError={(err) => console.error("Webcam access error:", err)}
       />
       <canvas
         ref={canvasRef}
