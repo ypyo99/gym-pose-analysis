@@ -16,6 +16,7 @@ function App() {
   const [memberName, setMemberName] = useState<string>('');
   const [showGrid, setShowGrid] = useState<boolean>(false);
   const [showModes, setShowModes] = useState<boolean>(false);
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
   const trackerRef = useRef<PoseTrackerRef>(null);
 
   const handleCapture = () => {
@@ -28,7 +29,7 @@ function App() {
   return (
     <div className="relative w-full h-screen overflow-hidden bg-gray-900 font-sans">
       {/* Tracker Component */}
-      <PoseTracker ref={trackerRef} mode={mode} showGrid={showGrid} />
+      <PoseTracker ref={trackerRef} mode={mode} showGrid={showGrid} facingMode={facingMode} />
 
       {/* Clickable Overlay for toggling mode buttons */}
       <div 
@@ -62,6 +63,15 @@ function App() {
           title="그리드 표시 토글"
         >
           📐
+        </button>
+        
+        {/* Camera Toggle Button */}
+        <button
+          onClick={() => setFacingMode(prev => prev === 'user' ? 'environment' : 'user')}
+          className="w-14 h-14 md:w-16 md:h-16 text-2xl md:text-3xl flex items-center justify-center bg-white/20 backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] transition-transform active:scale-90 hover:bg-white/30 text-white"
+          title="카메라 전/후면 전환"
+        >
+          🔄
         </button>
         
         {/* Capture Button */}

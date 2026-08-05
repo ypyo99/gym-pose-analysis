@@ -11,13 +11,14 @@ const drawLandmarks = (window as any).drawLandmarks;
 interface PoseTrackerProps {
   mode: 'squat' | 'deadlift' | 'turtle' | 'asymmetry' | 'plank';
   showGrid?: boolean;
+  facingMode?: 'user' | 'environment';
 }
 
 export interface PoseTrackerRef {
   capture: (memberName: string) => void;
 }
 
-const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGrid = false }, ref) => {
+const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGrid = false, facingMode = 'user' }, ref) => {
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [feedback, setFeedback] = useState<string>('');
@@ -430,10 +431,10 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
 
       <Webcam
         ref={webcamRef}
-        mirrored={true}
+        mirrored={facingMode === 'user'}
         className="absolute w-full h-full object-cover z-0"
         videoConstraints={{
-          facingMode: 'user', // or 'environment' for rear camera
+          facingMode: facingMode, // dynamic facing mode
           width: { ideal: 3840 },
           height: { ideal: 2160 }
         }}
