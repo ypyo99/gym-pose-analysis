@@ -65,6 +65,30 @@ function App() {
     setAnalysisResult(null);
 
     try {
+      // API 키로 사용 가능한 모델 목록 확인
+      let targetModel = "gemini-1.5-flash";
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+        const data = await res.json();
+        
+        if (data && data.models) {
+          const availableModels = data.models.map((m: any) => m.name.replace('models/', ''));
+          console.log("Available models for this API key:", availableModels);
+          
+          if (availableModels.includes("gemini-1.5-flash")) targetModel = "gemini-1.5-flash";
+          else if (availableModels.includes("gemini-1.5-pro")) targetModel = "gemini-1.5-pro";
+          else if (availableModels.includes("gemini-1.5-flash-latest")) targetModel = "gemini-1.5-flash-latest";
+          else if (availableModels.includes("gemini-pro-vision")) targetModel = "gemini-pro-vision";
+          else {
+            const fallback = availableModels.find((m: string) => m.includes("vision") || m.includes("1.5"));
+            if (fallback) targetModel = fallback;
+          }
+        }
+      } catch (err) {
+        console.warn("Failed to fetch model list, using default.", err);
+      }
+
+      console.log(`Using model: ${targetModel}`);
       const genAI = new GoogleGenerativeAI(apiKey);
       const base64Data = screenshot.split(',')[1];
       const currentModeLabel = MODE_CONFIGS.find(m => m.id === mode)?.label || mode;
@@ -83,29 +107,15 @@ function App() {
         }
       };
 
-      let result;
-      try {
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-        result = await model.generateContent([prompt, imagePart]);
-      } catch (e: any) {
-        console.warn("gemini-1.5-flash failed, trying gemini-1.5-pro", e);
-        try {
-          const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
-          result = await model.generateContent([prompt, imagePart]);
-        } catch (e2: any) {
-          console.warn("gemini-1.5-pro failed, trying gemini-pro-vision", e2);
-          const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
-          result = await model.generateContent([prompt, imagePart]);
-        }
-      }
-
+      const model = genAI.getGenerativeModel({ model: targetModel });
+      const result = await model.generateContent([prompt, imagePart]);
       const response = await result.response;
       const text = response.text();
       
       setAnalysisResult(text);
-    } catch (error) {
+    } catch (error: any) {
       console.error("AI Analysis Error:", error);
-      alert("분석 중 오류가 발생했습니다. API 키나 네트워크 상태를 확인해주세요.");
+      alert(`분석 중 오류가 발생했습니다: ${error?.message || '알 수 없는 오류'}\n(F12를 눌러 콘솔 창에서 사용 가능한 모델 목록을 확인해 보세요)`);
     } finally {
       setIsAnalyzing(false);
     }
