@@ -71,32 +71,8 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
     canvasCtx.save();
     canvasCtx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
     
-    // Background Removal (Segmentation)
-    if (results.segmentationMask) {
-      // 1. Draw the segmentation mask with a blur filter to soften the harsh/jagged edges
-      canvasCtx.filter = 'blur(4px)';
-      canvasCtx.drawImage(results.segmentationMask, 0, 0, canvasRef.current.width, canvasRef.current.height);
-      canvasCtx.filter = 'none';
-      
-      // 2. Draw the original video frame only where the mask is (person only)
-      canvasCtx.globalCompositeOperation = 'source-in';
-      canvasCtx.drawImage(results.image, 0, 0, canvasRef.current.width, canvasRef.current.height);
-
-      // 3. Draw a dimming layer behind the person
-      canvasCtx.globalCompositeOperation = 'destination-over';
-      canvasCtx.fillStyle = 'rgba(17, 24, 39, 0.95)'; // 95% dark overlay
-      canvasCtx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-
-      // 4. Draw the original video behind the dimming layer
-      // This creates a "cinematic dark mode" where the messy edges blend into the real background
-      canvasCtx.drawImage(results.image, 0, 0, canvasRef.current.width, canvasRef.current.height);
-
-      // 5. Reset composite operation for drawing the skeleton normally
-      canvasCtx.globalCompositeOperation = 'source-over';
-    } else {
-      // If no mask is available yet, just draw the webcam feed normally
-      canvasCtx.drawImage(results.image, 0, 0, canvasRef.current.width, canvasRef.current.height);
-    }
+    // Draw the original video frame without background removal
+    canvasCtx.drawImage(results.image, 0, 0, canvasRef.current.width, canvasRef.current.height);
     
     // Draw Posture Grid
     if (showGrid) {
@@ -392,8 +368,6 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
     pose.setOptions({
       modelComplexity: 1,
       smoothLandmarks: true,
-      enableSegmentation: true,
-      smoothSegmentation: true,
       minDetectionConfidence: 0.5,
       minTrackingConfidence: 0.5,
       selfieMode: true, // Acts like a mirror
