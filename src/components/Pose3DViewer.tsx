@@ -23,20 +23,24 @@ const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks }) => {
   const transformedLandmarks = useMemo(() => {
     if (!worldLandmarks || worldLandmarks.length < 25) return null;
 
-    // Find center X and Z from hips (landmarks 23 and 24)
-    const leftHip = worldLandmarks[23];
-    const rightHip = worldLandmarks[24];
-    const cx = (leftHip.x + rightHip.x) / 2;
-    const cz = (leftHip.z + rightHip.z) / 2;
-
-    // Find lowest point (max Y in mediapipe because Y goes down) to place on grid
+    let minX = Infinity, maxX = -Infinity;
+    let minZ = Infinity, maxZ = -Infinity;
     let maxY = -Infinity;
-    worldLandmarks.forEach((lm: any) => {
-      if (lm.visibility && lm.visibility > 0.5 && lm.y > maxY) {
-        maxY = lm.y;
+
+    worldLandmarks.forEach((lm: any, i: number) => {
+      // Exclude face (0-10), hands (17-22), and feet (29-32) from bounding box
+      if (lm.visibility && lm.visibility > 0.5 && i > 10 && (i < 17 || i > 22) && i < 29) {
+        if (lm.x < minX) minX = lm.x;
+        if (lm.x > maxX) maxX = lm.x;
+        if (lm.z < minZ) minZ = lm.z;
+        if (lm.z > maxZ) maxZ = lm.z;
+        if (lm.y > maxY) maxY = lm.y;
       }
     });
-    const cy = maxY !== -Infinity ? maxY : (leftHip.y + rightHip.y) / 2;
+
+    const cx = minX !== Infinity ? (minX + maxX) / 2 : 0;
+    const cz = minZ !== Infinity ? (minZ + maxZ) / 2 : 0;
+    const cy = maxY !== -Infinity ? maxY : 0;
 
     return worldLandmarks.map((lm, index) => {
       // Scale coordinates up a bit for better viewing
@@ -73,10 +77,10 @@ const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks }) => {
           const start = transformedLandmarks[startIdx];
           const end = transformedLandmarks[endIdx];
           
-          // Skip drawing if visibility is too low or it's a face landmark
+          // Skip drawing if visibility is too low or it's a face/hand/foot landmark
           if (start.visibility < 0.5 || end.visibility < 0.5) return null;
-          if (startIdx >= 0 && startIdx <= 10) return null;
-          if (endIdx >= 0 && endIdx <= 10) return null;
+          if (startIdx <= 10 || (startIdx >= 17 && startIdx <= 22) || startIdx >= 29) return null;
+          if (endIdx <= 10 || (endIdx >= 17 && endIdx <= 22) || endIdx >= 29) return null;
           
           return (
             <Line
@@ -94,7 +98,7 @@ const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks }) => {
         {/* Draw Joints (Spheres) */}
         {transformedLandmarks && transformedLandmarks.map((lm, i) => {
           if (lm.visibility < 0.5) return null;
-          if (i >= 0 && i <= 10) return null; // Hide face
+          if (i <= 10 || (i >= 17 && i <= 22) || i >= 29) return null; // Hide face, hands, feet
           
           return (
             <Sphere
