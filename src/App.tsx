@@ -3,6 +3,7 @@ import PoseTracker, { type PoseTrackerRef } from './components/PoseTracker';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import ReactMarkdown from 'react-markdown';
 import * as htmlToImage from 'html-to-image';
+import { Sparkles, Grid3X3, SwitchCamera, Camera, Loader2, Settings } from 'lucide-react';
 
 export type ExerciseMode = 'squat' | 'deadlift' | 'turtle' | 'asymmetry' | 'plank';
 
@@ -199,37 +200,37 @@ function App() {
         <button
           onClick={handleAnalyze}
           disabled={isAnalyzing}
-          className="w-14 h-14 md:w-16 md:h-16 text-2xl md:text-3xl flex items-center justify-center bg-gradient-to-r from-purple-500 to-pink-500 backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(236,72,153,0.5)] transition-transform active:scale-90 hover:opacity-90 disabled:opacity-50"
+          className="w-14 h-14 md:w-16 md:h-16 flex items-center justify-center bg-gradient-to-r from-purple-500 to-pink-500 backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(236,72,153,0.5)] transition-transform active:scale-90 hover:opacity-90 disabled:opacity-50 text-white"
           title="AI 자세 분석"
         >
-          {isAnalyzing ? '⏳' : '🤖'}
+          {isAnalyzing ? <Loader2 className="w-6 h-6 md:w-8 md:h-8 animate-spin" /> : <Sparkles className="w-6 h-6 md:w-8 md:h-8" />}
         </button>
 
         {/* Grid Toggle Button */}
         <button
           onClick={() => setShowGrid(!showGrid)}
-          className={`w-14 h-14 md:w-16 md:h-16 text-2xl md:text-3xl flex items-center justify-center backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] transition-transform active:scale-90 ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-white/20 text-white hover:bg-white/30'}`}
+          className={`w-14 h-14 md:w-16 md:h-16 flex items-center justify-center backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] transition-transform active:scale-90 ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-white/20 text-white hover:bg-white/30'}`}
           title="그리드 표시 토글"
         >
-          📐
+          <Grid3X3 className="w-6 h-6 md:w-8 md:h-8" />
         </button>
         
         {/* Camera Toggle Button */}
         <button
           onClick={() => setFacingMode(prev => prev === 'user' ? 'environment' : 'user')}
-          className="w-14 h-14 md:w-16 md:h-16 text-2xl md:text-3xl flex items-center justify-center bg-white/20 backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] transition-transform active:scale-90 hover:bg-white/30 text-white"
+          className="w-14 h-14 md:w-16 md:h-16 flex items-center justify-center bg-white/20 backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] transition-transform active:scale-90 hover:bg-white/30 text-white"
           title="카메라 전/후면 전환"
         >
-          🔄
+          <SwitchCamera className="w-6 h-6 md:w-8 md:h-8" />
         </button>
         
         {/* Capture Button */}
         <button
           onClick={handleCapture}
-          className="w-14 h-14 md:w-16 md:h-16 text-2xl md:text-3xl flex items-center justify-center bg-white/20 backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] transition-transform active:scale-90 hover:bg-white/30"
+          className="w-14 h-14 md:w-16 md:h-16 flex items-center justify-center bg-white/20 backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] transition-transform active:scale-90 hover:bg-white/30 text-white"
           title="현재 화면 캡처"
         >
-          📸
+          <Camera className="w-6 h-6 md:w-8 md:h-8" />
         </button>
       </div>
 
@@ -272,7 +273,7 @@ function App() {
           >
             <div className="p-4 md:p-6 border-b border-white/10 flex justify-between items-center bg-black/30">
               <h2 className="text-xl md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 flex items-center gap-2">
-                🤖 AI 자세 분석 리포트
+                <Sparkles className="w-6 h-6 md:w-8 md:h-8 text-purple-400" /> AI 자세 분석 리포트
               </h2>
               <div className="flex gap-2">
                 <button 
@@ -333,7 +334,7 @@ function App() {
         <div className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
           <div className="bg-gray-900 border border-white/20 rounded-3xl w-full max-w-md p-6 flex flex-col shadow-2xl">
             <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
-              ⚙️ 설정
+              <Settings className="w-7 h-7 text-gray-300" /> 설정
             </h2>
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-300 mb-2">
