@@ -3,14 +3,6 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Sphere, Line, Html } from '@react-three/drei';
 import type { LandmarkList } from '@mediapipe/pose';
 
-function calculateProjectedAngle2D(a: any, b: any, c: any): number {
-  if (!a || !b || !c) return 0;
-  // Use only x and y (2D projection) to match the visual angle in the 2D photo
-  const radians = Math.atan2(c.y - b.y, c.x - b.x) - Math.atan2(a.y - b.y, a.x - b.x);
-  let angle = Math.abs((radians * 180.0) / Math.PI);
-  if (angle > 180.0) angle = 360.0 - angle;
-  return angle;
-}
 
 // MediaPipe POSE_CONNECTIONS (fallback if global is not available)
 const POSE_CONNECTIONS: [number, number][] = (window as any).POSE_CONNECTIONS || [
@@ -23,11 +15,12 @@ const POSE_CONNECTIONS: [number, number][] = (window as any).POSE_CONNECTIONS ||
 
 interface Pose3DViewerProps {
   worldLandmarks: LandmarkList | null;
+  poseLandmarksData?: { landmarks: any; width: number; height: number } | null;
   onBackgroundClick?: () => void;
   mode?: 'squat' | 'deadlift' | 'turtle' | 'asymmetry' | 'plank';
 }
 
-const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks, onBackgroundClick, mode }) => {
+const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks, poseLandmarksData, onBackgroundClick, mode }) => {
   // Transform landmarks to match Three.js coordinate system
   // MediaPipe: x right, y down, z forward
   // Three.js: x right, y up, z out
@@ -67,50 +60,88 @@ const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks, onBackgroun
   }, [worldLandmarks]);
 
   const anglesToRender = useMemo(() => {
-    if (!transformedLandmarks || !mode) return [];
+    if (!transformedLandmarks || !mode || !poseLandmarksData) return [];
     const angles: { pos: [number, number, number]; text: string }[] = [];
     
-    const getLm = (index: number) => transformedLandmarks[index];
+    const getLm3D = (index: number) => transformedLandmarks[index];
+    const getLm2D = (index: number) => poseLandmarksData.landmarks[index];
+    const { width, height } = poseLandmarksData;
+
+    // Helper to calculate exact 2D angle matching PoseTracker's logic
+    const calcAngle = (a2D: any, b2D: any, c2D: any) => {
+      const a = { x: a2D.x * width, y: a2D.y * height };
+      const b = { x: b2D.x * width, y: b2D.y * height };
+      const c = { x: c2D.x * width, y: c2D.y * height };
+      const radians = Math.atan2(c.y - b.y, c.x - b.x) - Math.atan2(a.y - b.y, a.x - b.x);
+      let angle = Math.abs((radians * 180.0) / Math.PI);
+      if (angle > 180.0) angle = 360.0 - angle;
+      return angle;
+    };
 
     if (mode === 'squat') {
-      const hip = getLm(24); // Right hip
-      const knee = getLm(26); // Right knee
-      const ankle = getLm(28); // Right ankle
-      if (hip && knee && ankle && hip.visibility > 0.5 && knee.visibility > 0.5 && ankle.visibility > 0.5) {
-        const angle = calculateProjectedAngle2D(hip, knee, ankle);
-        angles.push({ pos: [knee.x, knee.y, knee.z], text: `${Math.round(angle)}°` });
+      const hip = getLm2D(24);
+      const knee = getLm2D(26);
+      const ankle = getLm2D(28);
+      const knee3D = getLm3D(26);
+      if (hip && knee && ankle && knee3D && hip.visibility > 0.5 && knee.visibility > 0.5 && ankle.visibility > 0.5) {
+        const angle = calcAngle(hip, knee, ankle);
+        angles.push({ pos: [knee3D.x, knee3D.y, knee3D.z], text: `${Math.round(angle)}°` });
       }
     } else if (mode === 'deadlift') {
-      const ear = getLm(8);
-      const shoulder = getLm(12);
-      const hip = getLm(24);
-      const knee = getLm(26);
-      if (ear && shoulder && hip && knee) {
-        const hipAngle = calculateProjectedAngle2D(shoulder, hip, knee);
-        const backAngle = calculateProjectedAngle2D(ear, shoulder, hip);
-        angles.push({ pos: [hip.x, hip.y, hip.z], text: `Hip: ${Math.round(hipAngle)}°` });
-        angles.push({ pos: [shoulder.x, shoulder.y, shoulder.z], text: `Back: ${Math.round(backAngle)}°` });
+      const ear = getLm2D(8);
+      const shoulder = getLm2D(12);
+      const hip = getLm2D(24);
+      const knee = getLm2D(26);
+      const hip3D = getLm3D(24);
+      const shoulder3D = getLm3D(12);
+      if (ear && shoulder && hip && knee && hip3D && shoulder3D) {
+        const hipAngle = calcAngle(shoulder, hip, knee);
+        const backAngle = calcAngle(ear, shoulder, hip);
+        angles.push({ pos: [hip3D.x, hip3D.y, hip3D.z], text: `Hip: ${Math.round(hipAngle)}°` });
+        angles.push({ pos: [shoulder3D.x, shoulder3D.y, shoulder3D.z], text: `Back: ${Math.round(backAngle)}°` });
       }
     } else if (mode === 'turtle') {
-      const ear = getLm(8);
-      const shoulder = getLm(12);
-      const hip = getLm(24);
-      if (ear && shoulder && hip) {
-        const angle = calculateProjectedAngle2D(ear, shoulder, hip);
-        angles.push({ pos: [shoulder.x, shoulder.y, shoulder.z], text: `Neck: ${Math.round(angle)}°` });
+      const ear = getLm2D(8);
+      const shoulder = getLm2D(12);
+      const shoulder3D = getLm3D(12);
+      if (ear && shoulder && shoulder3D) {
+        const dx = Math.abs((ear.x * width) - (shoulder.x * width));
+        const dy = Math.abs((ear.y * height) - (shoulder.y * height));
+        const angle = Math.atan2(dx, dy) * (180 / Math.PI);
+        angles.push({ pos: [shoulder3D.x, shoulder3D.y, shoulder3D.z], text: `Neck: ${Math.round(angle)}°` });
       }
     } else if (mode === 'plank') {
-      const shoulder = getLm(12);
-      const hip = getLm(24);
-      const ankle = getLm(28);
-      if (shoulder && hip && ankle) {
-        const angle = calculateProjectedAngle2D(shoulder, hip, ankle);
-        angles.push({ pos: [hip.x, hip.y, hip.z], text: `Core: ${Math.round(angle)}°` });
+      const shoulder = getLm2D(12);
+      const hip = getLm2D(24);
+      const ankle = getLm2D(28);
+      const hip3D = getLm3D(24);
+      if (shoulder && hip && ankle && hip3D) {
+        const angle = calcAngle(shoulder, hip, ankle);
+        angles.push({ pos: [hip3D.x, hip3D.y, hip3D.z], text: `Core: ${Math.round(angle)}°` });
+      }
+    } else if (mode === 'asymmetry') {
+      const ls = getLm2D(11);
+      const rs = getLm2D(12);
+      const lh = getLm2D(23);
+      const rh = getLm2D(24);
+      const rs3D = getLm3D(12);
+      const rh3D = getLm3D(24);
+      if (ls && rs && lh && rh && rs3D && rh3D) {
+        const lsP = { x: ls.x * width, y: ls.y * height };
+        const rsP = { x: rs.x * width, y: rs.y * height };
+        const lhP = { x: lh.x * width, y: lh.y * height };
+        const rhP = { x: rh.x * width, y: rh.y * height };
+        const shoulderDiff = lsP.y - rsP.y;
+        const hipDiff = lhP.y - rhP.y;
+        const shoulderAngle = Math.atan2(Math.abs(shoulderDiff), Math.abs(lsP.x - rsP.x)) * (180 / Math.PI);
+        const hipAngle = Math.atan2(Math.abs(hipDiff), Math.abs(lhP.x - rhP.x)) * (180 / Math.PI);
+        angles.push({ pos: [rs3D.x, rs3D.y, rs3D.z], text: `어깨: ${shoulderAngle.toFixed(1)}°` });
+        angles.push({ pos: [rh3D.x, rh3D.y, rh3D.z], text: `골반: ${hipAngle.toFixed(1)}°` });
       }
     }
     
     return angles;
-  }, [transformedLandmarks, mode]);
+  }, [transformedLandmarks, mode, poseLandmarksData]);
 
   return (
     <Canvas

@@ -29,6 +29,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
   const [feedback, setFeedback] = useState<string>('');
   const [feedbackColor, setFeedbackColor] = useState<string>('text-white');
   const [worldLandmarks, setWorldLandmarks] = useState<any>(null);
+  const [poseLandmarksData, setPoseLandmarksData] = useState<{landmarks: any, width: number, height: number} | null>(null);
 
   useImperativeHandle(ref, () => ({
     capture: (memberName: string) => {
@@ -60,15 +61,17 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
   const onResults = useCallback((results: Results) => {
     if (!canvasRef.current) return;
     
+    const videoWidth = (results.image as any).videoWidth || (results.image as any).naturalWidth || results.image.width;
+    const videoHeight = (results.image as any).videoHeight || (results.image as any).naturalHeight || results.image.height;
+
     // Save 3D landmarks for 3D viewer
     if (results.poseWorldLandmarks) {
       setWorldLandmarks(results.poseWorldLandmarks);
+      setPoseLandmarksData({ landmarks: results.poseLandmarks, width: videoWidth, height: videoHeight });
     } else {
       setWorldLandmarks(null);
+      setPoseLandmarksData(null);
     }
-
-    const videoWidth = (results.image as any).videoWidth || (results.image as any).naturalWidth || results.image.width;
-    const videoHeight = (results.image as any).videoHeight || (results.image as any).naturalHeight || results.image.height;
 
     canvasRef.current.width = videoWidth;
     canvasRef.current.height = videoHeight;
@@ -502,7 +505,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       
       {viewMode === '3d' && (
         <div className="absolute inset-0 z-10 bg-gray-900 pointer-events-auto">
-          <Pose3DViewer worldLandmarks={worldLandmarks} onBackgroundClick={onBackgroundClick} mode={mode} />
+          <Pose3DViewer worldLandmarks={worldLandmarks} poseLandmarksData={poseLandmarksData} onBackgroundClick={onBackgroundClick} mode={mode} />
           {!worldLandmarks && (
             <div className="absolute inset-0 flex items-center justify-center text-white text-lg">
               3D 좌표를 추출 중입니다... 전신이 보이게 해주세요.
