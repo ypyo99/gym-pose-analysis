@@ -117,14 +117,21 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       canvasCtx.restore();
     }
     
-    // MediaPipe pose results
     if (results.poseLandmarks) {
+      // Create a copy for drawing, hiding facial landmarks (0-10) for a cleaner UI
+      const landmarksToDraw = results.poseLandmarks.map((lm, index) => {
+        if (index >= 0 && index <= 10) {
+          return { ...lm, visibility: 0 };
+        }
+        return lm;
+      });
+
       // Draw skeleton
-      drawConnectors(canvasCtx, results.poseLandmarks, POSE_CONNECTIONS, {
+      drawConnectors(canvasCtx, landmarksToDraw, POSE_CONNECTIONS, {
         color: '#00FF00',
         lineWidth: 4,
       });
-      drawLandmarks(canvasCtx, results.poseLandmarks, {
+      drawLandmarks(canvasCtx, landmarksToDraw, {
         color: '#FF0000',
         lineWidth: 2,
         radius: 4,
