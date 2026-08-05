@@ -74,7 +74,9 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
     // Draw Posture Grid
     if (showGrid) {
       canvasCtx.save();
-      canvasCtx.strokeStyle = 'rgba(255, 255, 255, 0.4)'; // Slightly more visible white
+      canvasCtx.strokeStyle = 'rgba(255, 255, 255, 0.7)'; // Slightly more visible white
+      canvasCtx.shadowColor = 'rgba(0, 0, 0, 0.6)'; // Add dark shadow for visibility on light backgrounds
+      canvasCtx.shadowBlur = 4;
       
       // 화면의 실제 크기(해상도)에 맞춰 그리드 간격과 굵기 동적 계산
       const canvasRect = canvasRef.current.getBoundingClientRect();
