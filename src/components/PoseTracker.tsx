@@ -409,7 +409,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
   return (
     <div className="relative w-full h-full flex flex-col items-center justify-center bg-black">
       {/* Feedback Overlay */}
-      <div className="absolute top-20 md:top-28 left-0 w-full flex justify-center z-20 pointer-events-none px-4">
+      <div className="absolute top-8 md:top-12 left-0 w-full flex justify-center z-20 pointer-events-none px-4">
         <div className="bg-black/70 px-5 py-3 md:px-8 md:py-4 rounded-3xl backdrop-blur-md border border-white/20 shadow-[0_10px_40px_rgba(0,0,0,0.8)] max-w-full text-center">
           <h1 className={`text-xl md:text-3xl lg:text-4xl font-extrabold tracking-wide drop-shadow-md whitespace-pre-wrap ${feedbackColor}`}>
             {feedback}
