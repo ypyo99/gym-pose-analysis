@@ -3,15 +3,13 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Sphere, Line, Html } from '@react-three/drei';
 import type { LandmarkList } from '@mediapipe/pose';
 
-function calculateAngle3D(a: any, b: any, c: any): number {
+function calculateProjectedAngle2D(a: any, b: any, c: any): number {
   if (!a || !b || !c) return 0;
-  const ba = { x: a.x - b.x, y: a.y - b.y, z: a.z - b.z };
-  const bc = { x: c.x - b.x, y: c.y - b.y, z: c.z - b.z };
-  const dot = ba.x * bc.x + ba.y * bc.y + ba.z * bc.z;
-  const magBA = Math.sqrt(ba.x*ba.x + ba.y*ba.y + ba.z*ba.z);
-  const magBC = Math.sqrt(bc.x*bc.x + bc.y*bc.y + bc.z*bc.z);
-  if (magBA * magBC === 0) return 0;
-  return Math.acos(dot / (magBA * magBC)) * (180 / Math.PI);
+  // Use only x and y (2D projection) to match the visual angle in the 2D photo
+  const radians = Math.atan2(c.y - b.y, c.x - b.x) - Math.atan2(a.y - b.y, a.x - b.x);
+  let angle = Math.abs((radians * 180.0) / Math.PI);
+  if (angle > 180.0) angle = 360.0 - angle;
+  return angle;
 }
 
 // MediaPipe POSE_CONNECTIONS (fallback if global is not available)
@@ -79,7 +77,7 @@ const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks, onBackgroun
       const knee = getLm(26); // Right knee
       const ankle = getLm(28); // Right ankle
       if (hip && knee && ankle && hip.visibility > 0.5 && knee.visibility > 0.5 && ankle.visibility > 0.5) {
-        const angle = calculateAngle3D(hip, knee, ankle);
+        const angle = calculateProjectedAngle2D(hip, knee, ankle);
         angles.push({ pos: [knee.x, knee.y, knee.z], text: `${Math.round(angle)}°` });
       }
     } else if (mode === 'deadlift') {
@@ -88,8 +86,8 @@ const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks, onBackgroun
       const hip = getLm(24);
       const knee = getLm(26);
       if (ear && shoulder && hip && knee) {
-        const hipAngle = calculateAngle3D(shoulder, hip, knee);
-        const backAngle = calculateAngle3D(ear, shoulder, hip);
+        const hipAngle = calculateProjectedAngle2D(shoulder, hip, knee);
+        const backAngle = calculateProjectedAngle2D(ear, shoulder, hip);
         angles.push({ pos: [hip.x, hip.y, hip.z], text: `Hip: ${Math.round(hipAngle)}°` });
         angles.push({ pos: [shoulder.x, shoulder.y, shoulder.z], text: `Back: ${Math.round(backAngle)}°` });
       }
@@ -98,7 +96,7 @@ const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks, onBackgroun
       const shoulder = getLm(12);
       const hip = getLm(24);
       if (ear && shoulder && hip) {
-        const angle = calculateAngle3D(ear, shoulder, hip);
+        const angle = calculateProjectedAngle2D(ear, shoulder, hip);
         angles.push({ pos: [shoulder.x, shoulder.y, shoulder.z], text: `Neck: ${Math.round(angle)}°` });
       }
     } else if (mode === 'plank') {
@@ -106,7 +104,7 @@ const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks, onBackgroun
       const hip = getLm(24);
       const ankle = getLm(28);
       if (shoulder && hip && ankle) {
-        const angle = calculateAngle3D(shoulder, hip, ankle);
+        const angle = calculateProjectedAngle2D(shoulder, hip, ankle);
         angles.push({ pos: [hip.x, hip.y, hip.z], text: `Core: ${Math.round(angle)}°` });
       }
     }

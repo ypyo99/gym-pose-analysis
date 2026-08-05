@@ -513,7 +513,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
 
       <canvas
         ref={canvasRef}
-        className={`absolute w-full h-full z-20 pointer-events-none ${viewMode === '2d' && imageSrc ? 'object-contain bg-black' : (viewMode === '2d' ? 'object-cover' : '')}`}
+        className={`absolute w-full h-full z-20 pointer-events-none ${imageSrc ? 'object-contain' : 'object-cover'} ${viewMode === '2d' && imageSrc ? 'bg-black' : ''}`}
       />
     </div>
   );
