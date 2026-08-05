@@ -430,6 +430,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       </div>
 
       <Webcam
+        key={facingMode}
         ref={webcamRef}
         mirrored={facingMode === 'user'}
         className="absolute w-full h-full object-cover z-0"
