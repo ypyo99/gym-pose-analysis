@@ -221,7 +221,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
             setFeedbackColor('text-yellow-400');
           }
         } else {
-          setFeedback('전신(특히 측면)이 화면에 보이게 해주세요');
+          setFeedback('전신(측면)이 화면에 보이게 해주세요');
           setFeedbackColor('text-white');
         }
       } else if (mode === 'turtle') {
