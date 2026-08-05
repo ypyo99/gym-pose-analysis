@@ -430,8 +430,8 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
         className="absolute w-full h-full object-cover z-0"
         videoConstraints={{
           facingMode: 'user', // or 'environment' for rear camera
-          width: { ideal: 1920 },
-          height: { ideal: 1080 }
+          width: { ideal: 3840 },
+          height: { ideal: 2160 }
         }}
         onUserMediaError={(err) => console.error("Webcam access error:", err)}
       />
