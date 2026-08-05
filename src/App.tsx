@@ -243,7 +243,7 @@ function App() {
         {/* Grid Toggle Button */}
         <button
           onClick={() => setShowGrid(!showGrid)}
-          className={`w-14 h-14 md:w-16 md:h-16 flex items-center justify-center backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] transition-transform active:scale-90 ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-white/20 text-white hover:bg-white/30'}`}
+          className={`w-14 h-14 md:w-16 md:h-16 flex items-center justify-center backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] transition-transform active:scale-90 ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/40 text-white hover:bg-black/60'}`}
           title="그리드 표시 토글"
         >
           <Grid3X3 className="w-6 h-6 md:w-8 md:h-8" />
@@ -252,7 +252,7 @@ function App() {
         {/* Mode Toggle Button */}
         <button
           onClick={handleToggleMode}
-          className={`w-14 h-14 md:w-16 md:h-16 flex items-center justify-center backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] transition-transform active:scale-90 ${inputMode === 'photo' ? 'bg-green-500/80 text-white' : 'bg-white/20 text-white hover:bg-white/30'}`}
+          className={`w-14 h-14 md:w-16 md:h-16 flex items-center justify-center backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] transition-transform active:scale-90 ${inputMode === 'photo' ? 'bg-green-500/80 text-white' : 'bg-black/40 text-white hover:bg-black/60'}`}
           title="앨범 사진 불러오기"
         >
           {inputMode === 'camera' ? <ImageIcon className="w-6 h-6 md:w-8 md:h-8" /> : <Camera className="w-6 h-6 md:w-8 md:h-8" />}
@@ -262,7 +262,7 @@ function App() {
         {inputMode === 'camera' && (
           <button
             onClick={() => setFacingMode(prev => prev === 'user' ? 'environment' : 'user')}
-            className="w-14 h-14 md:w-16 md:h-16 flex items-center justify-center bg-white/20 backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] transition-transform active:scale-90 hover:bg-white/30 text-white"
+            className="w-14 h-14 md:w-16 md:h-16 flex items-center justify-center bg-black/40 backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] transition-transform active:scale-90 hover:bg-black/60 text-white"
             title="카메라 전/후면 전환"
           >
             <SwitchCamera className="w-6 h-6 md:w-8 md:h-8" />
@@ -272,7 +272,7 @@ function App() {
         {/* Capture Button */}
         <button
           onClick={handleCapture}
-          className="w-14 h-14 md:w-16 md:h-16 flex items-center justify-center bg-white/20 backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] transition-transform active:scale-90 hover:bg-white/30 text-white"
+          className="w-14 h-14 md:w-16 md:h-16 flex items-center justify-center bg-black/40 backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] transition-transform active:scale-90 hover:bg-black/60 text-white"
           title="현재 화면 캡처"
         >
           <Camera className="w-6 h-6 md:w-8 md:h-8" />
