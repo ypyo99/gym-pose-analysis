@@ -388,7 +388,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       smoothLandmarks: true,
       minDetectionConfidence: 0.5,
       minTrackingConfidence: 0.5,
-      selfieMode: true, // Acts like a mirror
+      selfieMode: facingMode === 'user', // Acts like a mirror for user camera
     });
 
     pose.onResults((results: Results) => {
@@ -422,7 +422,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       cancelAnimationFrame(animationFrameId);
       pose.close();
     };
-  }, [onResults]);
+  }, [onResults, facingMode]);
 
   return (
     <div className="relative w-full h-full flex flex-col items-center justify-center bg-black">
