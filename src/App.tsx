@@ -15,6 +15,7 @@ function App() {
   const [mode, setMode] = useState<ExerciseMode>('squat');
   const [memberName, setMemberName] = useState<string>('');
   const [showGrid, setShowGrid] = useState<boolean>(false);
+  const [showModes, setShowModes] = useState<boolean>(false);
   const trackerRef = useRef<PoseTrackerRef>(null);
 
   const handleCapture = () => {
@@ -28,6 +29,12 @@ function App() {
     <div className="relative w-full h-screen overflow-hidden bg-gray-900 font-sans">
       {/* Tracker Component */}
       <PoseTracker ref={trackerRef} mode={mode} showGrid={showGrid} />
+
+      {/* Clickable Overlay for toggling mode buttons */}
+      <div 
+        className="absolute inset-0 z-20" 
+        onClick={() => setShowModes(prev => !prev)} 
+      />
 
       {/* UI Overlay - Top Area (Logo/Title) */}
       <div className="absolute top-0 left-0 w-full p-3 md:p-4 z-30 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent">
@@ -68,7 +75,7 @@ function App() {
       </div>
 
       {/* UI Overlay - Bottom Area (Controls) */}
-      <div className="absolute bottom-0 left-0 w-full p-4 md:p-6 z-30 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
+      <div className={`absolute bottom-0 left-0 w-full p-4 md:p-6 z-30 bg-gradient-to-t from-black/90 via-black/50 to-transparent transition-all duration-300 ${showModes ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 pointer-events-none'}`}>
         <div className="grid grid-cols-3 md:flex gap-2 md:gap-4 justify-center w-full max-w-sm md:max-w-2xl mx-auto">
           {MODE_CONFIGS.map((config) => (
             <button
