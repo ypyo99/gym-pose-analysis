@@ -78,8 +78,9 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
     // Draw Posture Grid
     if (showGrid) {
       canvasCtx.save();
-      canvasCtx.strokeStyle = 'rgba(255, 255, 255, 0.25)'; // Semi-transparent white
-      canvasCtx.lineWidth = 1;
+      canvasCtx.strokeStyle = 'rgba(255, 255, 255, 0.3)'; // Semi-transparent white
+      const gridLineWidth = Math.max(2, Math.floor(videoWidth / 400));
+      canvasCtx.lineWidth = gridLineWidth;
 
       // Draw vertical lines
       const cols = 8;
@@ -103,7 +104,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
 
       // Draw strong center vertical line for symmetry check
       canvasCtx.strokeStyle = 'rgba(0, 255, 255, 0.6)'; // Cyan
-      canvasCtx.lineWidth = 2;
+      canvasCtx.lineWidth = gridLineWidth * 2;
       canvasCtx.beginPath();
       canvasCtx.moveTo(videoWidth / 2, 0);
       canvasCtx.lineTo(videoWidth / 2, videoHeight);
