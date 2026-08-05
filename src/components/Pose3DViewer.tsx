@@ -21,14 +21,30 @@ const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks }) => {
   // MediaPipe: x right, y down, z forward
   // Three.js: x right, y up, z out
   const transformedLandmarks = useMemo(() => {
-    if (!worldLandmarks) return null;
+    if (!worldLandmarks || worldLandmarks.length < 25) return null;
+
+    // Find center X and Z from hips (landmarks 23 and 24)
+    const leftHip = worldLandmarks[23];
+    const rightHip = worldLandmarks[24];
+    const cx = (leftHip.x + rightHip.x) / 2;
+    const cz = (leftHip.z + rightHip.z) / 2;
+
+    // Find lowest point (max Y in mediapipe because Y goes down) to place on grid
+    let maxY = -Infinity;
+    worldLandmarks.forEach((lm: any) => {
+      if (lm.visibility && lm.visibility > 0.5 && lm.y > maxY) {
+        maxY = lm.y;
+      }
+    });
+    const cy = maxY !== -Infinity ? maxY : (leftHip.y + rightHip.y) / 2;
+
     return worldLandmarks.map((lm, index) => {
       // Scale coordinates up a bit for better viewing
       const scale = 2;
       return {
-        x: lm.x * scale,
-        y: -lm.y * scale, // Flip Y so head is up
-        z: -lm.z * scale, // Flip Z so it matches expected depth
+        x: (lm.x - cx) * scale,
+        y: -(lm.y - cy) * scale, // Flip Y so head is up
+        z: -(lm.z - cz) * scale, // Flip Z so it matches expected depth
         visibility: lm.visibility || 0,
         index
       };
@@ -57,8 +73,10 @@ const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks }) => {
           const start = transformedLandmarks[startIdx];
           const end = transformedLandmarks[endIdx];
           
-          // Skip drawing if visibility is too low
+          // Skip drawing if visibility is too low or it's a face landmark
           if (start.visibility < 0.5 || end.visibility < 0.5) return null;
+          if (startIdx >= 0 && startIdx <= 10) return null;
+          if (endIdx >= 0 && endIdx <= 10) return null;
           
           return (
             <Line
@@ -76,6 +94,7 @@ const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks }) => {
         {/* Draw Joints (Spheres) */}
         {transformedLandmarks && transformedLandmarks.map((lm, i) => {
           if (lm.visibility < 0.5) return null;
+          if (i >= 0 && i <= 10) return null; // Hide face
           
           return (
             <Sphere

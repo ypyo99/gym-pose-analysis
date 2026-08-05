@@ -203,7 +203,7 @@ function App() {
 
       {/* Clickable Overlay for toggling mode buttons */}
       <div 
-        className="absolute inset-0 z-20" 
+        className={`absolute inset-0 z-20 ${viewMode === '3d' ? 'pointer-events-none' : ''}`}
         onClick={() => setShowModes(prev => !prev)} 
       />
 
