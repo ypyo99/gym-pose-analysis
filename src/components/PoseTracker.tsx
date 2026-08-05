@@ -2,6 +2,7 @@ import { useRef, useEffect, useState, useCallback, useImperativeHandle, forwardR
 import Webcam from 'react-webcam';
 import type { Results } from '@mediapipe/pose';
 import { calculateAngle, type Point } from '../utils/angleUtils';
+import Pose3DViewer from './Pose3DViewer';
 
 const Pose = (window as any).Pose;
 const POSE_CONNECTIONS = (window as any).POSE_CONNECTIONS;
@@ -13,6 +14,7 @@ interface PoseTrackerProps {
   showGrid?: boolean;
   facingMode?: 'user' | 'environment';
   imageSrc?: string | null;
+  viewMode?: '2d' | '3d';
 }
 
 export interface PoseTrackerRef {
@@ -20,11 +22,12 @@ export interface PoseTrackerRef {
   getScreenshot: () => string | null;
 }
 
-const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGrid = false, facingMode = 'user', imageSrc = null }, ref) => {
+const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGrid = false, facingMode = 'user', imageSrc = null, viewMode = '2d' }, ref) => {
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [feedback, setFeedback] = useState<string>('');
   const [feedbackColor, setFeedbackColor] = useState<string>('text-white');
+  const [worldLandmarks, setWorldLandmarks] = useState<any>(null);
 
   useImperativeHandle(ref, () => ({
     capture: (memberName: string) => {
@@ -55,6 +58,13 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
 
   const onResults = useCallback((results: Results) => {
     if (!canvasRef.current) return;
+    
+    // Save 3D landmarks for 3D viewer
+    if (results.poseWorldLandmarks) {
+      setWorldLandmarks(results.poseWorldLandmarks);
+    } else {
+      setWorldLandmarks(null);
+    }
 
     const videoWidth = (results.image as any).videoWidth || (results.image as any).naturalWidth || results.image.width;
     const videoHeight = (results.image as any).videoHeight || (results.image as any).naturalHeight || results.image.height;
@@ -462,7 +472,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           key={facingMode}
           ref={webcamRef}
           mirrored={facingMode === 'user'}
-          className="absolute w-full h-full object-cover z-0"
+          className={`absolute w-full h-full object-cover z-0 ${viewMode === '3d' ? 'opacity-0' : 'opacity-100'}`}
           videoConstraints={{
             facingMode: facingMode === 'environment' ? { exact: 'environment' } : 'user',
             width: facingMode === 'environment' ? { ideal: 3840 } : { ideal: 1920 },
@@ -473,8 +483,19 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       )}
       <canvas
         ref={canvasRef}
-        className={`absolute w-full h-full z-10 ${!imageSrc ? 'object-cover' : 'object-contain bg-black'}`}
+        className={`absolute w-full h-full z-10 ${!imageSrc ? 'object-cover' : 'object-contain bg-black'} ${viewMode === '3d' ? 'opacity-0' : 'opacity-100'}`}
       />
+      
+      {viewMode === '3d' && (
+        <div className="absolute inset-0 z-15 bg-gray-900">
+          <Pose3DViewer worldLandmarks={worldLandmarks} />
+          {!worldLandmarks && (
+            <div className="absolute inset-0 flex items-center justify-center text-white text-lg">
+              3D 좌표를 추출 중입니다... 전신이 보이게 해주세요.
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 });

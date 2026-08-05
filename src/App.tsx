@@ -3,7 +3,7 @@ import PoseTracker, { type PoseTrackerRef } from './components/PoseTracker';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import ReactMarkdown from 'react-markdown';
 import * as htmlToImage from 'html-to-image';
-import { Sparkles, Grid3X3, SwitchCamera, Camera, Loader2, Settings, Image as ImageIcon } from 'lucide-react';
+import { Sparkles, Grid3X3, SwitchCamera, Camera, Loader2, Settings, Image as ImageIcon, Cuboid } from 'lucide-react';
 
 export type ExerciseMode = 'squat' | 'deadlift' | 'turtle' | 'asymmetry' | 'plank';
 
@@ -20,6 +20,7 @@ function App() {
   const [memberName, setMemberName] = useState<string>('');
   const [showGrid, setShowGrid] = useState<boolean>(false);
   const [showModes, setShowModes] = useState<boolean>(false);
+  const [viewMode, setViewMode] = useState<'2d' | '3d'>('2d');
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
   const [inputMode, setInputMode] = useState<'camera' | 'photo'>('camera');
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -189,7 +190,7 @@ function App() {
     <div className="relative w-full h-screen overflow-hidden bg-gray-900 font-sans">
       {/* Pose Tracker Component */}
       <div className="absolute inset-0 z-0">
-        <PoseTracker ref={trackerRef} mode={mode} showGrid={showGrid} facingMode={facingMode} imageSrc={uploadedImage} />
+        <PoseTracker ref={trackerRef} mode={mode} showGrid={showGrid} facingMode={facingMode} imageSrc={uploadedImage} viewMode={viewMode} />
       </div>
 
       <input 
@@ -247,6 +248,15 @@ function App() {
           title="그리드 표시 토글"
         >
           <Grid3X3 className="w-6 h-6 md:w-8 md:h-8" />
+        </button>
+        
+        {/* 3D View Toggle Button */}
+        <button
+          onClick={() => setViewMode(prev => prev === '2d' ? '3d' : '2d')}
+          className={`w-14 h-14 md:w-16 md:h-16 flex items-center justify-center backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] transition-transform active:scale-90 ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/40 text-white hover:bg-black/60'}`}
+          title="3D 뼈대 뷰어 토글"
+        >
+          <Cuboid className="w-6 h-6 md:w-8 md:h-8" />
         </button>
         
         {/* Mode Toggle Button */}
