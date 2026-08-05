@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import PoseTracker, { type PoseTrackerRef } from './components/PoseTracker';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import ReactMarkdown from 'react-markdown';
+import html2canvas from 'html2canvas';
 
 export type ExerciseMode = 'squat' | 'deadlift' | 'turtle' | 'asymmetry' | 'plank';
 
@@ -21,9 +22,11 @@ function App() {
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [analysisResult, setAnalysisResult] = useState<string | null>(null);
+  const [currentScreenshot, setCurrentScreenshot] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [apiKeyInput, setApiKeyInput] = useState<string>('');
   const trackerRef = useRef<PoseTrackerRef>(null);
+  const reportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const savedKey = localStorage.getItem('gemini_api_key');
@@ -35,6 +38,33 @@ function App() {
   const handleSaveSettings = () => {
     localStorage.setItem('gemini_api_key', apiKeyInput);
     setShowSettings(false);
+  };
+
+  const handleSaveReport = async () => {
+    if (!reportRef.current) return;
+    try {
+      const canvas = await html2canvas(reportRef.current, {
+        backgroundColor: '#111827', // bg-gray-900
+        scale: 2,
+        useCORS: true,
+      });
+      const dataUrl = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      const now = new Date();
+      const dateStr = now.getFullYear().toString().slice(-2) + 
+                      String(now.getMonth() + 1).padStart(2, '0') + 
+                      String(now.getDate()).padStart(2, '0');
+      const timeStr = String(now.getHours()).padStart(2, '0') + 
+                      String(now.getMinutes()).padStart(2, '0') + 
+                      String(now.getSeconds()).padStart(2, '0');
+      const name = memberName.trim() || '회원';
+      link.download = `${name}-AI리포트-${dateStr}-${timeStr}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (error) {
+      console.error('Failed to save report:', error);
+      alert('리포트 저장에 실패했습니다.');
+    }
   };
 
   const handleCapture = () => {
@@ -63,6 +93,7 @@ function App() {
 
     setIsAnalyzing(true);
     setAnalysisResult(null);
+    setCurrentScreenshot(screenshot);
 
     try {
       // API 키로 사용 가능한 모델 목록 확인
@@ -238,22 +269,39 @@ function App() {
       {analysisResult && (
         <div className="absolute inset-0 z-50 flex items-center justify-center p-4 md:p-8 bg-black/70 backdrop-blur-md" onClick={() => setAnalysisResult(null)}>
           <div 
-            className="bg-gray-900 border border-white/20 rounded-3xl w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl overflow-hidden"
+            className="bg-gray-900 border border-white/20 rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-4 md:p-6 border-b border-white/10 flex justify-between items-center bg-black/30">
               <h2 className="text-xl md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 flex items-center gap-2">
                 🤖 AI 자세 분석 리포트
               </h2>
-              <button 
-                onClick={() => setAnalysisResult(null)}
-                className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
-              >
-                ✕
-              </button>
+              <div className="flex gap-2">
+                <button 
+                  onClick={handleSaveReport}
+                  className="px-4 py-1.5 rounded-full bg-purple-600 text-white font-bold text-sm hover:bg-purple-700 transition-colors shadow-lg"
+                >
+                  저장
+                </button>
+                <button 
+                  onClick={() => setAnalysisResult(null)}
+                  className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
             </div>
-            <div className="p-4 md:p-6 overflow-y-auto custom-scrollbar text-white prose prose-invert max-w-none">
-              <ReactMarkdown>{analysisResult}</ReactMarkdown>
+            <div className="p-0 overflow-y-auto custom-scrollbar flex-1 bg-gray-900">
+              <div ref={reportRef} className="p-4 md:p-6 bg-gray-900 flex flex-col gap-6">
+                {currentScreenshot && (
+                  <div className="w-full rounded-2xl overflow-hidden border border-white/10 shadow-lg bg-black">
+                    <img src={currentScreenshot} alt="Captured Pose" className="w-full h-auto object-contain max-h-[40vh] mx-auto" />
+                  </div>
+                )}
+                <div className="text-white prose prose-invert max-w-none">
+                  <ReactMarkdown>{analysisResult}</ReactMarkdown>
+                </div>
+              </div>
             </div>
           </div>
         </div>
