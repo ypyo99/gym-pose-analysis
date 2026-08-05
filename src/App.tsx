@@ -75,12 +75,21 @@ function App() {
           const availableModels = data.models.map((m: any) => m.name.replace('models/', ''));
           console.log("Available models for this API key:", availableModels);
           
-          if (availableModels.includes("gemini-1.5-flash")) targetModel = "gemini-1.5-flash";
-          else if (availableModels.includes("gemini-1.5-pro")) targetModel = "gemini-1.5-pro";
-          else if (availableModels.includes("gemini-1.5-flash-latest")) targetModel = "gemini-1.5-flash-latest";
-          else if (availableModels.includes("gemini-pro-vision")) targetModel = "gemini-pro-vision";
-          else {
-            const fallback = availableModels.find((m: string) => m.includes("vision") || m.includes("1.5"));
+          const preferredModels = [
+            "gemini-flash-latest",
+            "gemini-3.5-flash",
+            "gemini-3.1-flash",
+            "gemini-2.5-flash",
+            "gemini-2.0-flash",
+            "gemini-1.5-flash",
+            "gemini-pro-latest"
+          ];
+          const found = preferredModels.find(m => availableModels.includes(m));
+          
+          if (found) {
+            targetModel = found;
+          } else {
+            const fallback = availableModels.find((m: string) => m.startsWith("gemini") && m.includes("flash") && !m.includes("tts"));
             if (fallback) targetModel = fallback;
           }
         }
