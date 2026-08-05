@@ -14,9 +14,10 @@ const POSE_CONNECTIONS: [number, number][] = (window as any).POSE_CONNECTIONS ||
 
 interface Pose3DViewerProps {
   worldLandmarks: LandmarkList | null;
+  onBackgroundClick?: () => void;
 }
 
-const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks }) => {
+const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks, onBackgroundClick }) => {
   // Transform landmarks to match Three.js coordinate system
   // MediaPipe: x right, y down, z forward
   // Three.js: x right, y up, z out
@@ -60,6 +61,7 @@ const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks }) => {
       camera={{ position: [0, 1, 5], fov: 50 }}
       className="w-full h-full"
       style={{ background: 'transparent' }}
+      onPointerMissed={onBackgroundClick}
     >
       <ambientLight intensity={0.8} />
       <directionalLight position={[10, 10, 10]} intensity={1.5} />

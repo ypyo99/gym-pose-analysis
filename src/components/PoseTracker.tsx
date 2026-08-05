@@ -15,6 +15,7 @@ interface PoseTrackerProps {
   facingMode?: 'user' | 'environment';
   imageSrc?: string | null;
   viewMode?: '2d' | '3d';
+  onBackgroundClick?: () => void;
 }
 
 export interface PoseTrackerRef {
@@ -22,7 +23,7 @@ export interface PoseTrackerRef {
   getScreenshot: () => string | null;
 }
 
-const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGrid = false, facingMode = 'user', imageSrc = null, viewMode = '2d' }, ref) => {
+const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGrid = false, facingMode = 'user', imageSrc = null, viewMode = '2d', onBackgroundClick }, ref) => {
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [feedback, setFeedback] = useState<string>('');
@@ -501,7 +502,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       
       {viewMode === '3d' && (
         <div className="absolute inset-0 z-10 bg-gray-900 pointer-events-auto">
-          <Pose3DViewer worldLandmarks={worldLandmarks} />
+          <Pose3DViewer worldLandmarks={worldLandmarks} onBackgroundClick={onBackgroundClick} />
           {!worldLandmarks && (
             <div className="absolute inset-0 flex items-center justify-center text-white text-lg">
               3D 좌표를 추출 중입니다... 전신이 보이게 해주세요.

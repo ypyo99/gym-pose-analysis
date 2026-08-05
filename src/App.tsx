@@ -190,7 +190,15 @@ function App() {
     <div className="relative w-full h-screen overflow-hidden bg-gray-900 font-sans">
       {/* Pose Tracker Component */}
       <div className="absolute inset-0 z-0">
-        <PoseTracker ref={trackerRef} mode={mode} showGrid={showGrid} facingMode={facingMode} imageSrc={uploadedImage} viewMode={viewMode} />
+        <PoseTracker 
+          ref={trackerRef} 
+          mode={mode} 
+          showGrid={showGrid} 
+          facingMode={facingMode} 
+          imageSrc={uploadedImage} 
+          viewMode={viewMode}
+          onBackgroundClick={() => setShowModes(prev => !prev)}
+        />
       </div>
 
       <input 
