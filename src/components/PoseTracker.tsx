@@ -108,21 +108,35 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       const gridLineWidth = visualLineWidth * scaleX;
       canvasCtx.lineWidth = gridLineWidth;
 
-      // Draw vertical lines
-      const cols = Math.floor(videoWidth / colWidth);
-      for (let i = 1; i <= cols; i++) {
+      // Draw vertical lines symmetrically from center
+      const centerX = videoWidth / 2;
+      const colsHalf = Math.floor(centerX / colWidth);
+      for (let i = 1; i <= colsHalf; i++) {
+        // Right side
         canvasCtx.beginPath();
-        canvasCtx.moveTo(i * colWidth, 0);
-        canvasCtx.lineTo(i * colWidth, videoHeight);
+        canvasCtx.moveTo(centerX + i * colWidth, 0);
+        canvasCtx.lineTo(centerX + i * colWidth, videoHeight);
+        canvasCtx.stroke();
+        // Left side
+        canvasCtx.beginPath();
+        canvasCtx.moveTo(centerX - i * colWidth, 0);
+        canvasCtx.lineTo(centerX - i * colWidth, videoHeight);
         canvasCtx.stroke();
       }
 
-      // Draw horizontal lines
-      const rows = Math.floor(videoHeight / rowHeight);
-      for (let i = 1; i <= rows; i++) {
+      // Draw horizontal lines symmetrically from center
+      const centerY = videoHeight / 2;
+      const rowsHalf = Math.floor(centerY / rowHeight);
+      for (let i = 1; i <= rowsHalf; i++) {
+        // Bottom side
         canvasCtx.beginPath();
-        canvasCtx.moveTo(0, i * rowHeight);
-        canvasCtx.lineTo(videoWidth, i * rowHeight);
+        canvasCtx.moveTo(0, centerY + i * rowHeight);
+        canvasCtx.lineTo(videoWidth, centerY + i * rowHeight);
+        canvasCtx.stroke();
+        // Top side
+        canvasCtx.beginPath();
+        canvasCtx.moveTo(0, centerY - i * rowHeight);
+        canvasCtx.lineTo(videoWidth, centerY - i * rowHeight);
         canvasCtx.stroke();
       }
 
