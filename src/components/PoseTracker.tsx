@@ -410,7 +410,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       smoothLandmarks: true,
       minDetectionConfidence: 0.5,
       minTrackingConfidence: 0.5,
-      selfieMode: facingMode === 'user', // Acts like a mirror for user camera
+      selfieMode: !imageSrc && facingMode === 'user', // Mirror only for user camera, not photos
     });
 
     pose.onResults((results: Results) => {
