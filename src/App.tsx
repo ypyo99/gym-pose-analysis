@@ -23,7 +23,6 @@ function App() {
     }
   };
 
-  const currentModeLabel = MODE_CONFIGS.find(m => m.id === mode)?.label || mode.toUpperCase();
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-gray-900 font-sans">
@@ -44,9 +43,6 @@ function App() {
             onChange={(e) => setMemberName(e.target.value)}
             className="w-24 md:w-36 lg:w-48 px-3 py-1 md:px-5 md:py-2 bg-white/20 backdrop-blur-md rounded-full text-white text-sm md:text-xl font-bold border border-white/30 outline-none focus:bg-white/30 placeholder-gray-300 text-center shadow-md transition-all"
           />
-          <div className="px-3 py-1 md:px-5 md:py-2 bg-white/20 backdrop-blur-md rounded-full text-white text-sm md:text-xl font-bold border border-white/30 shadow-md">
-            {currentModeLabel} 모드
-          </div>
         </div>
       </div>
 
