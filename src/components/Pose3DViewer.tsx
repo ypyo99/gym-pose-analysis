@@ -1,7 +1,18 @@
 import React, { useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Sphere, Line } from '@react-three/drei';
+import { OrbitControls, Sphere, Line, Html } from '@react-three/drei';
 import type { LandmarkList } from '@mediapipe/pose';
+
+function calculateAngle3D(a: any, b: any, c: any): number {
+  if (!a || !b || !c) return 0;
+  const ba = { x: a.x - b.x, y: a.y - b.y, z: a.z - b.z };
+  const bc = { x: c.x - b.x, y: c.y - b.y, z: c.z - b.z };
+  const dot = ba.x * bc.x + ba.y * bc.y + ba.z * bc.z;
+  const magBA = Math.sqrt(ba.x*ba.x + ba.y*ba.y + ba.z*ba.z);
+  const magBC = Math.sqrt(bc.x*bc.x + bc.y*bc.y + bc.z*bc.z);
+  if (magBA * magBC === 0) return 0;
+  return Math.acos(dot / (magBA * magBC)) * (180 / Math.PI);
+}
 
 // MediaPipe POSE_CONNECTIONS (fallback if global is not available)
 const POSE_CONNECTIONS: [number, number][] = (window as any).POSE_CONNECTIONS || [
@@ -15,9 +26,10 @@ const POSE_CONNECTIONS: [number, number][] = (window as any).POSE_CONNECTIONS ||
 interface Pose3DViewerProps {
   worldLandmarks: LandmarkList | null;
   onBackgroundClick?: () => void;
+  mode?: 'squat' | 'deadlift' | 'turtle' | 'asymmetry' | 'plank';
 }
 
-const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks, onBackgroundClick }) => {
+const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks, onBackgroundClick, mode }) => {
   // Transform landmarks to match Three.js coordinate system
   // MediaPipe: x right, y down, z forward
   // Three.js: x right, y up, z out
@@ -55,6 +67,52 @@ const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks, onBackgroun
       };
     });
   }, [worldLandmarks]);
+
+  const anglesToRender = useMemo(() => {
+    if (!transformedLandmarks || !mode) return [];
+    const angles: { pos: [number, number, number]; text: string }[] = [];
+    
+    const getLm = (index: number) => transformedLandmarks[index];
+
+    if (mode === 'squat') {
+      const hip = getLm(24); // Right hip
+      const knee = getLm(26); // Right knee
+      const ankle = getLm(28); // Right ankle
+      if (hip && knee && ankle && hip.visibility > 0.5 && knee.visibility > 0.5 && ankle.visibility > 0.5) {
+        const angle = calculateAngle3D(hip, knee, ankle);
+        angles.push({ pos: [knee.x, knee.y, knee.z], text: `${Math.round(angle)}°` });
+      }
+    } else if (mode === 'deadlift') {
+      const ear = getLm(8);
+      const shoulder = getLm(12);
+      const hip = getLm(24);
+      const knee = getLm(26);
+      if (ear && shoulder && hip && knee) {
+        const hipAngle = calculateAngle3D(shoulder, hip, knee);
+        const backAngle = calculateAngle3D(ear, shoulder, hip);
+        angles.push({ pos: [hip.x, hip.y, hip.z], text: `Hip: ${Math.round(hipAngle)}°` });
+        angles.push({ pos: [shoulder.x, shoulder.y, shoulder.z], text: `Back: ${Math.round(backAngle)}°` });
+      }
+    } else if (mode === 'turtle') {
+      const ear = getLm(8);
+      const shoulder = getLm(12);
+      const hip = getLm(24);
+      if (ear && shoulder && hip) {
+        const angle = calculateAngle3D(ear, shoulder, hip);
+        angles.push({ pos: [shoulder.x, shoulder.y, shoulder.z], text: `Neck: ${Math.round(angle)}°` });
+      }
+    } else if (mode === 'plank') {
+      const shoulder = getLm(12);
+      const hip = getLm(24);
+      const ankle = getLm(28);
+      if (shoulder && hip && ankle) {
+        const angle = calculateAngle3D(shoulder, hip, ankle);
+        angles.push({ pos: [hip.x, hip.y, hip.z], text: `Core: ${Math.round(angle)}°` });
+      }
+    }
+    
+    return angles;
+  }, [transformedLandmarks, mode]);
 
   return (
     <Canvas
@@ -113,6 +171,15 @@ const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks, onBackgroun
           );
         })}
         
+        {/* Draw Angles using Html */}
+        {anglesToRender.map((angle, i) => (
+          <Html key={`angle-${i}`} position={angle.pos} center zIndexRange={[100, 0]}>
+            <div className="bg-black/70 text-white px-2 py-1 rounded-md text-sm md:text-base font-bold whitespace-nowrap pointer-events-none transform -translate-y-6 md:-translate-y-8 border border-white/30 shadow-lg backdrop-blur-sm">
+              {angle.text}
+            </div>
+          </Html>
+        ))}
+
         {/* Grid Floor to give spatial reference */}
         <gridHelper args={[10, 10, '#ffffff', '#555555']} position={[0, -1, 0]} />
       </group>

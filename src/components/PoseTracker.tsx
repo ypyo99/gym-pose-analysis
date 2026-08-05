@@ -502,7 +502,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       
       {viewMode === '3d' && (
         <div className="absolute inset-0 z-10 bg-gray-900 pointer-events-auto">
-          <Pose3DViewer worldLandmarks={worldLandmarks} onBackgroundClick={onBackgroundClick} />
+          <Pose3DViewer worldLandmarks={worldLandmarks} onBackgroundClick={onBackgroundClick} mode={mode} />
           {!worldLandmarks && (
             <div className="absolute inset-0 flex items-center justify-center text-white text-lg">
               3D 좌표를 추출 중입니다... 전신이 보이게 해주세요.
