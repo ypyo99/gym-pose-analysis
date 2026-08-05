@@ -66,8 +66,6 @@ function App() {
 
     try {
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
       const base64Data = screenshot.split(',')[1];
       const currentModeLabel = MODE_CONFIGS.find(m => m.id === mode)?.label || mode;
       
@@ -85,7 +83,22 @@ function App() {
         }
       };
 
-      const result = await model.generateContent([prompt, imagePart]);
+      let result;
+      try {
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        result = await model.generateContent([prompt, imagePart]);
+      } catch (e: any) {
+        console.warn("gemini-1.5-flash failed, trying gemini-1.5-pro", e);
+        try {
+          const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+          result = await model.generateContent([prompt, imagePart]);
+        } catch (e2: any) {
+          console.warn("gemini-1.5-pro failed, trying gemini-pro-vision", e2);
+          const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
+          result = await model.generateContent([prompt, imagePart]);
+        }
+      }
+
       const response = await result.response;
       const text = response.text();
       
