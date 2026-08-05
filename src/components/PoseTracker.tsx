@@ -121,8 +121,13 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
     
     if (results.poseLandmarks) {
       // Create a copy for drawing, hiding facial landmarks (0-10) for a cleaner UI
+      // and hiding fingers (17-22) and feet/toes (29-32)
       const landmarksToDraw = results.poseLandmarks.map((lm, index) => {
-        if (index >= 0 && index <= 10) {
+        if (
+          (index >= 0 && index <= 10) || // face
+          (index >= 17 && index <= 22) || // hands/fingers
+          (index >= 29 && index <= 32)    // feet/toes
+        ) {
           return { ...lm, visibility: 0 };
         }
         return lm;
