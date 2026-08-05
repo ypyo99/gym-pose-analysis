@@ -78,8 +78,10 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
     canvasCtx.save();
     canvasCtx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
     
-    // Draw the original video frame without background removal
-    canvasCtx.drawImage(results.image, 0, 0, canvasRef.current.width, canvasRef.current.height);
+    // Draw the original video frame only in 2D mode
+    if (viewMode === '2d') {
+      canvasCtx.drawImage(results.image, 0, 0, canvasRef.current.width, canvasRef.current.height);
+    }
     
     // Draw Posture Grid
     if (showGrid) {
@@ -141,7 +143,8 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       canvasCtx.restore();
     }
     
-    if (results.poseLandmarks) {
+    // Draw 2D skeleton only in 2D mode
+    if (viewMode === '2d' && results.poseLandmarks) {
       // Create a copy for drawing, hiding facial landmarks (0-10) for a cleaner UI
       // and hiding fingers (17-22) and feet/toes (29-32)
       const landmarksToDraw = results.poseLandmarks.map((lm, index) => {
@@ -392,7 +395,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       }
     }
     canvasCtx.restore();
-  }, [mode, showGrid]);
+  }, [mode, showGrid, viewMode]);
 
   useEffect(() => {
     let isComponentMounted = true;
@@ -481,13 +484,9 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           onUserMediaError={(err) => console.error("Webcam access error:", err)}
         />
       )}
-      <canvas
-        ref={canvasRef}
-        className={`absolute w-full h-full z-10 ${!imageSrc ? 'object-cover' : 'object-contain bg-black'} ${viewMode === '3d' ? 'opacity-0' : 'opacity-100'}`}
-      />
       
       {viewMode === '3d' && (
-        <div className="absolute inset-0 z-15 bg-gray-900">
+        <div className="absolute inset-0 z-10 bg-gray-900 pointer-events-auto">
           <Pose3DViewer worldLandmarks={worldLandmarks} />
           {!worldLandmarks && (
             <div className="absolute inset-0 flex items-center justify-center text-white text-lg">
@@ -496,6 +495,11 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           )}
         </div>
       )}
+
+      <canvas
+        ref={canvasRef}
+        className={`absolute w-full h-full z-20 pointer-events-none ${viewMode === '2d' && imageSrc ? 'object-contain bg-black' : (viewMode === '2d' ? 'object-cover' : '')}`}
+      />
     </div>
   );
 });
