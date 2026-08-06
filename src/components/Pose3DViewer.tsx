@@ -30,14 +30,14 @@ const DynamicAnglesRenderer = ({ angles }: { angles: any[] }) => {
   // Convert pixels to 3D world units
   const fontSize3D = baseFontSizePx * pixelToWorld;
   const offsetX3D = 20 * pixelToWorld; // 2D offset is +20px
-  const outlineWidth3D = (baseFontSizePx / 6) * pixelToWorld;
+  const outlineWidth3D = (baseFontSizePx / 4) * pixelToWorld; // Make outline thicker
   
   return (
     <>
       {angles.map((angle, i) => (
         <Billboard key={`angle-${i}`} position={[angle.pos[0] + offsetX3D, angle.pos[1], angle.pos[2]]}>
           <Text
-            font="/fonts/Roboto-Bold.ttf"
+            font="/fonts/Roboto-Black.ttf"
             fontSize={fontSize3D}
             color="#FFFFFF"
             outlineWidth={outlineWidth3D}
