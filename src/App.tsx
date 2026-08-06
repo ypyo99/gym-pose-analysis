@@ -353,26 +353,26 @@ function App() {
             className="bg-gray-900 border border-white/20 rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-4 md:p-6 border-b border-white/10 flex justify-between items-center bg-black/30">
-              <h2 className="text-xl md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 flex items-center gap-2">
-                <Sparkles className="w-6 h-6 md:w-8 md:h-8 text-purple-400" /> 
-                AI 자세 분석 리포트 
-                <span className="text-base md:text-lg text-purple-200/70 font-medium ml-1">
+            <div className="p-3 md:p-6 border-b border-white/10 flex justify-between items-center bg-black/30 gap-2 overflow-hidden">
+              <h2 className="text-sm sm:text-lg md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 flex items-center gap-1.5 md:gap-2 whitespace-nowrap truncate">
+                <Sparkles className="w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8 text-purple-400 shrink-0" /> 
+                <span className="truncate">AI 자세 분석 리포트</span>
+                <span className="text-xs sm:text-base md:text-lg text-purple-200/70 font-medium shrink-0 ml-0.5 md:ml-1">
                   ({MODE_CONFIGS.find(c => c.id === mode)?.label})
                 </span>
               </h2>
-              <div className="flex gap-2">
+              <div className="flex gap-1.5 md:gap-2 shrink-0">
                 <button 
                   onClick={handleSaveReport}
-                  className="px-4 py-1.5 rounded-full bg-purple-600 text-white font-bold text-sm hover:bg-purple-700 transition-colors shadow-lg"
+                  className="px-3 md:px-4 py-1 md:py-1.5 rounded-full bg-purple-600 text-white font-bold text-xs md:text-sm hover:bg-purple-700 transition-colors shadow-lg whitespace-nowrap shrink-0"
                 >
                   저장
                 </button>
                 <button 
                   onClick={() => setAnalysisResult(null)}
-                  className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+                  className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors shrink-0"
                 >
-                  ✕
+                  <span className="text-sm md:text-base">✕</span>
                 </button>
               </div>
             </div>
