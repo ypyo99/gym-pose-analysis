@@ -237,9 +237,9 @@ function App() {
             onClick={() => setShowSettings(true)}
             className="w-12 h-12 md:w-16 md:h-16 object-cover rounded-2xl shadow-lg opacity-90 hover:opacity-100 transition-opacity cursor-pointer active:scale-95" 
           />
-          <div className="flex items-center gap-2 md:gap-3 bg-black/60 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
-            <Dumbbell className="w-5 h-5 md:w-8 md:h-8 text-cyan-400" />
-            <h1 className="text-xl md:text-3xl lg:text-4xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-500">
+          <div className="flex items-center gap-1.5 md:gap-3 bg-black/60 backdrop-blur-md px-3 py-1.5 md:px-4 md:py-2 rounded-xl md:rounded-2xl border border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
+            <Dumbbell className="w-4 h-4 md:w-8 md:h-8 text-cyan-400 shrink-0" />
+            <h1 className="text-base sm:text-xl md:text-3xl lg:text-4xl font-black tracking-wider md:tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-500 whitespace-nowrap">
               AI PT STUDIO
             </h1>
           </div>
