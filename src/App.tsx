@@ -378,6 +378,17 @@ function App() {
             </div>
             <div className="p-0 overflow-y-auto custom-scrollbar flex-1 bg-gray-900">
               <div ref={reportRef} className="p-4 md:p-6 bg-gray-900 flex flex-col gap-6">
+                {/* Report Title (Included in saved image) */}
+                <div className="flex items-center justify-center gap-2 md:gap-3 pb-2 md:pb-4 border-b border-white/10">
+                  <Sparkles className="w-6 h-6 md:w-8 md:h-8 text-purple-400 shrink-0" /> 
+                  <h2 className="text-xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 text-center">
+                    AI 자세 분석 리포트 
+                    <span className="text-base md:text-xl text-purple-200/70 font-bold ml-2">
+                      ({MODE_CONFIGS.find(c => c.id === mode)?.label})
+                    </span>
+                  </h2>
+                </div>
+
                 {currentScreenshot && (
                   <div className="w-full rounded-2xl overflow-hidden border border-white/10 shadow-lg bg-black">
                     <img src={currentScreenshot} alt="Captured Pose" className="w-full h-auto object-contain max-h-[40vh] mx-auto" />
