@@ -254,24 +254,7 @@ function App() {
           {isAnalyzing ? <Loader2 className="w-6 h-6 md:w-8 md:h-8 animate-spin" /> : <Sparkles className="w-6 h-6 md:w-8 md:h-8" />}
         </button>
 
-        {/* Grid Toggle Button */}
-        <button
-          onClick={() => setShowGrid(!showGrid)}
-          className={`w-14 h-14 md:w-16 md:h-16 flex items-center justify-center backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] transition-transform active:scale-90 ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/40 text-white hover:bg-black/60'}`}
-          title="그리드 표시 토글"
-        >
-          <Grid3X3 className="w-6 h-6 md:w-8 md:h-8" />
-        </button>
-        
-        {/* 3D View Toggle Button */}
-        <button
-          onClick={() => setViewMode(prev => prev === '2d' ? '3d' : '2d')}
-          className={`w-14 h-14 md:w-16 md:h-16 flex items-center justify-center backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] transition-transform active:scale-90 ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/40 text-white hover:bg-black/60'}`}
-          title="3D 뼈대 뷰어 토글"
-        >
-          <PersonStanding className="w-6 h-6 md:w-8 md:h-8" />
-        </button>
-        
+
         {/* Camera Toggle Button */}
         {inputMode === 'camera' && (
           <button
@@ -290,6 +273,24 @@ function App() {
           title="앨범 사진 불러오기"
         >
           {inputMode === 'camera' ? <ImageIcon className="w-6 h-6 md:w-8 md:h-8" /> : <Camera className="w-6 h-6 md:w-8 md:h-8" />}
+        </button>
+        
+        {/* Grid Toggle Button */}
+        <button
+          onClick={() => setShowGrid(!showGrid)}
+          className={`w-14 h-14 md:w-16 md:h-16 flex items-center justify-center backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] transition-transform active:scale-90 ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/40 text-white hover:bg-black/60'}`}
+          title="그리드 표시 토글"
+        >
+          <Grid3X3 className="w-6 h-6 md:w-8 md:h-8" />
+        </button>
+        
+        {/* 3D View Toggle Button */}
+        <button
+          onClick={() => setViewMode(prev => prev === '2d' ? '3d' : '2d')}
+          className={`w-14 h-14 md:w-16 md:h-16 flex items-center justify-center backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] transition-transform active:scale-90 ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/40 text-white hover:bg-black/60'}`}
+          title="3D 뼈대 뷰어 토글"
+        >
+          <PersonStanding className="w-6 h-6 md:w-8 md:h-8" />
         </button>
         
         {/* Capture Button */}
