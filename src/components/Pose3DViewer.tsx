@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, Sphere, Line, Text, Billboard } from '@react-three/drei';
 import type { LandmarkList } from '@mediapipe/pose';
 
@@ -19,6 +19,40 @@ interface Pose3DViewerProps {
   onBackgroundClick?: () => void;
   mode?: 'squat' | 'deadlift' | 'turtle' | 'asymmetry' | 'plank';
 }
+
+const DynamicAnglesRenderer = ({ angles }: { angles: any[] }) => {
+  const { size, viewport } = useThree();
+  const pixelToWorld = viewport.width / size.width;
+  
+  // Exact same logic as 2D PoseTracker: baseFontSize = Math.max(18, Math.floor(width / 30))
+  const baseFontSizePx = Math.max(18, Math.floor(size.width / 30));
+  
+  // Convert pixels to 3D world units
+  const fontSize3D = baseFontSizePx * pixelToWorld;
+  const offsetX3D = 20 * pixelToWorld; // 2D offset is +20px
+  const outlineWidth3D = (baseFontSizePx / 6) * pixelToWorld;
+  
+  return (
+    <>
+      {angles.map((angle, i) => (
+        <Billboard key={`angle-${i}`} position={[angle.pos[0] + offsetX3D, angle.pos[1], angle.pos[2]]}>
+          <Text
+            font="/fonts/Roboto-Bold.ttf"
+            fontSize={fontSize3D}
+            color="#FFFFFF"
+            outlineWidth={outlineWidth3D}
+            outlineColor="#000000"
+            anchorX="left"
+            anchorY="bottom"
+            material-toneMapped={false}
+          >
+            {angle.text}
+          </Text>
+        </Billboard>
+      ))}
+    </>
+  );
+};
 
 const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks, poseLandmarksData, onBackgroundClick, mode }) => {
   // Transform landmarks to match Three.js coordinate system
@@ -201,23 +235,8 @@ const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks, poseLandmar
           );
         })}
         
-        {/* Draw Angles using WebGL Text so they appear in screenshots */}
-        {anglesToRender.map((angle, i) => (
-          <Billboard key={`angle-${i}`} position={[angle.pos[0] + 0.1, angle.pos[1], angle.pos[2]]}>
-            <Text
-              font="/fonts/Roboto-Bold.ttf"
-              fontSize={0.16}
-              color="#FFFFFF"
-              outlineWidth={0.015}
-              outlineColor="#000000"
-              anchorX="left"
-              anchorY="bottom"
-              material-toneMapped={false}
-            >
-              {angle.text}
-            </Text>
-          </Billboard>
-        ))}
+        {/* Dynamically draw angles to exactly match 2D pixel scale */}
+        <DynamicAnglesRenderer angles={anglesToRender} />
 
         {/* Grid Floor to give spatial reference */}
         <gridHelper args={[10, 10, '#ffffff', '#555555']} position={[0, -1, 0]} />
