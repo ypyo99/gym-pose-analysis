@@ -37,7 +37,7 @@ const DynamicAnglesRenderer = ({ angles }: { angles: any[] }) => {
       {angles.map((angle, i) => (
         <Billboard key={`angle-${i}`} position={[angle.pos[0] + offsetX3D, angle.pos[1], angle.pos[2]]}>
           <Text
-            font="/fonts/Roboto-Black.ttf"
+            font="/fonts/NanumGothic-ExtraBold.ttf"
             fontSize={fontSize3D}
             color="#FFFFFF"
             outlineWidth={outlineWidth3D}
@@ -131,8 +131,8 @@ const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks, poseLandmar
       if (ear && shoulder && hip && knee && hip3D && shoulder3D) {
         const hipAngle = calcAngle(shoulder, hip, knee);
         const backAngle = calcAngle(ear, shoulder, hip);
-        angles.push({ pos: [hip3D.x, hip3D.y, hip3D.z], text: `Hip: ${Math.round(hipAngle)}°` });
-        angles.push({ pos: [shoulder3D.x, shoulder3D.y, shoulder3D.z], text: `Back: ${Math.round(backAngle)}°` });
+        angles.push({ pos: [hip3D.x, hip3D.y, hip3D.z], text: `고관절: ${Math.round(hipAngle)}°` });
+        angles.push({ pos: [shoulder3D.x, shoulder3D.y, shoulder3D.z], text: `허리/등: ${Math.round(backAngle)}°` });
       }
     } else if (mode === 'turtle') {
       const ear = getLm2D(8);
@@ -142,7 +142,7 @@ const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks, poseLandmar
         const dx = Math.abs((ear.x * width) - (shoulder.x * width));
         const dy = Math.abs((ear.y * height) - (shoulder.y * height));
         const angle = Math.atan2(dx, dy) * (180 / Math.PI);
-        angles.push({ pos: [shoulder3D.x, shoulder3D.y, shoulder3D.z], text: `Neck: ${Math.round(angle)}°` });
+        angles.push({ pos: [shoulder3D.x, shoulder3D.y, shoulder3D.z], text: `목 각도: ${Math.round(angle)}°` });
       }
     } else if (mode === 'plank') {
       const shoulder = getLm2D(12);
@@ -151,7 +151,7 @@ const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks, poseLandmar
       const hip3D = getLm3D(24);
       if (shoulder && hip && ankle && hip3D) {
         const angle = calcAngle(shoulder, hip, ankle);
-        angles.push({ pos: [hip3D.x, hip3D.y, hip3D.z], text: `Core: ${Math.round(angle)}°` });
+        angles.push({ pos: [hip3D.x, hip3D.y, hip3D.z], text: `코어 정렬: ${Math.round(angle)}°` });
       }
     } else if (mode === 'asymmetry') {
       const ls = getLm2D(11);
@@ -169,8 +169,8 @@ const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks, poseLandmar
         const hipDiff = lhP.y - rhP.y;
         const shoulderAngle = Math.atan2(Math.abs(shoulderDiff), Math.abs(lsP.x - rsP.x)) * (180 / Math.PI);
         const hipAngle = Math.atan2(Math.abs(hipDiff), Math.abs(lhP.x - rhP.x)) * (180 / Math.PI);
-        angles.push({ pos: [rs3D.x, rs3D.y, rs3D.z], text: `Shoulder: ${shoulderAngle.toFixed(1)}°` });
-        angles.push({ pos: [rh3D.x, rh3D.y, rh3D.z], text: `Pelvis: ${hipAngle.toFixed(1)}°` });
+        angles.push({ pos: [rs3D.x, rs3D.y, rs3D.z], text: `어깨 기울기: ${shoulderAngle.toFixed(1)}°` });
+        angles.push({ pos: [rh3D.x, rh3D.y, rh3D.z], text: `골반 기울기: ${hipAngle.toFixed(1)}°` });
       }
     }
     
