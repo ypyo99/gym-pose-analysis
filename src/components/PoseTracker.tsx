@@ -46,14 +46,20 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       const ctx = tempCanvas.getContext('2d');
       if (!ctx) return null;
       
-      // Draw the original camera/photo image first
-      ctx.drawImage(img, 0, 0, width, height);
+      // Fill with background color first
+      ctx.fillStyle = '#111827'; // gray-900 to match 3D viewer background
+      ctx.fillRect(0, 0, width, height);
       
-      // Draw the 2D canvas on top (which contains skeletons, angles, grids)
-      ctx.drawImage(canvasRef.current, 0, 0, width, height);
-      
-      // If in 3D mode, also capture the 3D canvas
-      if (viewMode === '3d') {
+      if (viewMode === '2d') {
+        // Draw the original camera/photo image first
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Draw the 2D canvas on top (which contains skeletons, angles, grids)
+        ctx.drawImage(canvasRef.current, 0, 0, width, height);
+      } else {
+        // In 3D mode, skip original photo. Draw grid (from 2D canvas) and 3D canvas.
+        ctx.drawImage(canvasRef.current, 0, 0, width, height);
+        
         const threeCanvas = document.querySelector('.pose-3d-canvas canvas') as HTMLCanvasElement;
         if (threeCanvas) {
           ctx.drawImage(threeCanvas, 0, 0, width, height);
