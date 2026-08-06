@@ -186,7 +186,13 @@ function App() {
       setAnalysisResult(text);
     } catch (error: any) {
       console.error("AI Analysis Error:", error);
-      alert(`분석 중 오류가 발생했습니다: ${error?.message || '알 수 없는 오류'}\n(F12를 눌러 콘솔 창에서 사용 가능한 모델 목록을 확인해 보세요)`);
+      const errorMessage = error?.message || '';
+      if (errorMessage.includes('429') || errorMessage.toLowerCase().includes('quota') || errorMessage.toLowerCase().includes('exceeded')) {
+        alert("일일 무료 AI 분석 제공량이 모두 소진되었습니다.\n\n좌측 상단 로고를 클릭하여 발급받으신 개인 Gemini API Key를 입력하시면 계속해서 제한 없이 이용하실 수 있습니다.");
+        setShowSettings(true);
+      } else {
+        alert(`분석 중 오류가 발생했습니다: ${errorMessage || '알 수 없는 오류'}\n(네트워크 연결 상태를 확인하시거나 잠시 후 다시 시도해 주세요)`);
+      }
     } finally {
       setIsAnalyzing(false);
     }
