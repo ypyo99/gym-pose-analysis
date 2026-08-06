@@ -436,6 +436,16 @@ function App() {
               <p className="text-xs text-gray-400 mt-2">
                 입력하신 키는 브라우저 로컬 스토리지에만 안전하게 저장됩니다.
               </p>
+              <div className="mt-3">
+                <a 
+                  href="https://aistudio.google.com/app/apikey" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center text-sm text-purple-400 hover:text-purple-300 underline underline-offset-4"
+                >
+                  👉 구글 AI 스튜디오에서 무료 API Key 발급받기
+                </a>
+              </div>
             </div>
             <div className="flex gap-3 justify-end">
               <button
