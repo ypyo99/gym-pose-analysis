@@ -344,6 +344,9 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           canvasCtx.setLineDash([]);
           
           canvasCtx.font = `900 ${baseFontSize}px Arial`;
+          canvasCtx.strokeStyle = '#000000';
+          canvasCtx.lineWidth = strokeWidth;
+          canvasCtx.strokeText(`목 각도: ${Math.round(neckAngle)}°`, pEar.x + 20, pEar.y);
           canvasCtx.fillStyle = '#FFFFFF';
           canvasCtx.fillText(`목 각도: ${Math.round(neckAngle)}°`, pEar.x + 20, pEar.y);
           
@@ -396,6 +399,10 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           canvasCtx.stroke();
           
           canvasCtx.font = `900 ${Math.max(16, baseFontSize - 4)}px Arial`;
+          canvasCtx.strokeStyle = '#000000';
+          canvasCtx.lineWidth = strokeWidth;
+          canvasCtx.strokeText(`어깨 기울기: ${shoulderAngle.toFixed(1)}°`, rs.x - 40, rs.y - 20);
+          canvasCtx.strokeText(`골반 기울기: ${hipAngle.toFixed(1)}°`, rh.x - 40, rh.y - 20);
           canvasCtx.fillStyle = '#FFFFFF';
           canvasCtx.fillText(`어깨 기울기: ${shoulderAngle.toFixed(1)}°`, rs.x - 40, rs.y - 20);
           canvasCtx.fillText(`골반 기울기: ${hipAngle.toFixed(1)}°`, rh.x - 40, rh.y - 20);
