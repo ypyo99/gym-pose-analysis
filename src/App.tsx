@@ -61,7 +61,8 @@ function App() {
                       String(now.getMinutes()).padStart(2, '0') + 
                       String(now.getSeconds()).padStart(2, '0');
       const name = memberName.trim() || '회원';
-      link.download = `${name}-AI리포트-${dateStr}-${timeStr}.png`;
+      const currentModeLabel = MODE_CONFIGS.find(m => m.id === mode)?.label || mode;
+      link.download = `${name}-${currentModeLabel}-AI리포트-${dateStr}-${timeStr}.png`;
       link.href = dataUrl;
       link.click();
     } catch (error) {
@@ -72,7 +73,8 @@ function App() {
 
   const handleCapture = () => {
     if (trackerRef.current) {
-      trackerRef.current.capture(memberName);
+      const currentModeLabel = MODE_CONFIGS.find(m => m.id === mode)?.label || mode;
+      trackerRef.current.capture(memberName, currentModeLabel);
     }
   };
 

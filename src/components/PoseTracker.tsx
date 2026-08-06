@@ -19,7 +19,7 @@ interface PoseTrackerProps {
 }
 
 export interface PoseTrackerRef {
-  capture: (memberName: string) => void;
+  capture: (memberName: string, modeLabel?: string) => void;
   getScreenshot: () => string | null;
 }
 
@@ -70,7 +70,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
     };
 
     return {
-      capture: (memberName: string) => {
+      capture: (memberName: string, modeLabel?: string) => {
         const dataUrl = createCompositeImage('image/png');
         if (!dataUrl) return;
         
@@ -85,7 +85,8 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
                         String(now.getSeconds()).padStart(2, '0');
         
         const name = memberName.trim() || '회원';
-        link.download = `${name}-${dateStr}-${timeStr}.png`;
+        const modeStr = modeLabel ? `-${modeLabel}` : '';
+        link.download = `${name}${modeStr}-캡처-${dateStr}-${timeStr}.png`;
         link.href = dataUrl;
         link.click();
       },
