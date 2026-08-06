@@ -205,6 +205,7 @@ const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks, poseLandmar
         {anglesToRender.map((angle, i) => (
           <Billboard key={`angle-${i}`} position={[angle.pos[0] + 0.15, angle.pos[1], angle.pos[2]]}>
             <Text
+              font="/fonts/Roboto-Bold.ttf"
               fontSize={0.12}
               color="white"
               outlineWidth={0.02}
