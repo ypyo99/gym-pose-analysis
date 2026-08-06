@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Sphere, Line, Html } from '@react-three/drei';
+import { OrbitControls, Sphere, Line, Text, Billboard } from '@react-three/drei';
 import type { LandmarkList } from '@mediapipe/pose';
 
 
@@ -135,8 +135,8 @@ const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks, poseLandmar
         const hipDiff = lhP.y - rhP.y;
         const shoulderAngle = Math.atan2(Math.abs(shoulderDiff), Math.abs(lsP.x - rsP.x)) * (180 / Math.PI);
         const hipAngle = Math.atan2(Math.abs(hipDiff), Math.abs(lhP.x - rhP.x)) * (180 / Math.PI);
-        angles.push({ pos: [rs3D.x, rs3D.y, rs3D.z], text: `어깨: ${shoulderAngle.toFixed(1)}°` });
-        angles.push({ pos: [rh3D.x, rh3D.y, rh3D.z], text: `골반: ${hipAngle.toFixed(1)}°` });
+        angles.push({ pos: [rs3D.x, rs3D.y, rs3D.z], text: `Shoulder: ${shoulderAngle.toFixed(1)}°` });
+        angles.push({ pos: [rh3D.x, rh3D.y, rh3D.z], text: `Pelvis: ${hipAngle.toFixed(1)}°` });
       }
     }
     
@@ -201,13 +201,20 @@ const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks, poseLandmar
           );
         })}
         
-        {/* Draw Angles using Html */}
+        {/* Draw Angles using WebGL Text so they appear in screenshots */}
         {anglesToRender.map((angle, i) => (
-          <Html key={`angle-${i}`} position={angle.pos} center zIndexRange={[100, 0]}>
-            <div className="bg-black/70 text-white px-2 py-1 rounded-md text-sm md:text-base font-bold whitespace-nowrap pointer-events-none transform -translate-y-6 md:-translate-y-8 border border-white/30 shadow-lg backdrop-blur-sm">
+          <Billboard key={`angle-${i}`} position={[angle.pos[0], angle.pos[1] + 0.3, angle.pos[2]]}>
+            <Text
+              fontSize={0.25}
+              color="white"
+              outlineWidth={0.03}
+              outlineColor="black"
+              anchorX="center"
+              anchorY="middle"
+            >
               {angle.text}
-            </div>
-          </Html>
+            </Text>
+          </Billboard>
         ))}
 
         {/* Grid Floor to give spatial reference */}
