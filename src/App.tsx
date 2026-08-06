@@ -342,7 +342,11 @@ function App() {
           >
             <div className="p-4 md:p-6 border-b border-white/10 flex justify-between items-center bg-black/30">
               <h2 className="text-xl md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 flex items-center gap-2">
-                <Sparkles className="w-6 h-6 md:w-8 md:h-8 text-purple-400" /> AI 자세 분석 리포트
+                <Sparkles className="w-6 h-6 md:w-8 md:h-8 text-purple-400" /> 
+                AI 자세 분석 리포트 
+                <span className="text-base md:text-lg text-purple-200/70 font-medium ml-1">
+                  ({MODE_CONFIGS.find(c => c.id === mode)?.label})
+                </span>
               </h2>
               <div className="flex gap-2">
                 <button 
