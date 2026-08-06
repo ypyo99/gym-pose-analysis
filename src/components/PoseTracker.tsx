@@ -442,9 +442,9 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           canvasCtx.font = `900 ${baseFontSize}px "NanumGothic-ExtraBold", sans-serif`;
           canvasCtx.strokeStyle = '#000000';
           canvasCtx.lineWidth = strokeWidth;
-          canvasCtx.strokeText(`${Math.round(angle)}°`, p2.x, p2.y - 30);
+          canvasCtx.strokeText(`코어정렬: ${Math.round(angle)}°`, p2.x, p2.y - 30);
           canvasCtx.fillStyle = '#FFFFFF';
-          canvasCtx.fillText(`${Math.round(angle)}°`, p2.x, p2.y - 30);
+          canvasCtx.fillText(`코어정렬: ${Math.round(angle)}°`, p2.x, p2.y - 30);
           
           if (angle > 170) {
             setFeedback('Perfect! 훌륭한 코어 정렬입니다');
