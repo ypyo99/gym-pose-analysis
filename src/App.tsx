@@ -229,7 +229,9 @@ function App() {
             onClick={() => setShowSettings(true)}
             className="w-12 h-12 md:w-16 md:h-16 object-cover rounded-2xl shadow-lg opacity-90 hover:opacity-100 transition-opacity cursor-pointer active:scale-95" 
           />
-          <h1 className="text-white text-lg md:text-2xl lg:text-3xl font-bold tracking-wider">AI PT STUDIO</h1>
+          <h1 className="text-xl md:text-3xl lg:text-4xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-500 drop-shadow-[0_2px_10px_rgba(168,85,247,0.4)]">
+            AI PT STUDIO
+          </h1>
         </div>
         <div className="flex items-center gap-2 md:gap-4">
           <input
