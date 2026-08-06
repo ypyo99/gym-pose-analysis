@@ -3,7 +3,7 @@ import PoseTracker, { type PoseTrackerRef } from './components/PoseTracker';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import ReactMarkdown from 'react-markdown';
 import * as htmlToImage from 'html-to-image';
-import { Sparkles, Grid3X3, SwitchCamera, Camera, Loader2, Settings, Image as ImageIcon, Cuboid } from 'lucide-react';
+import { Sparkles, Grid3X3, SwitchCamera, Camera, Loader2, Settings, Image as ImageIcon, Cuboid, Download } from 'lucide-react';
 
 export type ExerciseMode = 'squat' | 'deadlift' | 'turtle' | 'asymmetry' | 'plank';
 
@@ -298,7 +298,7 @@ function App() {
           className="w-14 h-14 md:w-16 md:h-16 flex items-center justify-center bg-black/40 backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] transition-transform active:scale-90 hover:bg-black/60 text-white"
           title="현재 화면 캡처"
         >
-          <Camera className="w-6 h-6 md:w-8 md:h-8" />
+          <Download className="w-6 h-6 md:w-8 md:h-8" />
         </button>
       </div>
 
