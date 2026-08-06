@@ -3,7 +3,7 @@ import PoseTracker, { type PoseTrackerRef } from './components/PoseTracker';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import ReactMarkdown from 'react-markdown';
 import * as htmlToImage from 'html-to-image';
-import { Sparkles, Grid3X3, SwitchCamera, Camera, Loader2, Settings, Image as ImageIcon, Cuboid, Download } from 'lucide-react';
+import { Sparkles, Grid3X3, SwitchCamera, Camera, Loader2, Settings, Image as ImageIcon, PersonStanding, Download } from 'lucide-react';
 
 export type ExerciseMode = 'squat' | 'deadlift' | 'turtle' | 'asymmetry' | 'plank';
 
@@ -269,7 +269,7 @@ function App() {
           className={`w-14 h-14 md:w-16 md:h-16 flex items-center justify-center backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] transition-transform active:scale-90 ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/40 text-white hover:bg-black/60'}`}
           title="3D 뼈대 뷰어 토글"
         >
-          <Cuboid className="w-6 h-6 md:w-8 md:h-8" />
+          <PersonStanding className="w-6 h-6 md:w-8 md:h-8" />
         </button>
         
         {/* Mode Toggle Button */}
