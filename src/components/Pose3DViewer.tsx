@@ -203,15 +203,16 @@ const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks, poseLandmar
         
         {/* Draw Angles using WebGL Text so they appear in screenshots */}
         {anglesToRender.map((angle, i) => (
-          <Billboard key={`angle-${i}`} position={[angle.pos[0] + 0.15, angle.pos[1], angle.pos[2]]}>
+          <Billboard key={`angle-${i}`} position={[angle.pos[0] + 0.1, angle.pos[1], angle.pos[2]]}>
             <Text
               font="/fonts/Roboto-Bold.ttf"
-              fontSize={0.12}
-              color="white"
-              outlineWidth={0.02}
-              outlineColor="black"
+              fontSize={0.16}
+              color="#FFFFFF"
+              outlineWidth={0.015}
+              outlineColor="#000000"
               anchorX="left"
-              anchorY="middle"
+              anchorY="bottom"
+              material-toneMapped={false}
             >
               {angle.text}
             </Text>
