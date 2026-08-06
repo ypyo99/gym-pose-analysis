@@ -272,15 +272,6 @@ function App() {
           <PersonStanding className="w-6 h-6 md:w-8 md:h-8" />
         </button>
         
-        {/* Mode Toggle Button */}
-        <button
-          onClick={handleToggleMode}
-          className={`w-14 h-14 md:w-16 md:h-16 flex items-center justify-center backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] transition-transform active:scale-90 ${inputMode === 'photo' ? 'bg-green-500/80 text-white' : 'bg-black/40 text-white hover:bg-black/60'}`}
-          title="앨범 사진 불러오기"
-        >
-          {inputMode === 'camera' ? <ImageIcon className="w-6 h-6 md:w-8 md:h-8" /> : <Camera className="w-6 h-6 md:w-8 md:h-8" />}
-        </button>
-        
         {/* Camera Toggle Button */}
         {inputMode === 'camera' && (
           <button
@@ -291,6 +282,15 @@ function App() {
             <SwitchCamera className="w-6 h-6 md:w-8 md:h-8" />
           </button>
         )}
+        
+        {/* Mode Toggle Button */}
+        <button
+          onClick={handleToggleMode}
+          className={`w-14 h-14 md:w-16 md:h-16 flex items-center justify-center backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] transition-transform active:scale-90 ${inputMode === 'photo' ? 'bg-green-500/80 text-white' : 'bg-black/40 text-white hover:bg-black/60'}`}
+          title="앨범 사진 불러오기"
+        >
+          {inputMode === 'camera' ? <ImageIcon className="w-6 h-6 md:w-8 md:h-8" /> : <Camera className="w-6 h-6 md:w-8 md:h-8" />}
+        </button>
         
         {/* Capture Button */}
         <button
