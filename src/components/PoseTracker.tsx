@@ -247,7 +247,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           const angle = calculateAngle(p1, p2, p3);
 
           // Draw angle text near knee
-          canvasCtx.font = `900 ${baseFontSize}px Arial`;
+          canvasCtx.font = `900 ${baseFontSize}px "NanumGothic-ExtraBold", sans-serif`;
           canvasCtx.strokeStyle = '#000000';
           canvasCtx.lineWidth = strokeWidth;
           canvasCtx.strokeText(`${Math.round(angle)}°`, p2.x + 20, p2.y);
@@ -284,17 +284,17 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           const backAngle = calculateAngle(pEar, pShoulder, pHip);
 
           // Draw angles near joints
-          canvasCtx.font = `900 ${Math.max(16, baseFontSize - 4)}px Arial`;
+          canvasCtx.font = `900 ${Math.max(16, baseFontSize - 4)}px "NanumGothic-ExtraBold", sans-serif`;
           canvasCtx.strokeStyle = '#000000';
           canvasCtx.lineWidth = strokeWidth;
           
-          canvasCtx.strokeText(`Hip: ${Math.round(hipAngle)}°`, pHip.x + 20, pHip.y);
+          canvasCtx.strokeText(`고관절: ${Math.round(hipAngle)}°`, pHip.x + 20, pHip.y);
           canvasCtx.fillStyle = '#FFFFFF';
-          canvasCtx.fillText(`Hip: ${Math.round(hipAngle)}°`, pHip.x + 20, pHip.y);
+          canvasCtx.fillText(`고관절: ${Math.round(hipAngle)}°`, pHip.x + 20, pHip.y);
           
-          canvasCtx.strokeText(`Back: ${Math.round(backAngle)}°`, pShoulder.x + 20, pShoulder.y);
+          canvasCtx.strokeText(`허리/등: ${Math.round(backAngle)}°`, pShoulder.x + 20, pShoulder.y);
           canvasCtx.fillStyle = '#FF9999';
-          canvasCtx.fillText(`Back: ${Math.round(backAngle)}°`, pShoulder.x + 20, pShoulder.y);
+          canvasCtx.fillText(`허리/등: ${Math.round(backAngle)}°`, pShoulder.x + 20, pShoulder.y);
 
           // Provide feedback
           if (backAngle < 145) {
@@ -344,7 +344,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           canvasCtx.stroke();
           canvasCtx.setLineDash([]);
           
-          canvasCtx.font = `900 ${baseFontSize}px Arial`;
+          canvasCtx.font = `900 ${baseFontSize}px "NanumGothic-ExtraBold", sans-serif`;
           canvasCtx.strokeStyle = '#000000';
           canvasCtx.lineWidth = strokeWidth;
           canvasCtx.strokeText(`목 각도: ${Math.round(neckAngle)}°`, pEar.x + 20, pEar.y);
@@ -399,7 +399,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           canvasCtx.lineTo(rh.x, rh.y);
           canvasCtx.stroke();
           
-          canvasCtx.font = `900 ${Math.max(16, baseFontSize - 4)}px Arial`;
+          canvasCtx.font = `900 ${Math.max(16, baseFontSize - 4)}px "NanumGothic-ExtraBold", sans-serif`;
           canvasCtx.strokeStyle = '#000000';
           canvasCtx.lineWidth = strokeWidth;
           canvasCtx.strokeText(`어깨 기울기: ${shoulderAngle.toFixed(1)}°`, rs.x - 40, rs.y - 20);
@@ -439,7 +439,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           
           const angle = calculateAngle(p1, p2, p3);
           
-          canvasCtx.font = `900 ${baseFontSize}px Arial`;
+          canvasCtx.font = `900 ${baseFontSize}px "NanumGothic-ExtraBold", sans-serif`;
           canvasCtx.strokeStyle = '#000000';
           canvasCtx.lineWidth = strokeWidth;
           canvasCtx.strokeText(`${Math.round(angle)}°`, p2.x, p2.y - 30);
