@@ -146,9 +146,10 @@ const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks, poseLandmar
   return (
     <Canvas
       camera={{ position: [0, 1, 5], fov: 50 }}
-      className="w-full h-full"
+      className="w-full h-full pose-3d-canvas"
       style={{ background: 'transparent' }}
       onPointerMissed={onBackgroundClick}
+      gl={{ preserveDrawingBuffer: true }}
     >
       <ambientLight intensity={0.8} />
       <directionalLight position={[10, 10, 10]} intensity={1.5} />

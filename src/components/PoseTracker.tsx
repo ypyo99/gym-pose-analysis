@@ -52,6 +52,14 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       // Draw the 2D canvas on top (which contains skeletons, angles, grids)
       ctx.drawImage(canvasRef.current, 0, 0, width, height);
       
+      // If in 3D mode, also capture the 3D canvas
+      if (viewMode === '3d') {
+        const threeCanvas = document.querySelector('.pose-3d-canvas canvas') as HTMLCanvasElement;
+        if (threeCanvas) {
+          ctx.drawImage(threeCanvas, 0, 0, width, height);
+        }
+      }
+      
       return tempCanvas.toDataURL(mimeType, quality);
     };
 
