@@ -345,9 +345,9 @@ function App() {
             src="/logo.jpg" 
             alt="PT Shop Logo" 
             onClick={() => setShowSettings(true)}
-            className="w-12 h-12 md:w-16 md:h-16 object-cover rounded-2xl shadow-lg opacity-90 hover:opacity-100 transition-opacity cursor-pointer active:scale-95" 
+            className="w-12 h-12 md:w-16 md:h-16 object-cover rounded-lg shadow-lg opacity-90 hover:opacity-100 transition-opacity cursor-pointer active:scale-95" 
           />
-          <div className="h-12 md:h-16 flex items-center gap-2 md:gap-3 bg-black/60 backdrop-blur-md px-3 md:px-4 rounded-2xl border border-white/10 shadow-lg">
+          <div className="h-12 md:h-16 flex items-center gap-2 md:gap-3 bg-black/60 backdrop-blur-md px-3 md:px-4 rounded-lg border border-white/10 shadow-lg">
             <Dumbbell className="w-5 h-5 md:w-7 md:h-7 text-cyan-400 shrink-0" />
             <div className="flex flex-col justify-center leading-none">
               <span className="text-[11px] sm:text-xs md:text-sm font-black tracking-widest text-cyan-400 uppercase">
