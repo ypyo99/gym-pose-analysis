@@ -328,8 +328,8 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       });
 
       // Dynamically scale sizes based on video resolution (so it looks bold even in 4K)
-      const lineThickness = Math.max(8, Math.floor(videoWidth / 120));
-      const dotRadius = Math.max(12, Math.floor(videoWidth / 80));
+      const lineThickness = Math.max(4, Math.floor(videoWidth / 240));
+      const dotRadius = Math.max(6, Math.floor(videoWidth / 160));
 
       // Draw skeleton
       drawConnectors(canvasCtx, landmarksToDraw, POSE_CONNECTIONS, {
