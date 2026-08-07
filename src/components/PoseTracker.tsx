@@ -58,7 +58,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       const currentDistance = Math.sqrt(dx * dx + dy * dy);
       const distanceRatio = currentDistance / initialPinchDistance.current;
       let newZoom = touchStartZoom.current * distanceRatio;
-      setZoom(Math.max(0.5, Math.min(3, newZoom)));
+      setZoom(Math.max(1, Math.min(3, newZoom)));
     }
   };
 
