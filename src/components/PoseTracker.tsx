@@ -44,12 +44,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
   const initialPinchDistance = useRef<number | null>(null);
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (e.touches.length === 1) {
-      touchStartY.current = e.touches[0].clientY;
-      touchStartZoom.current = zoom;
-      initialPinchDistance.current = null;
-    } else if (e.touches.length === 2) {
-      touchStartY.current = null;
+    if (e.touches.length === 2) {
       const dx = e.touches[0].clientX - e.touches[1].clientX;
       const dy = e.touches[0].clientY - e.touches[1].clientY;
       initialPinchDistance.current = Math.sqrt(dx * dx + dy * dy);
@@ -58,13 +53,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (e.touches.length === 1 && touchStartY.current !== null) {
-      const currentY = e.touches[0].clientY;
-      const deltaY = touchStartY.current - currentY; // positive if swiping up
-      const zoomChange = deltaY * 0.01;
-      let newZoom = touchStartZoom.current + zoomChange;
-      setZoom(Math.max(1, Math.min(3, newZoom)));
-    } else if (e.touches.length === 2 && initialPinchDistance.current !== null) {
+    if (e.touches.length === 2 && initialPinchDistance.current !== null) {
       const dx = e.touches[0].clientX - e.touches[1].clientX;
       const dy = e.touches[0].clientY - e.touches[1].clientY;
       const currentDistance = Math.sqrt(dx * dx + dy * dy);
@@ -75,7 +64,6 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
   };
 
   const handleTouchEnd = () => {
-    touchStartY.current = null;
     initialPinchDistance.current = null;
   };
 
@@ -653,7 +641,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
 
   return (
     <div 
-      className="relative w-full h-full flex flex-col items-center justify-center bg-black touch-none"
+      className="relative w-full h-full flex flex-col items-center justify-center bg-black touch-pan-y"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
