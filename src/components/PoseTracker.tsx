@@ -32,6 +32,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
   const [feedbackColor, setFeedbackColor] = useState<string>('text-white');
   const [worldLandmarks, setWorldLandmarks] = useState<any>(null);
   const [poseLandmarksData, setPoseLandmarksData] = useState<{landmarks: any, width: number, height: number} | null>(null);
+  const [zoom, setZoom] = useState<number>(1);
   const lastImageRef = useRef<HTMLImageElement | HTMLVideoElement | HTMLCanvasElement | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
@@ -623,7 +624,30 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
         </div>
       )}
 
+      {/* Zoom Control Slider */}
       {!imageSrc && (
+        <div className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 z-30 flex flex-col items-center gap-2 bg-black/40 py-6 px-2 rounded-full backdrop-blur-md border border-white/20">
+          <span className="text-white font-bold text-xs md:text-sm">T</span>
+          <div className="h-32 md:h-48 my-4 flex items-center justify-center">
+            <input
+              type="range"
+              min="1"
+              max="3"
+              step="0.1"
+              value={zoom}
+              onChange={(e) => setZoom(parseFloat(e.target.value))}
+              className="w-32 md:w-48 appearance-none bg-white/30 h-1 md:h-1.5 rounded-full outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 md:[&::-webkit-slider-thumb]:w-5 md:[&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full cursor-pointer transform -rotate-90"
+            />
+          </div>
+          <span className="text-white font-bold text-xs md:text-sm">W</span>
+        </div>
+      )}
+
+      <div 
+        className="absolute inset-0 flex items-center justify-center origin-center transition-transform duration-100 ease-out pointer-events-none"
+        style={{ transform: `scale(${zoom})` }}
+      >
+        {!imageSrc && (
         <Webcam
           key={facingMode}
           ref={webcamRef}
@@ -654,6 +678,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
         ref={canvasRef}
         className={`absolute w-full h-full z-20 pointer-events-none ${imageSrc ? 'object-contain' : 'object-cover'} ${viewMode === '2d' && imageSrc ? 'bg-black' : ''}`}
       />
+      </div>
     </div>
   );
 });
