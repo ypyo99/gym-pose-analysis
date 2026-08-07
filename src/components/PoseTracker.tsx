@@ -599,6 +599,30 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
     canvasCtx.restore();
   }, [mode, showGrid, viewMode]);
 
+  // Continuously sync Three.js 3D canvas to 2D canvas in 3D mode so media recording captures the 3D skeleton
+  useEffect(() => {
+    if (viewMode !== '3d') return;
+    let animId: number;
+    const update3DOverlay = () => {
+      if (canvasRef.current) {
+        const threeCanvas = document.querySelector('.pose-3d-canvas canvas') as HTMLCanvasElement;
+        if (threeCanvas && threeCanvas.width > 0 && threeCanvas.height > 0) {
+          const canvasCtx = canvasRef.current.getContext('2d');
+          if (canvasCtx) {
+            canvasCtx.save();
+            canvasCtx.fillStyle = '#111827';
+            canvasCtx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+            canvasCtx.drawImage(threeCanvas, 0, 0, canvasRef.current.width, canvasRef.current.height);
+            canvasCtx.restore();
+          }
+        }
+      }
+      animId = requestAnimationFrame(update3DOverlay);
+    };
+    animId = requestAnimationFrame(update3DOverlay);
+    return () => cancelAnimationFrame(animId);
+  }, [viewMode]);
+
   useEffect(() => {
     let isComponentMounted = true;
     let animationFrameId: number;
