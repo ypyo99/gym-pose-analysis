@@ -652,12 +652,9 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           key={facingMode}
           ref={webcamRef}
           mirrored={facingMode === 'user'}
-          className={`absolute w-full h-full object-cover z-0 ${viewMode === '3d' ? 'opacity-0' : 'opacity-100'}`}
+          className={`absolute w-full h-full object-contain z-0 ${viewMode === '3d' ? 'opacity-0' : 'opacity-100'}`}
           videoConstraints={{
-            facingMode: facingMode === 'environment' ? { exact: 'environment' } : 'user',
-            aspectRatio: 9 / 16,
-            width: { ideal: 1080 },
-            height: { ideal: 1920 }
+            facingMode: facingMode
           }}
           onUserMediaError={(err) => console.error("Webcam access error:", err)}
         />
@@ -676,7 +673,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
 
       <canvas
         ref={canvasRef}
-        className={`absolute w-full h-full z-20 pointer-events-none ${imageSrc ? 'object-contain' : 'object-cover'} ${viewMode === '2d' && imageSrc ? 'bg-black' : ''}`}
+        className={`absolute w-full h-full z-20 pointer-events-none object-contain ${viewMode === '2d' && imageSrc ? 'bg-black' : ''}`}
       />
       </div>
     </div>
