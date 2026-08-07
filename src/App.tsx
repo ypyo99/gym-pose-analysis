@@ -3,8 +3,9 @@ import PoseTracker, { type PoseTrackerRef } from './components/PoseTracker';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import ReactMarkdown from 'react-markdown';
 import * as htmlToImage from 'html-to-image';
-import { Sparkles, Grid3X3, SwitchCamera, Camera, Loader2, Settings, Image as ImageIcon, PersonStanding, Download, Dumbbell } from 'lucide-react';
+import { Sparkles, Grid3X3, Camera, Settings, PersonStanding, Download, Dumbbell, Video, Square, Play, X, Upload, Activity } from 'lucide-react';
 
+export type AppMode = 'photo_capture' | 'video_capture' | 'photo_upload';
 export type ExerciseMode = 'squat' | 'deadlift' | 'turtle' | 'asymmetry' | 'plank';
 
 const MODE_CONFIGS: { id: ExerciseMode; label: string; color: string; shadow: string }[] = [
@@ -16,29 +17,56 @@ const MODE_CONFIGS: { id: ExerciseMode; label: string; color: string; shadow: st
 ];
 
 function App() {
+  const [appMode, setAppMode] = useState<AppMode>('photo_capture');
   const [mode, setMode] = useState<ExerciseMode>('squat');
   const [memberName, setMemberName] = useState<string>('');
   const [showGrid, setShowGrid] = useState<boolean>(false);
-  const [showModes, setShowModes] = useState<boolean>(false);
   const [viewMode, setViewMode] = useState<'2d' | '3d'>('2d');
-  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
-  const [inputMode, setInputMode] = useState<'camera' | 'photo'>('camera');
+  
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [analysisResult, setAnalysisResult] = useState<string | null>(null);
   const [currentScreenshot, setCurrentScreenshot] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [apiKeyInput, setApiKeyInput] = useState<string>('');
+  
+  const [recordingState, setRecordingState] = useState<'idle' | 'countdown' | 'recording'>('idle');
+  const [countdown, setCountdown] = useState<number>(3);
+  const [recordedFrames, setRecordedFrames] = useState<string[]>([]);
+  const [recordedVideoUrl, setRecordedVideoUrl] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [showPoseSelector, setShowPoseSelector] = useState<boolean>(false);
+
   const trackerRef = useRef<PoseTrackerRef>(null);
   const reportRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const savedKey = localStorage.getItem('gemini_api_key');
-    if (savedKey) {
-      setApiKeyInput(savedKey);
+    if (savedKey) setApiKeyInput(savedKey);
+
+    const savedAppMode = localStorage.getItem('appMode') as AppMode;
+    if (savedAppMode && ['photo_capture', 'video_capture', 'photo_upload'].includes(savedAppMode)) {
+      setAppMode(savedAppMode);
     }
   }, []);
+
+  const handleModeSwitch = (newMode: AppMode) => {
+    setAppMode(newMode);
+    localStorage.setItem('appMode', newMode);
+    handleExit();
+  };
+
+  const handleExit = () => {
+    setCurrentScreenshot(null);
+    setRecordedVideoUrl(null);
+    setRecordedFrames([]);
+    setUploadedImage(null);
+    setIsPlaying(false);
+    setRecordingState('idle');
+    setShowPoseSelector(false);
+  };
 
   const handleSaveSettings = () => {
     localStorage.setItem('gemini_api_key', apiKeyInput);
@@ -49,7 +77,7 @@ function App() {
     if (!reportRef.current) return;
     try {
       const dataUrl = await htmlToImage.toPng(reportRef.current, {
-        backgroundColor: '#111827', // bg-gray-900
+        backgroundColor: '#111827',
         pixelRatio: 2,
       });
       const link = document.createElement('a');
@@ -71,10 +99,56 @@ function App() {
     }
   };
 
-  const handleCapture = () => {
+  const handleCapturePhoto = () => {
     if (trackerRef.current) {
-      const currentModeLabel = MODE_CONFIGS.find(m => m.id === mode)?.label || mode;
-      trackerRef.current.capture(memberName, currentModeLabel);
+      const shot = trackerRef.current.getScreenshot();
+      if (shot) setCurrentScreenshot(shot);
+    }
+  };
+
+  const handleDownloadScreenshot = () => {
+    if (!currentScreenshot) return;
+    const link = document.createElement('a');
+    
+    const now = new Date();
+    const dateStr = now.getFullYear().toString().slice(-2) + 
+                    String(now.getMonth() + 1).padStart(2, '0') + 
+                    String(now.getDate()).padStart(2, '0');
+    const timeStr = String(now.getHours()).padStart(2, '0') + 
+                    String(now.getMinutes()).padStart(2, '0') + 
+                    String(now.getSeconds()).padStart(2, '0');
+    const name = memberName.trim() || '회원';
+    const currentModeLabel = MODE_CONFIGS.find(m => m.id === mode)?.label || mode;
+    
+    link.download = `${name}-${currentModeLabel}-캡처-${dateStr}-${timeStr}.jpg`;
+    link.href = currentScreenshot;
+    link.click();
+  };
+
+  const startRecordingFlow = () => {
+    setRecordedFrames([]);
+    setRecordedVideoUrl(null);
+    setCurrentScreenshot(null);
+    setShowPoseSelector(false);
+    
+    setRecordingState('recording');
+    if (trackerRef.current) {
+      trackerRef.current.startRecording();
+    }
+  };
+
+  const stopRecording = async () => {
+    setRecordingState('idle');
+    if (trackerRef.current) {
+      const { blob, frames } = await trackerRef.current.stopRecording();
+      if (blob) {
+        const url = URL.createObjectURL(blob);
+        setRecordedVideoUrl(url);
+      }
+      if (frames && frames.length > 0) {
+        setRecordedFrames(frames);
+        setCurrentScreenshot(frames[0]);
+      }
     }
   };
 
@@ -84,27 +158,29 @@ function App() {
       const reader = new FileReader();
       reader.onload = (event) => {
         setUploadedImage(event.target?.result as string);
-        setInputMode('photo');
       };
       reader.readAsDataURL(file);
-    }
-  };
-
-  const handleToggleMode = () => {
-    if (inputMode === 'camera') {
-      fileInputRef.current?.click();
-    } else {
-      setInputMode('camera');
-      setUploadedImage(null);
     }
   };
 
   const handleAnalyze = async () => {
     if (!trackerRef.current) return;
     
-    const screenshot = trackerRef.current.getScreenshot();
-    if (!screenshot) {
-      alert("화면을 캡처할 수 없습니다.");
+    let framesToAnalyze: string[] = [];
+    if (appMode === 'video_capture' && recordedFrames.length > 0) {
+      framesToAnalyze = [...recordedFrames];
+    } else if (appMode === 'photo_capture' && currentScreenshot) {
+      framesToAnalyze.push(currentScreenshot);
+    } else if (appMode === 'photo_upload') {
+      const shot = trackerRef.current.getScreenshot();
+      if (shot) {
+        framesToAnalyze.push(shot);
+        setCurrentScreenshot(shot);
+      }
+    }
+
+    if (framesToAnalyze.length === 0) {
+      alert("분석할 이미지가 없습니다.");
       return;
     }
 
@@ -119,10 +195,8 @@ function App() {
 
     setIsAnalyzing(true);
     setAnalysisResult(null);
-    setCurrentScreenshot(screenshot);
 
     try {
-      // API 키로 사용 가능한 모델 목록 확인
       let targetModel = "gemini-1.5-flash";
       try {
         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
@@ -130,22 +204,11 @@ function App() {
         
         if (data && data.models) {
           const availableModels = data.models.map((m: any) => m.name.replace('models/', ''));
-          console.log("Available models for this API key:", availableModels);
-          
-          const preferredModels = [
-            "gemini-flash-latest",
-            "gemini-3.5-flash",
-            "gemini-3.1-flash",
-            "gemini-2.5-flash",
-            "gemini-2.0-flash",
-            "gemini-1.5-flash",
-            "gemini-pro-latest"
-          ];
+          const preferredModels = ["gemini-flash-latest", "gemini-3.5-flash", "gemini-3.1-flash", "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-pro-latest"];
           const found = preferredModels.find(m => availableModels.includes(m));
           
-          if (found) {
-            targetModel = found;
-          } else {
+          if (found) targetModel = found;
+          else {
             const fallback = availableModels.find((m: string) => m.startsWith("gemini") && m.includes("flash") && !m.includes("tts"));
             if (fallback) targetModel = fallback;
           }
@@ -154,12 +217,23 @@ function App() {
         console.warn("Failed to fetch model list, using default.", err);
       }
 
-      console.log(`Using model: ${targetModel}`);
       const genAI = new GoogleGenerativeAI(apiKey);
-      const base64Data = screenshot.split(',')[1];
       const currentModeLabel = MODE_CONFIGS.find(m => m.id === mode)?.label || mode;
+      const isVideo = framesToAnalyze.length > 1;
       
-      const prompt = `전문 헬스 트레이너로서 첨부된 사진 속 회원의 '${currentModeLabel}' 자세를 분석해 주세요. 
+      const prompt = isVideo 
+        ? `전문 헬스 트레이너로서 첨부된 연속된 ${framesToAnalyze.length}장의 사진(동영상의 주요 장면) 속 회원의 '${currentModeLabel}' 자세를 분석해 주세요. 
+화면에 표시된 관절의 각도와 위치 가이드라인, 그리고 시간의 흐름에 따른 자세 변화를 종합적으로 참고하여 다음 내용을 포함해 주세요:
+### 1. 현재 자세에서 잘된 점
+### 2. 개선이 필요한 점과 그 이유
+### 3. 올바른 자세를 위한 구체적인 수정 팁
+
+[작성 가이드라인]
+- 현장에서 회원이 빠르게 브리핑을 받을 수 있도록, 내용을 길게 쓰지 말고 각 섹션을 짧은 문장의 불릿 포인트 형태로 핵심만 정리해 주세요.
+- 각 불릿 포인트 앞에는 내용과 어울리는 이모지(아이콘)를 반드시 넣어주세요 (예: ✅, 💡, ⚠️, 📌 등).
+- 각도를 표시할 때 수학 기호(LaTeX 등, 예: $96^\\circ$)를 절대 사용하지 말고, 평문(예: 96도)으로 자연스럽게 표시해 주세요.
+- 반드시 위 3개의 소제목을 마크다운 h3(###) 태그로 시작해서 작성해 주세요.`
+        : `전문 헬스 트레이너로서 첨부된 사진 속 회원의 '${currentModeLabel}' 자세를 분석해 주세요. 
 화면에 표시된 관절의 각도와 위치 가이드라인을 참고하여 다음 내용을 포함해 주세요:
 ### 1. 현재 자세에서 잘된 점
 ### 2. 개선이 필요한 점과 그 이유
@@ -171,19 +245,17 @@ function App() {
 - 각도를 표시할 때 수학 기호(LaTeX 등, 예: $96^\\circ$)를 절대 사용하지 말고, 평문(예: 96도)으로 자연스럽게 표시해 주세요.
 - 반드시 위 3개의 소제목을 마크다운 h3(###) 태그로 시작해서 작성해 주세요.`;
 
-      const imagePart = {
+      const imageParts = framesToAnalyze.map(frame => ({
         inlineData: {
-          data: base64Data,
+          data: frame.split(',')[1],
           mimeType: "image/jpeg"
         }
-      };
+      }));
 
       const model = genAI.getGenerativeModel({ model: targetModel });
-      const result = await model.generateContent([prompt, imagePart]);
+      const result = await model.generateContent([prompt, ...imageParts]);
       const response = await result.response;
-      const text = response.text();
-      
-      setAnalysisResult(text);
+      setAnalysisResult(response.text());
     } catch (error: any) {
       console.error("AI Analysis Error:", error);
       const errorMessage = error?.message || '';
@@ -198,7 +270,6 @@ function App() {
     }
   };
 
-
   return (
     <div className="relative w-full h-screen overflow-hidden bg-gray-900 font-sans">
       {/* Pose Tracker Component */}
@@ -207,10 +278,10 @@ function App() {
           ref={trackerRef} 
           mode={mode} 
           showGrid={showGrid} 
-          facingMode={facingMode} 
-          imageSrc={uploadedImage} 
+          facingMode="user" 
+          imageSrc={appMode === 'photo_upload' ? uploadedImage : null} 
           viewMode={viewMode}
-          onBackgroundClick={() => setShowModes(prev => !prev)}
+          onBackgroundClick={() => setShowPoseSelector(false)}
         />
       </div>
 
@@ -222,14 +293,35 @@ function App() {
         className="hidden" 
       />
 
-      {/* Clickable Overlay for toggling mode buttons */}
-      <div 
-        className={`absolute inset-0 z-20 ${viewMode === '3d' ? 'pointer-events-none' : ''}`}
-        onClick={() => setShowModes(prev => !prev)} 
-      />
+      {/* Captured Image Overlay */}
+      {appMode === 'photo_capture' && currentScreenshot && (
+        <div className="absolute inset-0 z-10 bg-black flex items-center justify-center pointer-events-none">
+          <img src={currentScreenshot} alt="Captured" className="w-full h-full object-contain" />
+        </div>
+      )}
 
-      {/* UI Overlay - Top Area (Logo/Title) */}
-      <div className="absolute top-0 left-0 w-full p-3 md:p-4 z-30 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent">
+      {/* Video Playback Overlay */}
+      {appMode === 'video_capture' && recordedVideoUrl && isPlaying && (
+        <div className="absolute inset-0 z-20 bg-black flex flex-col items-center justify-center pointer-events-auto">
+          <video 
+            ref={videoRef}
+            src={recordedVideoUrl} 
+            className="w-full h-full object-contain" 
+            autoPlay 
+            controls
+            onEnded={() => setIsPlaying(false)}
+          />
+          <div className="absolute bottom-32 z-30 pointer-events-none">
+            <div className="bg-black/70 backdrop-blur-md px-6 py-3 rounded-full border border-white/20 shadow-lg flex items-center gap-3">
+              <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-white font-bold text-lg tracking-wider">재생 중...</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Top Bar */}
+      <div className="absolute top-0 left-0 w-full p-3 md:p-4 z-30 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent pointer-events-auto">
         <div className="flex items-center gap-3 md:gap-4">
           <img 
             src="/logo.jpg" 
@@ -237,9 +329,9 @@ function App() {
             onClick={() => setShowSettings(true)}
             className="w-12 h-12 md:w-16 md:h-16 object-cover rounded-2xl shadow-lg opacity-90 hover:opacity-100 transition-opacity cursor-pointer active:scale-95" 
           />
-          <div className="flex items-center gap-1.5 md:gap-3 bg-black/60 backdrop-blur-md px-3 py-1.5 md:px-4 md:py-2 rounded-xl md:rounded-2xl border border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
+          <div className="flex items-center gap-1.5 md:gap-3 bg-black/60 backdrop-blur-md px-3 py-1.5 md:px-4 md:py-2 rounded-xl border border-white/10 shadow-lg hidden sm:flex">
             <Dumbbell className="w-4 h-4 md:w-8 md:h-8 text-cyan-400 shrink-0" />
-            <h1 className="text-base sm:text-xl md:text-3xl lg:text-4xl font-black tracking-wider md:tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-500 whitespace-nowrap">
+            <h1 className="text-base sm:text-xl md:text-2xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-500 whitespace-nowrap">
               AI PT STUDIO
             </h1>
           </div>
@@ -255,85 +347,165 @@ function App() {
         </div>
       </div>
 
-      {/* Side Action Buttons */}
-      <div className={`absolute bottom-40 md:bottom-32 right-4 md:right-6 z-40 flex flex-col gap-3 md:gap-4 transition-all duration-300 ${showModes ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8 pointer-events-none'}`}>
-        {/* AI Analyze Button */}
-        <button
-          onClick={handleAnalyze}
-          disabled={isAnalyzing}
-          className="w-14 h-14 md:w-16 md:h-16 flex items-center justify-center bg-gradient-to-r from-purple-500 to-pink-500 backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(236,72,153,0.5)] transition-transform active:scale-90 hover:opacity-90 disabled:opacity-50 text-white"
-          title="AI 자세 분석"
-        >
-          {isAnalyzing ? <Loader2 className="w-6 h-6 md:w-8 md:h-8 animate-spin" /> : <Sparkles className="w-6 h-6 md:w-8 md:h-8" />}
-        </button>
-
-
-        {/* Camera Toggle Button */}
-        {inputMode === 'camera' && (
-          <button
-            onClick={() => setFacingMode(prev => prev === 'user' ? 'environment' : 'user')}
-            className="w-14 h-14 md:w-16 md:h-16 flex items-center justify-center bg-black/40 backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] transition-transform active:scale-90 hover:bg-black/60 text-white"
-            title="카메라 전/후면 전환"
+      {/* Mode Selection Tabs */}
+      <div className="absolute top-20 left-0 w-full z-40 flex justify-center pointer-events-auto px-4">
+        <div className="flex bg-black/60 backdrop-blur-md rounded-full p-1 border border-white/20 shadow-lg">
+          <button 
+            onClick={() => handleModeSwitch('photo_capture')}
+            className={`px-4 py-2 rounded-full text-sm md:text-base font-bold transition-colors ${appMode === 'photo_capture' ? 'bg-white text-black' : 'text-gray-300 hover:text-white'}`}
           >
-            <SwitchCamera className="w-6 h-6 md:w-8 md:h-8" />
+            사진 촬영
           </button>
-        )}
-        
-        {/* Mode Toggle Button */}
-        <button
-          onClick={handleToggleMode}
-          className={`w-14 h-14 md:w-16 md:h-16 flex items-center justify-center backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] transition-transform active:scale-90 ${inputMode === 'photo' ? 'bg-green-500/80 text-white' : 'bg-black/40 text-white hover:bg-black/60'}`}
-          title="앨범 사진 불러오기"
-        >
-          {inputMode === 'camera' ? <ImageIcon className="w-6 h-6 md:w-8 md:h-8" /> : <Camera className="w-6 h-6 md:w-8 md:h-8" />}
-        </button>
-        
-        {/* Grid Toggle Button */}
-        <button
-          onClick={() => setShowGrid(!showGrid)}
-          className={`w-14 h-14 md:w-16 md:h-16 flex items-center justify-center backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] transition-transform active:scale-90 ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/40 text-white hover:bg-black/60'}`}
-          title="그리드 표시 토글"
-        >
-          <Grid3X3 className="w-6 h-6 md:w-8 md:h-8" />
-        </button>
-        
-        {/* 3D View Toggle Button */}
-        <button
-          onClick={() => setViewMode(prev => prev === '2d' ? '3d' : '2d')}
-          className={`w-14 h-14 md:w-16 md:h-16 flex items-center justify-center backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] transition-transform active:scale-90 ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/40 text-white hover:bg-black/60'}`}
-          title="3D 뼈대 뷰어 토글"
-        >
-          <PersonStanding className="w-6 h-6 md:w-8 md:h-8" />
-        </button>
-        
-        {/* Capture Button */}
-        <button
-          onClick={handleCapture}
-          className="w-14 h-14 md:w-16 md:h-16 flex items-center justify-center bg-black/40 backdrop-blur-md border border-white/40 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] transition-transform active:scale-90 hover:bg-black/60 text-white"
-          title="현재 화면 캡처"
-        >
-          <Download className="w-6 h-6 md:w-8 md:h-8" />
-        </button>
-      </div>
-
-      {/* UI Overlay - Bottom Area (Controls) */}
-      <div className={`absolute bottom-0 left-0 w-full p-4 md:p-6 z-30 bg-gradient-to-t from-black/90 via-black/50 to-transparent transition-all duration-300 ${showModes ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 pointer-events-none'}`}>
-        <div className="grid grid-cols-3 md:flex gap-2 md:gap-4 justify-center w-full max-w-sm md:max-w-2xl mx-auto">
-          {MODE_CONFIGS.map((config) => (
-            <button
-              key={config.id}
-              onClick={() => setMode(config.id)}
-              className={`py-3 md:py-4 px-2 md:px-6 rounded-2xl font-bold text-sm md:text-lg transition-all transform active:scale-95 whitespace-nowrap ${
-                mode === config.id
-                  ? `${config.color} text-white ${config.shadow}`
-                  : 'bg-white/10 text-gray-300 backdrop-blur-md hover:bg-white/20'
-              }`}
-            >
-              {config.label}
-            </button>
-          ))}
+          <button 
+            onClick={() => handleModeSwitch('video_capture')}
+            className={`px-4 py-2 rounded-full text-sm md:text-base font-bold transition-colors ${appMode === 'video_capture' ? 'bg-white text-black' : 'text-gray-300 hover:text-white'}`}
+          >
+            동영상 촬영
+          </button>
+          <button 
+            onClick={() => handleModeSwitch('photo_upload')}
+            className={`px-4 py-2 rounded-full text-sm md:text-base font-bold transition-colors ${appMode === 'photo_upload' ? 'bg-white text-black' : 'text-gray-300 hover:text-white'}`}
+          >
+            사진 업로드
+          </button>
         </div>
       </div>
+
+      {/* Pose Selector Overlay */}
+      {showPoseSelector && (
+        <div className="absolute bottom-40 left-0 w-full z-30 flex justify-center pointer-events-auto px-4">
+          <div className="grid grid-cols-3 md:flex gap-2 md:gap-4 justify-center w-full max-w-sm md:max-w-2xl bg-black/80 backdrop-blur-md p-4 rounded-3xl border border-white/20 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
+            {MODE_CONFIGS.map((config) => (
+              <button
+                key={config.id}
+                onClick={() => { setMode(config.id); setShowPoseSelector(false); }}
+                className={`py-3 md:py-4 px-2 md:px-6 rounded-2xl font-bold text-sm md:text-lg transition-all transform active:scale-95 whitespace-nowrap ${
+                  mode === config.id
+                    ? `${config.color} text-white ${config.shadow}`
+                    : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                }`}
+              >
+                {config.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Bottom Controls */}
+      <div className="absolute bottom-0 left-0 w-full p-6 z-40 bg-gradient-to-t from-black via-black/80 to-transparent flex flex-col items-center justify-end pointer-events-auto min-h-[150px]">
+        
+        {/* Photo Capture Mode Controls */}
+        {appMode === 'photo_capture' && (
+          <div className="flex items-center justify-center gap-4 md:gap-6 w-full px-2 md:px-8">
+            {!currentScreenshot ? (
+              <div className="flex items-center justify-between w-full">
+                <div className="flex-1 flex justify-start gap-2 md:gap-4">
+                  <button onClick={() => setShowPoseSelector(p => !p)} className={`px-4 py-3 md:px-6 md:py-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center gap-2 font-bold ${showPoseSelector ? 'bg-purple-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="운동 종목 선택">
+                    <span className="text-sm md:text-lg">{MODE_CONFIGS.find(m => m.id === mode)?.label}</span>
+                  </button>
+                </div>
+                <div className="flex-none mx-2 md:mx-6">
+                  <button onClick={handleCapturePhoto} className="p-6 md:p-8 rounded-full bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-transform active:scale-90 hover:bg-red-600" title="촬영"><Camera className="w-8 h-8 md:w-10 md:h-10 text-white fill-current" /></button>
+                </div>
+                <div className="flex-1 flex justify-end gap-2 md:gap-4">
+                  <button onClick={() => setShowGrid(!showGrid)} className={`p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="그리드"><Grid3X3 className="w-6 h-6 md:w-8 md:h-8" /></button>
+                  <button onClick={() => setViewMode(v => v === '2d' ? '3d' : '2d')} className={`p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="골격 표시 (3D)"><PersonStanding className="w-6 h-6 md:w-8 md:h-8" /></button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <button onClick={() => setShowPoseSelector(p => !p)} className={`px-4 py-3 md:px-6 md:py-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center gap-2 font-bold ${showPoseSelector ? 'bg-purple-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="운동 종목 선택">
+                  <span className="text-sm md:text-lg">{MODE_CONFIGS.find(m => m.id === mode)?.label}</span>
+                </button>
+                <button onClick={handleAnalyze} className="px-6 py-4 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center gap-2 text-white font-bold text-base md:text-lg hover:opacity-90"><Sparkles className="w-6 h-6" /> AI 분석</button>
+                <button onClick={handleDownloadScreenshot} className="p-4 rounded-full bg-blue-600 border border-white/40 shadow-lg transition-transform active:scale-95 hover:bg-blue-700 text-white" title="다운로드"><Download className="w-6 h-6 md:w-8 md:h-8" /></button>
+                <button onClick={() => setShowGrid(!showGrid)} className={`p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="그리드"><Grid3X3 className="w-6 h-6 md:w-8 md:h-8" /></button>
+                <button onClick={() => setViewMode(v => v === '2d' ? '3d' : '2d')} className={`p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="골격 표시 (3D)"><PersonStanding className="w-6 h-6 md:w-8 md:h-8" /></button>
+                <button onClick={handleExit} className="p-4 rounded-full bg-gray-600 border border-white/40 shadow-lg transition-transform active:scale-95 hover:bg-gray-700 text-white" title="취소"><X className="w-6 h-6 md:w-8 md:h-8" /></button>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Video Capture Mode Controls */}
+        {appMode === 'video_capture' && (
+          <div className="flex items-center justify-center gap-4 md:gap-6 w-full px-2 md:px-8">
+            {!recordedVideoUrl ? (
+              recordingState === 'recording' ? (
+                <div className="flex items-center justify-center w-full">
+                  <button onClick={stopRecording} className="p-6 md:p-8 rounded-full bg-red-600 shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-transform active:scale-90 animate-pulse hover:bg-red-700" title="정지"><Square className="w-8 h-8 md:w-10 md:h-10 text-white fill-current" /></button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex-1 flex justify-start gap-2 md:gap-4">
+                    <button onClick={() => setShowPoseSelector(p => !p)} className={`px-4 py-3 md:px-6 md:py-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center gap-2 font-bold ${showPoseSelector ? 'bg-purple-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="운동 종목 선택">
+                      <span className="text-sm md:text-lg">{MODE_CONFIGS.find(m => m.id === mode)?.label}</span>
+                    </button>
+                  </div>
+                  <div className="flex-none mx-2 md:mx-6">
+                    <button onClick={startRecordingFlow} disabled={recordingState === 'countdown'} className={`p-6 md:p-8 rounded-full ${recordingState === 'countdown' ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600'} shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-transform active:scale-90`} title="녹화"><Video className="w-8 h-8 md:w-10 md:h-10 text-white fill-current" /></button>
+                  </div>
+                  <div className="flex-1 flex justify-end gap-2 md:gap-4">
+                    <button onClick={() => setShowGrid(!showGrid)} className={`p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="그리드"><Grid3X3 className="w-6 h-6 md:w-8 md:h-8" /></button>
+                    <button onClick={() => setViewMode(v => v === '2d' ? '3d' : '2d')} className={`p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="골격 표시 (3D)"><PersonStanding className="w-6 h-6 md:w-8 md:h-8" /></button>
+                  </div>
+                </div>
+              )
+            ) : (
+              <>
+                <button onClick={handleAnalyze} className="px-6 py-4 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center gap-2 text-white font-bold text-base md:text-lg hover:opacity-90"><Sparkles className="w-6 h-6" /> AI 분석</button>
+                <button onClick={() => {
+                   const link = document.createElement('a');
+                   link.download = `video-${Date.now()}.webm`;
+                   link.href = recordedVideoUrl;
+                   link.click();
+                }} className="p-4 rounded-full bg-blue-600 border border-white/40 shadow-lg transition-transform active:scale-95 hover:bg-blue-700 text-white" title="다운로드"><Download className="w-6 h-6 md:w-8 md:h-8" /></button>
+                <button onClick={() => setIsPlaying(!isPlaying)} className="p-4 rounded-full bg-green-600 border border-white/40 shadow-lg transition-transform active:scale-95 hover:bg-green-700 text-white" title={isPlaying ? "일시정지" : "재생"}>
+                  {isPlaying ? <Square className="w-6 h-6 md:w-8 md:h-8 fill-current" /> : <Play className="w-6 h-6 md:w-8 md:h-8 fill-current ml-1" />}
+                </button>
+                <button onClick={handleExit} className="p-4 rounded-full bg-gray-600 border border-white/40 shadow-lg transition-transform active:scale-95 hover:bg-gray-700 text-white" title="취소"><X className="w-6 h-6 md:w-8 md:h-8" /></button>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Photo Upload Mode Controls */}
+        {appMode === 'photo_upload' && (
+          <div className="flex items-center justify-center gap-4 md:gap-6 w-full">
+            {!uploadedImage ? (
+              <button onClick={() => fileInputRef.current?.click()} className="px-8 py-4 rounded-full bg-blue-600 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center gap-3 text-white font-bold text-xl hover:bg-blue-700"><Upload className="w-8 h-8" /> 앨범에서 사진 선택</button>
+            ) : (
+              <>
+                <button onClick={() => setShowPoseSelector(p => !p)} className={`px-4 py-3 md:px-6 md:py-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center gap-2 font-bold ${showPoseSelector ? 'bg-purple-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="운동 종목 선택">
+                  <span className="text-sm md:text-lg">{MODE_CONFIGS.find(m => m.id === mode)?.label}</span>
+                </button>
+                <button onClick={handleAnalyze} className="px-6 py-4 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center gap-2 text-white font-bold text-base md:text-lg hover:opacity-90"><Sparkles className="w-6 h-6" /> AI 분석</button>
+                <button onClick={() => {
+                  const shot = trackerRef.current?.getScreenshot();
+                  if (shot) {
+                    const link = document.createElement('a');
+                    link.download = `upload-result-${Date.now()}.png`;
+                    link.href = shot;
+                    link.click();
+                  }
+                }} className="p-4 rounded-full bg-blue-600 border border-white/40 shadow-lg transition-transform active:scale-95 hover:bg-blue-700 text-white" title="다운로드"><Download className="w-6 h-6 md:w-8 md:h-8" /></button>
+                <button onClick={() => setShowGrid(!showGrid)} className={`p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="그리드"><Grid3X3 className="w-6 h-6 md:w-8 md:h-8" /></button>
+                <button onClick={() => setViewMode(v => v === '2d' ? '3d' : '2d')} className={`p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="골격 표시 (3D)"><PersonStanding className="w-6 h-6 md:w-8 md:h-8" /></button>
+                <button onClick={handleExit} className="p-4 rounded-full bg-gray-600 border border-white/40 shadow-lg transition-transform active:scale-95 hover:bg-gray-700 text-white" title="취소 (사진 다시 선택)"><X className="w-6 h-6 md:w-8 md:h-8" /></button>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Recording Indicator */}
+      {recordingState === 'recording' && (
+        <div className="absolute top-24 right-6 z-40 flex items-center gap-2 bg-black/50 px-4 py-2 rounded-full border border-red-500/50 backdrop-blur-md pointer-events-none">
+          <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+          <span className="text-white font-bold text-sm md:text-base">REC</span>
+        </div>
+      )}
 
       {/* AI Analyzing Loading Modal */}
       {isAnalyzing && (
@@ -378,7 +550,6 @@ function App() {
             </div>
             <div className="p-0 overflow-y-auto custom-scrollbar flex-1 bg-gray-900">
               <div ref={reportRef} className="p-4 md:p-6 bg-gray-900 flex flex-col gap-6">
-                {/* Report Title (Included in saved image) */}
                 <div className="flex items-center justify-center gap-2 md:gap-3 pb-2 md:pb-4 border-b border-white/10">
                   <Sparkles className="w-6 h-6 md:w-8 md:h-8 text-purple-400 shrink-0" /> 
                   <h2 className="text-xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 text-center">
@@ -389,32 +560,25 @@ function App() {
                   </h2>
                 </div>
 
-                {currentScreenshot && (
+                {appMode === 'video_capture' && recordedFrames.length > 1 ? (
+                  <div className="flex w-full gap-2 overflow-x-auto pb-2 snap-x custom-scrollbar">
+                    {recordedFrames.map((frame, idx) => (
+                      <div key={idx} className="shrink-0 w-[45%] md:w-1/3 snap-center rounded-xl overflow-hidden border border-white/10 shadow-lg bg-black">
+                        <img src={frame} alt={`Frame ${idx + 1}`} className="w-full h-auto object-cover aspect-video" />
+                      </div>
+                    ))}
+                  </div>
+                ) : currentScreenshot ? (
                   <div className="w-full rounded-2xl overflow-hidden border border-white/10 shadow-lg bg-black">
                     <img src={currentScreenshot} alt="Captured Pose" className="w-full h-auto object-contain max-h-[40vh] mx-auto" />
                   </div>
-                )}
+                ) : null}
                 <div className="text-white prose prose-invert max-w-none">
                   <ReactMarkdown
                     components={{
-                      h3: ({node, ...props}) => (
-                        <h3 
-                          className="bg-gradient-to-r from-purple-900/80 to-indigo-900/80 text-purple-200 px-4 py-3 rounded-xl text-lg md:text-xl font-extrabold mt-8 mb-4 shadow-lg border border-purple-500/30" 
-                          {...props} 
-                        />
-                      ),
-                      h2: ({node, ...props}) => (
-                        <h2 
-                          className="bg-gradient-to-r from-purple-900/80 to-indigo-900/80 text-purple-200 px-4 py-3 rounded-xl text-lg md:text-xl font-extrabold mt-8 mb-4 shadow-lg border border-purple-500/30" 
-                          {...props} 
-                        />
-                      ),
-                      h1: ({node, ...props}) => (
-                        <h1 
-                          className="bg-gradient-to-r from-purple-900/80 to-indigo-900/80 text-purple-200 px-4 py-3 rounded-xl text-lg md:text-xl font-extrabold mt-8 mb-4 shadow-lg border border-purple-500/30" 
-                          {...props} 
-                        />
-                      )
+                      h3: ({node, ...props}) => <h3 className="bg-gradient-to-r from-purple-900/80 to-indigo-900/80 text-purple-200 px-4 py-3 rounded-xl text-lg md:text-xl font-extrabold mt-8 mb-4 shadow-lg border border-purple-500/30" {...props} />,
+                      h2: ({node, ...props}) => <h2 className="bg-gradient-to-r from-purple-900/80 to-indigo-900/80 text-purple-200 px-4 py-3 rounded-xl text-lg md:text-xl font-extrabold mt-8 mb-4 shadow-lg border border-purple-500/30" {...props} />,
+                      h1: ({node, ...props}) => <h1 className="bg-gradient-to-r from-purple-900/80 to-indigo-900/80 text-purple-200 px-4 py-3 rounded-xl text-lg md:text-xl font-extrabold mt-8 mb-4 shadow-lg border border-purple-500/30" {...props} />
                     }}
                   >
                     {analysisResult}

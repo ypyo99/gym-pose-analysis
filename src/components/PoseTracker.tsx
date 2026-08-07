@@ -21,6 +21,8 @@ interface PoseTrackerProps {
 export interface PoseTrackerRef {
   capture: (memberName: string, modeLabel?: string) => void;
   getScreenshot: () => string | null;
+  startRecording: () => void;
+  stopRecording: () => Promise<{ blob: Blob | null, frames: string[] }>;
 }
 
 const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGrid = false, facingMode = 'user', imageSrc = null, viewMode = '2d', onBackgroundClick }, ref) => {
@@ -31,6 +33,10 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
   const [worldLandmarks, setWorldLandmarks] = useState<any>(null);
   const [poseLandmarksData, setPoseLandmarksData] = useState<{landmarks: any, width: number, height: number} | null>(null);
   const lastImageRef = useRef<HTMLImageElement | HTMLVideoElement | HTMLCanvasElement | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordedChunksRef = useRef<Blob[]>([]);
+  const frameIntervalRef = useRef<number | null>(null);
+  const capturedFramesRef = useRef<string[]>([]);
 
   useImperativeHandle(ref, () => {
     const createCompositeImage = (mimeType = 'image/png', quality = 1.0) => {
@@ -92,6 +98,67 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       },
       getScreenshot: () => {
         return createCompositeImage('image/jpeg', 0.8);
+      },
+      startRecording: () => {
+        if (!canvasRef.current) return;
+        recordedChunksRef.current = [];
+        capturedFramesRef.current = [];
+        try {
+          const stream = canvasRef.current.captureStream(30);
+          const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+          mediaRecorder.ondataavailable = (e) => {
+            if (e.data.size > 0) {
+              recordedChunksRef.current.push(e.data);
+            }
+          };
+          mediaRecorder.start();
+          mediaRecorderRef.current = mediaRecorder;
+          
+          frameIntervalRef.current = window.setInterval(() => {
+            const dataUrl = createCompositeImage('image/jpeg', 0.6);
+            if (dataUrl) capturedFramesRef.current.push(dataUrl);
+          }, 500) as unknown as number;
+        } catch (e) {
+          console.error("Recording start failed:", e);
+        }
+      },
+      stopRecording: () => {
+        return new Promise((resolve) => {
+          if (!mediaRecorderRef.current || mediaRecorderRef.current.state === 'inactive') {
+            resolve({ blob: null, frames: [] });
+            return;
+          }
+          
+          if (frameIntervalRef.current !== null) {
+            clearInterval(frameIntervalRef.current);
+            frameIntervalRef.current = null;
+          }
+
+          mediaRecorderRef.current.onstop = () => {
+            const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
+            
+            const frames = capturedFramesRef.current;
+            const keyFrames: string[] = [];
+            if (frames.length > 0) {
+              const numFrames = Math.min(5, frames.length);
+              if (numFrames === 1) {
+                keyFrames.push(frames[0]);
+              } else {
+                for (let i = 0; i < numFrames; i++) {
+                  const idx = Math.floor(i * (frames.length - 1) / (numFrames - 1));
+                  keyFrames.push(frames[idx]);
+                }
+              }
+            } else {
+               const current = createCompositeImage('image/jpeg', 0.6);
+               if (current) keyFrames.push(current);
+            }
+            
+            resolve({ blob, frames: keyFrames });
+          };
+          
+          mediaRecorderRef.current.stop();
+        });
       }
     };
   });
@@ -458,6 +525,10 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           setFeedbackColor('text-white');
         }
       }
+    } else {
+      if (feedback !== '') {
+        setFeedback('');
+      }
     }
     canvasCtx.restore();
   }, [mode, showGrid, viewMode]);
@@ -487,6 +558,17 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       }
     });
 
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        isProcessing = false;
+        const video = webcamRef.current?.video;
+        if (video && video.paused) {
+          video.play().catch(e => console.warn("Video play error:", e));
+        }
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
     if (imageSrc) {
       const img = new Image();
       img.onload = async () => {
@@ -501,6 +583,10 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
     } else {
       const processFrame = async () => {
         if (!isComponentMounted) return;
+        
+        // 탭 전환 등에서 루프가 끊기지 않도록 다음 프레임 예약 위치 변경
+        animationFrameId = requestAnimationFrame(processFrame);
+
         const video = webcamRef.current?.video;
         if (video && video.readyState >= 2 && !isProcessing) {
           isProcessing = true;
@@ -512,7 +598,6 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
             isProcessing = false;
           }
         }
-        animationFrameId = requestAnimationFrame(processFrame);
       };
       processFrame();
     }
@@ -521,19 +606,22 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       isComponentMounted = false;
       cancelAnimationFrame(animationFrameId);
       pose.close();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [onResults, facingMode, imageSrc]);
 
   return (
     <div className="relative w-full h-full flex flex-col items-center justify-center bg-black">
       {/* Feedback Overlay */}
-      <div className="absolute top-16 md:top-20 left-0 w-full flex justify-center z-20 pointer-events-none px-4">
-        <div className="bg-black/70 px-5 py-3 md:px-8 md:py-4 rounded-3xl backdrop-blur-md border border-white/20 shadow-[0_10px_40px_rgba(0,0,0,0.8)] max-w-full text-center">
-          <h1 className={`text-xl md:text-3xl lg:text-4xl font-extrabold tracking-wide drop-shadow-md whitespace-pre-wrap ${feedbackColor}`}>
-            {feedback}
-          </h1>
+      {feedback && (
+        <div className="absolute top-36 md:top-40 left-0 w-full flex justify-center z-20 pointer-events-none px-4">
+          <div className="bg-black/70 px-5 py-3 md:px-8 md:py-4 rounded-3xl backdrop-blur-md border border-white/20 shadow-[0_10px_40px_rgba(0,0,0,0.8)] max-w-full text-center">
+            <h1 className={`text-xl md:text-3xl lg:text-4xl font-extrabold tracking-wide drop-shadow-md whitespace-pre-wrap ${feedbackColor}`}>
+              {feedback}
+            </h1>
+          </div>
         </div>
-      </div>
+      )}
 
       {!imageSrc && (
         <Webcam
@@ -543,8 +631,9 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           className={`absolute w-full h-full object-cover z-0 ${viewMode === '3d' ? 'opacity-0' : 'opacity-100'}`}
           videoConstraints={{
             facingMode: facingMode === 'environment' ? { exact: 'environment' } : 'user',
-            width: facingMode === 'environment' ? { ideal: 3840 } : { ideal: 1920 },
-            height: facingMode === 'environment' ? { ideal: 2160 } : { ideal: 1080 }
+            aspectRatio: 9 / 16,
+            width: facingMode === 'environment' ? { ideal: 2160 } : { ideal: 1080 },
+            height: facingMode === 'environment' ? { ideal: 3840 } : { ideal: 1920 }
           }}
           onUserMediaError={(err) => console.error("Webcam access error:", err)}
         />
