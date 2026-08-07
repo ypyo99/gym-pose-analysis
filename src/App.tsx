@@ -3,7 +3,7 @@ import PoseTracker, { type PoseTrackerRef } from './components/PoseTracker';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import ReactMarkdown from 'react-markdown';
 import * as htmlToImage from 'html-to-image';
-import { Sparkles, Grid3X3, Camera, Settings, PersonStanding, Download, Dumbbell, Video, Square, Play, X, Upload, RefreshCcw } from 'lucide-react';
+import { Sparkles, Grid3X3, Camera, Settings, PersonStanding, Download, Dumbbell, Video, Square, X, Upload, RefreshCcw } from 'lucide-react';
 
 export type AppMode = 'photo_capture' | 'video_capture' | 'photo_upload';
 export type ExerciseMode = 'squat' | 'deadlift' | 'turtle' | 'asymmetry' | 'plank';
@@ -37,13 +37,11 @@ function App() {
 
   const [recordedFrames, setRecordedFrames] = useState<string[]>([]);
   const [recordedVideoUrl, setRecordedVideoUrl] = useState<string | null>(null);
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [showPoseSelector, setShowPoseSelector] = useState<boolean>(false);
 
   const trackerRef = useRef<PoseTrackerRef>(null);
   const reportRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const savedKey = localStorage.getItem('gemini_api_key');
@@ -67,7 +65,6 @@ function App() {
     setRecordedFrames([]);
     setUploadedImage(null);
     setUploadedVideo(null);
-    setIsPlaying(false);
     setRecordingState('idle');
     setShowPoseSelector(false);
   };
@@ -311,9 +308,9 @@ function App() {
           showGrid={showGrid} 
           showUI={showUI}
           facingMode={facingMode} 
-          imageSrc={appMode === 'photo_upload' ? uploadedImage : null} 
-          videoSrc={appMode === 'photo_upload' ? uploadedVideo : null}
-          isUploadMode={appMode === 'photo_upload'}
+          imageSrc={appMode === 'photo_upload' ? uploadedImage : (appMode === 'photo_capture' && currentScreenshot ? currentScreenshot : null)} 
+          videoSrc={appMode === 'photo_upload' ? uploadedVideo : (appMode === 'video_capture' && recordedVideoUrl ? recordedVideoUrl : null)}
+          isUploadMode={appMode === 'photo_upload' || (appMode === 'video_capture' && !!recordedVideoUrl) || (appMode === 'photo_capture' && !!currentScreenshot)}
           viewMode={viewMode}
           onBackgroundClick={() => {
             setShowPoseSelector(false);
@@ -329,33 +326,6 @@ function App() {
         onChange={handleImageUpload} 
         className="hidden" 
       />
-
-      {/* Captured Image Overlay */}
-      {appMode === 'photo_capture' && currentScreenshot && (
-        <div className="absolute inset-0 z-10 bg-black flex items-center justify-center pointer-events-none">
-          <img src={currentScreenshot} alt="Captured" className="w-full h-full object-contain" />
-        </div>
-      )}
-
-      {/* Video Playback Overlay */}
-      {appMode === 'video_capture' && recordedVideoUrl && isPlaying && (
-        <div className="absolute inset-0 z-20 bg-black flex flex-col items-center justify-center pointer-events-auto">
-          <video 
-            ref={videoRef}
-            src={recordedVideoUrl} 
-            className="w-full h-full object-contain" 
-            autoPlay 
-            controls
-            onEnded={() => setIsPlaying(false)}
-          />
-          <div className="absolute bottom-32 z-30 pointer-events-none">
-            <div className="bg-black/70 backdrop-blur-md px-6 py-3 rounded-full border border-white/20 shadow-lg flex items-center gap-3">
-              <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-white font-bold text-lg tracking-wider">재생 중...</span>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Top Bar */}
       <div className={`absolute top-0 left-0 w-full p-3 md:p-4 z-30 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent transition-opacity duration-300 ${showUI ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
@@ -498,6 +468,9 @@ function App() {
               )
             ) : (
               <div className="fixed right-4 top-1/2 -translate-y-1/2 flex flex-col items-center gap-4 z-50">
+                <button onClick={() => setShowPoseSelector(p => !p)} className={`shrink-0 px-4 py-3 md:px-6 md:py-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center font-bold ${showPoseSelector ? 'bg-purple-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="운동 종목 선택">
+                  <span className="text-sm md:text-lg whitespace-nowrap">{MODE_CONFIGS.find(m => m.id === mode)?.label}</span>
+                </button>
                 <button onClick={handleAnalyze} className="shrink-0 p-4 md:p-6 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center text-white hover:opacity-90"><Sparkles className="w-6 h-6 md:w-8 md:h-8" /></button>
                 <button onClick={() => {
                    const link = document.createElement('a');
@@ -519,9 +492,8 @@ function App() {
                    link.click();
                    alert(`저장되었습니다!\n\n파일명: ${filename}`);
                 }} className="shrink-0 p-4 rounded-full bg-blue-600 border border-white/40 shadow-lg transition-transform active:scale-95 hover:bg-blue-700 text-white flex items-center justify-center" title="다운로드"><Download className="w-6 h-6 md:w-8 md:h-8" /></button>
-                <button onClick={() => setIsPlaying(!isPlaying)} className="shrink-0 p-4 rounded-full bg-green-600 border border-white/40 shadow-lg transition-transform active:scale-95 hover:bg-green-700 text-white flex items-center justify-center" title={isPlaying ? "일시정지" : "재생"}>
-                  {isPlaying ? <Square className="w-6 h-6 md:w-8 md:h-8 fill-current" /> : <Play className="w-6 h-6 md:w-8 md:h-8 fill-current ml-1" />}
-                </button>
+                <button onClick={() => setShowGrid(!showGrid)} className={`shrink-0 p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="그리드"><Grid3X3 className="w-6 h-6 md:w-8 md:h-8" /></button>
+                <button onClick={() => setViewMode(v => v === '2d' ? '3d' : '2d')} className={`shrink-0 p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="골격 표시 (3D)"><PersonStanding className="w-6 h-6 md:w-8 md:h-8" /></button>
                 <button onClick={handleExit} className="shrink-0 p-4 rounded-full bg-gray-600 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center hover:bg-gray-700 text-white" title="취소"><X className="w-6 h-6 md:w-8 md:h-8" /></button>
               </div>
             )}
