@@ -689,16 +689,19 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           videoConstraints={{
             facingMode: facingMode,
             // @ts-ignore
-            advanced: [{ zoom: 1 }]
+            advanced: [{ zoom: 0.6 }]
           }}
           onUserMedia={(stream) => {
             const track = stream.getVideoTracks()[0];
             if (track && track.getCapabilities && track.applyConstraints) {
               const caps = track.getCapabilities() as any;
               if (caps.zoom) {
-                // Force zoom to minimum (widest angle / 1x) on mobile
-                const minZoom = caps.zoom.min ?? 1;
-                track.applyConstraints({ advanced: [{ zoom: minZoom } as any] }).catch(console.warn);
+                // Use 0.6x zoom (ultra-wide). If device minimum is higher, use that instead.
+                const targetZoom = Math.max(caps.zoom.min ?? 0.6, 0.1);
+                const finalZoom = Math.min(targetZoom, 0.6);
+                // finalZoom will be 0.6 if supported, otherwise the device minimum
+                const safeZoom = finalZoom < (caps.zoom.min ?? 0) ? (caps.zoom.min ?? 1) : finalZoom;
+                track.applyConstraints({ advanced: [{ zoom: safeZoom } as any] }).catch(console.warn);
               }
             }
           }}
