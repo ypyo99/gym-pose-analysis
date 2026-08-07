@@ -23,6 +23,7 @@ function App() {
   const [showGrid, setShowGrid] = useState<boolean>(false);
   const [viewMode, setViewMode] = useState<'2d' | '3d'>('2d');
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
+  const [showUI, setShowUI] = useState<boolean>(true);
   
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
