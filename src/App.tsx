@@ -272,7 +272,7 @@ function App() {
   };
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-gray-900 font-sans">
+    <div className="relative w-full h-screen overflow-hidden bg-gray-900 font-sans touch-none">
       {/* Pose Tracker Component */}
       <div className="absolute inset-0 z-0">
         <PoseTracker 

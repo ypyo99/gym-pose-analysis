@@ -38,6 +38,46 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
   const recordedChunksRef = useRef<Blob[]>([]);
   const frameIntervalRef = useRef<number | null>(null);
   const capturedFramesRef = useRef<string[]>([]);
+  
+  const touchStartY = useRef<number | null>(null);
+  const touchStartZoom = useRef<number>(1);
+  const initialPinchDistance = useRef<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      touchStartY.current = e.touches[0].clientY;
+      touchStartZoom.current = zoom;
+      initialPinchDistance.current = null;
+    } else if (e.touches.length === 2) {
+      touchStartY.current = null;
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      initialPinchDistance.current = Math.sqrt(dx * dx + dy * dy);
+      touchStartZoom.current = zoom;
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length === 1 && touchStartY.current !== null) {
+      const currentY = e.touches[0].clientY;
+      const deltaY = touchStartY.current - currentY; // positive if swiping up
+      const zoomChange = deltaY * 0.01;
+      let newZoom = touchStartZoom.current + zoomChange;
+      setZoom(Math.max(1, Math.min(3, newZoom)));
+    } else if (e.touches.length === 2 && initialPinchDistance.current !== null) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const currentDistance = Math.sqrt(dx * dx + dy * dy);
+      const distanceRatio = currentDistance / initialPinchDistance.current;
+      let newZoom = touchStartZoom.current * distanceRatio;
+      setZoom(Math.max(1, Math.min(3, newZoom)));
+    }
+  };
+
+  const handleTouchEnd = () => {
+    touchStartY.current = null;
+    initialPinchDistance.current = null;
+  };
 
   useImperativeHandle(ref, () => {
     const createCompositeImage = (mimeType = 'image/png', quality = 1.0) => {
@@ -612,7 +652,12 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
   }, [onResults, facingMode, imageSrc]);
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-center bg-black">
+    <div 
+      className="relative w-full h-full flex flex-col items-center justify-center bg-black touch-none"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
       {/* Feedback Overlay */}
       {feedback && (
         <div className="absolute top-36 md:top-40 left-0 w-full flex justify-center z-20 pointer-events-none px-4">
