@@ -214,7 +214,7 @@ const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks, poseLandmar
                 [end.x, end.y, end.z]
               ]}
               color="#00FF00"
-              lineWidth={4}
+              lineWidth={6}
             />
           );
         })}
