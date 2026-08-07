@@ -687,20 +687,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           mirrored={facingMode === 'user'}
           className={`absolute w-full h-full object-cover z-0 ${viewMode === '3d' ? 'opacity-0' : 'opacity-100'}`}
           videoConstraints={{
-            facingMode: facingMode,
-            width: { ideal: 1080 },
-            height: { ideal: 1920 },
-            // @ts-ignore
-            advanced: [{ zoom: 0.6 }]
-          }}
-          onUserMedia={(stream) => {
-            const track = stream.getVideoTracks()[0];
-            if (track && track.getCapabilities && track.applyConstraints) {
-              const caps = track.getCapabilities() as any;
-              if (caps.zoom) {
-                track.applyConstraints({ advanced: [{ zoom: Math.max(caps.zoom.min || 0.6, 0.6) } as any] }).catch(console.warn);
-              }
-            }
+            facingMode: facingMode
           }}
           onUserMediaError={(err) => console.error("Webcam access error:", err)}
         />
