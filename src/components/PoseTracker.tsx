@@ -42,6 +42,8 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
   const recordedChunksRef = useRef<Blob[]>([]);
   const frameIntervalRef = useRef<number | null>(null);
   const capturedFramesRef = useRef<string[]>([]);
+  const recordingCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const recordingAnimFrameRef = useRef<number | null>(null);
   
   const touchStartZoom = useRef<number>(1);
   const initialPinchDistance = useRef<number | null>(null);
@@ -152,7 +154,51 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
         recordedChunksRef.current = [];
         capturedFramesRef.current = [];
         try {
-          const stream = canvasRef.current.captureStream(30);
+          const recCanvas = document.createElement('canvas');
+          const videoW = canvasRef.current.width || 1280;
+          const videoH = canvasRef.current.height || 720;
+          recCanvas.width = videoW;
+          recCanvas.height = videoH;
+          recordingCanvasRef.current = recCanvas;
+
+          const renderRecordingFrame = () => {
+            if (recordingCanvasRef.current) {
+              const recCtx = recordingCanvasRef.current.getContext('2d');
+              if (recCtx) {
+                const w = recordingCanvasRef.current.width;
+                const h = recordingCanvasRef.current.height;
+                recCtx.save();
+                recCtx.fillStyle = '#111827';
+                recCtx.fillRect(0, 0, w, h);
+
+                if (viewMode === '2d') {
+                  if (lastImageRef.current) {
+                    try {
+                      recCtx.drawImage(lastImageRef.current as any, 0, 0, w, h);
+                    } catch (e) {}
+                  }
+                  if (canvasRef.current) {
+                    recCtx.drawImage(canvasRef.current, 0, 0, w, h);
+                  }
+                } else {
+                  if (canvasRef.current) {
+                    recCtx.drawImage(canvasRef.current, 0, 0, w, h);
+                  }
+                  const threeCanvas = document.querySelector('.pose-3d-canvas canvas') as HTMLCanvasElement;
+                  if (threeCanvas && threeCanvas.width > 0 && threeCanvas.height > 0) {
+                    try {
+                      recCtx.drawImage(threeCanvas, 0, 0, w, h);
+                    } catch (e) {}
+                  }
+                }
+                recCtx.restore();
+              }
+              recordingAnimFrameRef.current = requestAnimationFrame(renderRecordingFrame);
+            }
+          };
+          renderRecordingFrame();
+
+          const stream = recCanvas.captureStream(30);
           
           // 캠에서 오디오 트랙을 가져와서 캔버스 스트림에 합침
           if (webcamRef.current && webcamRef.current.video && webcamRef.current.video.srcObject) {
@@ -163,13 +209,24 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
             }
           }
           
-          const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+          let options: MediaRecorderOptions = { mimeType: 'video/webm' };
+          if (!MediaRecorder.isTypeSupported('video/webm')) {
+            if (MediaRecorder.isTypeSupported('video/mp4')) {
+              options = { mimeType: 'video/mp4' };
+            } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp8')) {
+              options = { mimeType: 'video/webm;codecs=vp8' };
+            } else {
+              options = {};
+            }
+          }
+
+          const mediaRecorder = new MediaRecorder(stream, options);
           mediaRecorder.ondataavailable = (e) => {
             if (e.data.size > 0) {
               recordedChunksRef.current.push(e.data);
             }
           };
-          mediaRecorder.start();
+          mediaRecorder.start(100);
           mediaRecorderRef.current = mediaRecorder;
           
           frameIntervalRef.current = window.setInterval(() => {
@@ -188,6 +245,12 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       },
       stopRecording: () => {
         return new Promise((resolve) => {
+          if (recordingAnimFrameRef.current !== null) {
+            cancelAnimationFrame(recordingAnimFrameRef.current);
+            recordingAnimFrameRef.current = null;
+          }
+          recordingCanvasRef.current = null;
+
           if (!mediaRecorderRef.current || mediaRecorderRef.current.state === 'inactive') {
             resolve({ blob: null, frames: [] });
             return;
@@ -199,7 +262,8 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           }
 
           mediaRecorderRef.current.onstop = () => {
-            const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
+            const mimeType = mediaRecorderRef.current?.mimeType || 'video/webm';
+            const blob = new Blob(recordedChunksRef.current, { type: mimeType });
             
             const frames = capturedFramesRef.current;
             const keyFrames: string[] = [];
@@ -244,8 +308,12 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       setPoseLandmarksData(null);
     }
 
-    canvasRef.current.width = videoWidth;
-    canvasRef.current.height = videoHeight;
+    if (canvasRef.current.width !== videoWidth) {
+      canvasRef.current.width = videoWidth;
+    }
+    if (canvasRef.current.height !== videoHeight) {
+      canvasRef.current.height = videoHeight;
+    }
 
     const canvasCtx = canvasRef.current.getContext('2d');
     if (!canvasCtx) return;
