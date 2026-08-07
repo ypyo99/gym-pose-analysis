@@ -28,7 +28,8 @@ export interface PoseTrackerRef {
 const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGrid = false, facingMode = 'user', imageSrc = null, viewMode = '2d', onBackgroundClick }, ref) => {
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-
+  const [feedback, setFeedback] = useState<string>('');
+  const [feedbackColor, setFeedbackColor] = useState<string>('text-white');
   const [worldLandmarks, setWorldLandmarks] = useState<any>(null);
   const [poseLandmarksData, setPoseLandmarksData] = useState<{landmarks: any, width: number, height: number} | null>(null);
   const [zoom, setZoom] = useState<number>(1);
@@ -380,6 +381,19 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           canvasCtx.fillStyle = '#FFFFFF';
           canvasCtx.fillText(`${Math.round(angle)}°`, p2.x + 20, p2.y);
 
+          if (angle > 160) {
+            setFeedback('준비 자세');
+            setFeedbackColor('text-blue-400');
+          } else if (angle < 90) {
+            setFeedback('Perfect! 좋은 깊이입니다');
+            setFeedbackColor('text-green-400');
+          } else {
+            setFeedback('더 깊게 앉으세요');
+            setFeedbackColor('text-yellow-400');
+          }
+        } else {
+          setFeedback('전신(측면)이 화면에 보이게 해주세요');
+          setFeedbackColor('text-white');
         }
       } else if (mode === 'deadlift') {
         const ear = results.poseLandmarks[8]; // Right ear
@@ -409,6 +423,23 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           canvasCtx.fillStyle = '#FF9999';
           canvasCtx.fillText(`허리/등: ${Math.round(backAngle)}°`, pShoulder.x + 20, pShoulder.y);
 
+          // Provide feedback
+          if (backAngle < 145) {
+            setFeedback('허리/등 굽음 주의! 가슴을 펴세요');
+            setFeedbackColor('text-red-500');
+          } else if (hipAngle > 160) {
+            setFeedback('준비 자세');
+            setFeedbackColor('text-blue-400');
+          } else if (hipAngle < 100) {
+            setFeedback('Perfect! 훌륭한 힙힌지입니다');
+            setFeedbackColor('text-green-400');
+          } else {
+            setFeedback('엉덩이를 뒤로 더 빼세요');
+            setFeedbackColor('text-yellow-400');
+          }
+        } else {
+          setFeedback('전신(측면)이 화면에 보이게 해주세요');
+          setFeedbackColor('text-white');
         }
       } else if (mode === 'turtle') {
         const isRightVisible = (results.poseLandmarks[8]?.visibility || 0) > (results.poseLandmarks[7]?.visibility || 0);
@@ -447,6 +478,19 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           canvasCtx.fillStyle = '#FFFFFF';
           canvasCtx.fillText(`목 각도: ${Math.round(neckAngle)}°`, pEar.x + 20, pEar.y);
           
+          if (neckAngle < 15) {
+            setFeedback('정상 (바른 자세입니다)');
+            setFeedbackColor('text-green-400');
+          } else if (neckAngle < 25) {
+            setFeedback('거북목 주의 (목이 앞으로 나왔습니다)');
+            setFeedbackColor('text-yellow-400');
+          } else {
+            setFeedback('거북목 심각 (교정이 필요합니다!)');
+            setFeedbackColor('text-red-500');
+          }
+        } else {
+          setFeedback('측면이 화면에 보이게 서주세요');
+          setFeedbackColor('text-white');
         }
       } else if (mode === 'asymmetry') {
         const leftShoulder = results.poseLandmarks[11];
@@ -491,6 +535,23 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           canvasCtx.fillText(`어깨 기울기: ${shoulderAngle.toFixed(1)}°`, rs.x - 40, rs.y - 20);
           canvasCtx.fillText(`골반 기울기: ${hipAngle.toFixed(1)}°`, rh.x - 40, rh.y - 20);
           
+          if (shoulderAngle < 1.5 && hipAngle < 1.5) {
+            setFeedback('좌우 대칭이 아주 좋습니다!');
+            setFeedbackColor('text-green-400');
+          } else {
+            let fb = [];
+            if (shoulderAngle >= 1.5) {
+              fb.push(shoulderDiff > 0 ? `좌측 어깨가 ${shoulderAngle.toFixed(1)}° 더 높음` : `우측 어깨가 ${shoulderAngle.toFixed(1)}° 더 높음`);
+            }
+            if (hipAngle >= 1.5) {
+              fb.push(hipDiff > 0 ? `좌측 골반이 ${hipAngle.toFixed(1)}° 더 높음` : `우측 골반이 ${hipAngle.toFixed(1)}° 더 높음`);
+            }
+            setFeedback(fb.join('\n'));
+            setFeedbackColor('text-yellow-400');
+          }
+        } else {
+          setFeedback('정면 전체가 화면에 보이게 서주세요');
+          setFeedbackColor('text-white');
         }
       } else if (mode === 'plank') {
         const isRightVisible = (results.poseLandmarks[12]?.visibility || 0) > (results.poseLandmarks[11]?.visibility || 0);
@@ -512,7 +573,21 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           canvasCtx.fillStyle = '#FFFFFF';
           canvasCtx.fillText(`코어정렬: ${Math.round(angle)}°`, p2.x, p2.y - 30);
           
+          if (angle > 170) {
+            setFeedback('Perfect! 훌륭한 코어 정렬입니다');
+            setFeedbackColor('text-green-400');
+          } else {
+            setFeedback('엉덩이 높이를 조절하여 일직선을 만드세요');
+            setFeedbackColor('text-yellow-400');
+          }
+        } else {
+          setFeedback('전신(측면)이 화면에 보이게 해주세요');
+          setFeedbackColor('text-white');
         }
+      }
+    } else {
+      if (feedback !== '') {
+        setFeedback('');
       }
     }
     canvasCtx.restore();
@@ -603,7 +678,16 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       onTouchEnd={handleTouchEnd}
       onClick={onBackgroundClick}
     >
-
+      {/* Feedback Overlay */}
+      {feedback && (
+        <div className="absolute top-36 md:top-40 left-0 w-full flex justify-center z-20 pointer-events-none px-4">
+          <div className="bg-black/70 px-5 py-3 md:px-8 md:py-4 rounded-3xl backdrop-blur-md border border-white/20 shadow-[0_10px_40px_rgba(0,0,0,0.8)] max-w-full text-center">
+            <h1 className={`text-xl md:text-3xl lg:text-4xl font-extrabold tracking-wide drop-shadow-md whitespace-pre-wrap ${feedbackColor}`}>
+              {feedback}
+            </h1>
+          </div>
+        </div>
+      )}
 
 
       <div 
