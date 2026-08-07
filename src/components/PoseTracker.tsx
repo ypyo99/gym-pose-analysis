@@ -640,7 +640,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
 
   return (
     <div 
-      className="relative w-full h-full flex flex-col items-center justify-center bg-black touch-pan-y"
+      className="relative w-full h-full flex flex-col items-center justify-center bg-black touch-none"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
