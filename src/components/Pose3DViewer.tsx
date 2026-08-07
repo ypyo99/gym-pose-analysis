@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, Sphere, Line, Text, Billboard } from '@react-three/drei';
 import type { LandmarkList } from '@mediapipe/pose';
@@ -177,71 +177,95 @@ const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks, poseLandmar
     return angles;
   }, [transformedLandmarks, mode, poseLandmarksData]);
 
+  const pointerDownPos = useRef<{ x: number; y: number } | null>(null);
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    pointerDownPos.current = { x: e.clientX, y: e.clientY };
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (pointerDownPos.current) {
+      const dx = Math.abs(e.clientX - pointerDownPos.current.x);
+      const dy = Math.abs(e.clientY - pointerDownPos.current.y);
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      // If movement is less than 6px, treat it as a click/tap on screen to toggle UI
+      if (dist < 6 && onBackgroundClick) {
+        onBackgroundClick();
+      }
+    }
+    pointerDownPos.current = null;
+  };
+
   return (
-    <Canvas
-      camera={{ position: [0, 1, 5], fov: 50 }}
-      className="w-full h-full pose-3d-canvas"
-      style={{ background: 'transparent' }}
-      onPointerMissed={onBackgroundClick}
-      gl={{ preserveDrawingBuffer: true }}
+    <div 
+      className="w-full h-full"
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
     >
-      <ambientLight intensity={0.8} />
-      <directionalLight position={[10, 10, 10]} intensity={1.5} />
-      
-      <OrbitControls 
-        enablePan={false}
-        enableZoom={true}
-        enableRotate={true}
-        autoRotate={false}
-      />
-      
-      <group position={[0, -1, 0]}>
-        {/* Draw Bones (Lines) */}
-        {transformedLandmarks && POSE_CONNECTIONS.map(([startIdx, endIdx], i) => {
-          const start = transformedLandmarks[startIdx];
-          const end = transformedLandmarks[endIdx];
-          
-          // Skip drawing if visibility is too low or it's a face/hand/foot landmark
-          if (start.visibility < 0.5 || end.visibility < 0.5) return null;
-          if (startIdx <= 10 || (startIdx >= 17 && startIdx <= 22) || startIdx >= 29) return null;
-          if (endIdx <= 10 || (endIdx >= 17 && endIdx <= 22) || endIdx >= 29) return null;
-          
-          return (
-            <Line
-              key={`bone-${i}`}
-              points={[
-                [start.x, start.y, start.z],
-                [end.x, end.y, end.z]
-              ]}
-              color="#00FF00"
-              lineWidth={6}
-            />
-          );
-        })}
-
-        {/* Draw Joints (Spheres) */}
-        {transformedLandmarks && transformedLandmarks.map((lm, i) => {
-          if (lm.visibility < 0.5) return null;
-          if (i <= 10 || (i >= 17 && i <= 22) || i >= 29) return null; // Hide face, hands, feet
-          
-          return (
-            <Sphere
-              key={`joint-${i}`}
-              args={[0.04, 16, 16]}
-              position={[lm.x, lm.y, lm.z]}
-            >
-              <meshStandardMaterial color="#FF0000" />
-            </Sphere>
-          );
-        })}
+      <Canvas
+        camera={{ position: [0, 1, 5], fov: 50 }}
+        className="w-full h-full pose-3d-canvas"
+        style={{ background: 'transparent' }}
+        gl={{ preserveDrawingBuffer: true }}
+      >
+        <ambientLight intensity={0.8} />
+        <directionalLight position={[10, 10, 10]} intensity={1.5} />
         
-        {/* Dynamically draw angles to exactly match 2D pixel scale */}
-        <DynamicAnglesRenderer angles={anglesToRender} />
+        <OrbitControls 
+          enablePan={false}
+          enableZoom={true}
+          enableRotate={true}
+          autoRotate={false}
+        />
+        
+        <group position={[0, -1, 0]}>
+          {/* Draw Bones (Lines) */}
+          {transformedLandmarks && POSE_CONNECTIONS.map(([startIdx, endIdx], i) => {
+            const start = transformedLandmarks[startIdx];
+            const end = transformedLandmarks[endIdx];
+            
+            // Skip drawing if visibility is too low or it's a face/hand/foot landmark
+            if (start.visibility < 0.5 || end.visibility < 0.5) return null;
+            if (startIdx <= 10 || (startIdx >= 17 && startIdx <= 22) || startIdx >= 29) return null;
+            if (endIdx <= 10 || (endIdx >= 17 && endIdx <= 22) || endIdx >= 29) return null;
+            
+            return (
+              <Line
+                key={`bone-${i}`}
+                points={[
+                  [start.x, start.y, start.z],
+                  [end.x, end.y, end.z]
+                ]}
+                color="#00FF00"
+                lineWidth={6}
+              />
+            );
+          })}
 
-        {/* Grid Floor to give spatial reference */}
-        <gridHelper args={[10, 10, '#ffffff', '#555555']} position={[0, -1, 0]} />
-      </group>
-    </Canvas>
+          {/* Draw Joints (Spheres) */}
+          {transformedLandmarks && transformedLandmarks.map((lm, i) => {
+            if (lm.visibility < 0.5) return null;
+            if (i <= 10 || (i >= 17 && i <= 22) || i >= 29) return null; // Hide face, hands, feet
+            
+            return (
+              <Sphere
+                key={`joint-${i}`}
+                args={[0.04, 16, 16]}
+                position={[lm.x, lm.y, lm.z]}
+              >
+                <meshStandardMaterial color="#FF0000" />
+              </Sphere>
+            );
+          })}
+          
+          {/* Dynamically draw angles to exactly match 2D pixel scale */}
+          <DynamicAnglesRenderer angles={anglesToRender} />
+
+          {/* Grid Floor to give spatial reference */}
+          <gridHelper args={[10, 10, '#ffffff', '#555555']} position={[0, -1, 0]} />
+        </group>
+      </Canvas>
+    </div>
   );
 };
 
