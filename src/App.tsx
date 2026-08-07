@@ -92,7 +92,14 @@ function App() {
       const timeStr = String(now.getHours()).padStart(2, '0') + 
                       String(now.getMinutes()).padStart(2, '0') + 
                       String(now.getSeconds()).padStart(2, '0');
-      const name = memberName.trim() || '회원';
+      const formatMemberName = (raw: string) => {
+        const trimmed = (raw || '').trim();
+        if (!trimmed || trimmed === '회원') return '회원님';
+        if (trimmed.endsWith('회원님')) return trimmed;
+        if (trimmed.endsWith('회원')) return `${trimmed}님`;
+        return `${trimmed} 회원님`;
+      };
+      const name = formatMemberName(memberName);
       const currentModeLabel = MODE_CONFIGS.find(m => m.id === mode)?.label || mode;
       const filename = `${name}-${currentModeLabel}-AI리포트-${dateStr}-${timeStr}.png`;
       link.download = filename;
@@ -123,7 +130,14 @@ function App() {
     const timeStr = String(now.getHours()).padStart(2, '0') + 
                     String(now.getMinutes()).padStart(2, '0') + 
                     String(now.getSeconds()).padStart(2, '0');
-    const name = memberName.trim() || '회원';
+    const formatMemberName = (raw: string) => {
+      const trimmed = (raw || '').trim();
+      if (!trimmed || trimmed === '회원') return '회원님';
+      if (trimmed.endsWith('회원님')) return trimmed;
+      if (trimmed.endsWith('회원')) return `${trimmed}님`;
+      return `${trimmed} 회원님`;
+    };
+    const name = formatMemberName(memberName);
     const currentModeLabel = MODE_CONFIGS.find(m => m.id === mode)?.label || mode;
     
     const filename = `${name}-${currentModeLabel}-캡처-${dateStr}-${timeStr}.jpg`;
@@ -490,7 +504,14 @@ function App() {
                    const now = new Date();
                    const dateStr = now.getFullYear().toString().slice(-2) + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
                    const timeStr = String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0') + String(now.getSeconds()).padStart(2, '0');
-                   const name = memberName.trim() || '회원';
+                   const formatMemberName = (raw: string) => {
+                     const trimmed = (raw || '').trim();
+                     if (!trimmed || trimmed === '회원') return '회원님';
+                     if (trimmed.endsWith('회원님')) return trimmed;
+                     if (trimmed.endsWith('회원')) return `${trimmed}님`;
+                     return `${trimmed} 회원님`;
+                   };
+                   const name = formatMemberName(memberName);
                    const currentModeLabel = MODE_CONFIGS.find(m => m.id === mode)?.label || mode;
                    const filename = `${name}-${currentModeLabel}-영상-${dateStr}-${timeStr}.webm`;
                    link.download = filename;
@@ -525,7 +546,14 @@ function App() {
                     const now = new Date();
                     const dateStr = now.getFullYear().toString().slice(-2) + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
                     const timeStr = String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0') + String(now.getSeconds()).padStart(2, '0');
-                    const name = memberName.trim() || '회원';
+                    const formatMemberName = (raw: string) => {
+                      const trimmed = (raw || '').trim();
+                      if (!trimmed || trimmed === '회원') return '회원님';
+                      if (trimmed.endsWith('회원님')) return trimmed;
+                      if (trimmed.endsWith('회원')) return `${trimmed}님`;
+                      return `${trimmed} 회원님`;
+                    };
+                    const name = formatMemberName(memberName);
                     const currentModeLabel = MODE_CONFIGS.find(m => m.id === mode)?.label || mode;
                     const typeLabel = uploadedVideo ? '동영상' : '사진';
                     const filename = `${name}-${currentModeLabel}-${typeLabel}-${dateStr}-${timeStr}.png`;

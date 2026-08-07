@@ -140,7 +140,14 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
                         String(now.getMinutes()).padStart(2, '0') + 
                         String(now.getSeconds()).padStart(2, '0');
         
-        const name = memberName.trim() || '회원';
+        const formatMemberName = (raw: string) => {
+          const trimmed = (raw || '').trim();
+          if (!trimmed || trimmed === '회원') return '회원님';
+          if (trimmed.endsWith('회원님')) return trimmed;
+          if (trimmed.endsWith('회원')) return `${trimmed}님`;
+          return `${trimmed} 회원님`;
+        };
+        const name = formatMemberName(memberName);
         const modeStr = modeLabel ? `-${modeLabel}` : '';
         link.download = `${name}${modeStr}-캡처-${dateStr}-${timeStr}.png`;
         link.href = dataUrl;
