@@ -49,6 +49,24 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
   
   const touchStartZoom = useRef<number>(1);
   const initialPinchDistance = useRef<number | null>(null);
+  const pointerDownPos = useRef<{ x: number; y: number } | null>(null);
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    pointerDownPos.current = { x: e.clientX, y: e.clientY };
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (pointerDownPos.current) {
+      const dx = Math.abs(e.clientX - pointerDownPos.current.x);
+      const dy = Math.abs(e.clientY - pointerDownPos.current.y);
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      // Only toggle UI if pointer movement is less than 5px (tap/click, not drag/rotate)
+      if (dist < 5 && onBackgroundClick) {
+        onBackgroundClick();
+      }
+    }
+    pointerDownPos.current = null;
+  };
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length === 2) {
@@ -869,7 +887,8 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      onClick={onBackgroundClick}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
     >
       {/* Feedback Overlay */}
       {feedback && (

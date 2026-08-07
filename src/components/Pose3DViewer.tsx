@@ -191,6 +191,7 @@ const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks, poseLandmar
       const dist = Math.sqrt(dx * dx + dy * dy);
       // If NOT currently dragging/orbiting and movement is less than 5px, toggle UI
       if (!isOrbitingRef.current && dist < 5 && onBackgroundClick) {
+        e.stopPropagation();
         onBackgroundClick();
       }
     }
