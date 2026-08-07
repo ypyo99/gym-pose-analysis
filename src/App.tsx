@@ -94,9 +94,11 @@ function App() {
                       String(now.getSeconds()).padStart(2, '0');
       const name = memberName.trim() || '회원';
       const currentModeLabel = MODE_CONFIGS.find(m => m.id === mode)?.label || mode;
-      link.download = `${name}-${currentModeLabel}-AI리포트-${dateStr}-${timeStr}.png`;
+      const filename = `${name}-${currentModeLabel}-AI리포트-${dateStr}-${timeStr}.png`;
+      link.download = filename;
       link.href = dataUrl;
       link.click();
+      alert(`저장되었습니다!\n\n파일명: ${filename}`);
     } catch (error) {
       console.error('Failed to save report:', error);
       alert('리포트 저장에 실패했습니다.');
@@ -124,9 +126,11 @@ function App() {
     const name = memberName.trim() || '회원';
     const currentModeLabel = MODE_CONFIGS.find(m => m.id === mode)?.label || mode;
     
-    link.download = `${name}-${currentModeLabel}-캡처-${dateStr}-${timeStr}.jpg`;
+    const filename = `${name}-${currentModeLabel}-캡처-${dateStr}-${timeStr}.jpg`;
+    link.download = filename;
     link.href = currentScreenshot;
     link.click();
+    alert(`저장되었습니다!\n\n파일명: ${filename}`);
   };
 
   const startRecordingFlow = () => {
@@ -487,9 +491,11 @@ function App() {
                    const timeStr = String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0') + String(now.getSeconds()).padStart(2, '0');
                    const name = memberName.trim() || '회원';
                    const currentModeLabel = MODE_CONFIGS.find(m => m.id === mode)?.label || mode;
-                   link.download = `${name}-${currentModeLabel}-영상-${dateStr}-${timeStr}.webm`;
+                   const filename = `${name}-${currentModeLabel}-영상-${dateStr}-${timeStr}.webm`;
+                   link.download = filename;
                    link.href = recordedVideoUrl;
                    link.click();
+                   alert(`저장되었습니다!\n\n파일명: ${filename}`);
                 }} className="shrink-0 p-4 rounded-full bg-blue-600 border border-white/40 shadow-lg transition-transform active:scale-95 hover:bg-blue-700 text-white flex items-center justify-center" title="다운로드"><Download className="w-6 h-6 md:w-8 md:h-8" /></button>
                 <button onClick={() => setIsPlaying(!isPlaying)} className="shrink-0 p-4 rounded-full bg-green-600 border border-white/40 shadow-lg transition-transform active:scale-95 hover:bg-green-700 text-white flex items-center justify-center" title={isPlaying ? "일시정지" : "재생"}>
                   {isPlaying ? <Square className="w-6 h-6 md:w-8 md:h-8 fill-current" /> : <Play className="w-6 h-6 md:w-8 md:h-8 fill-current ml-1" />}
@@ -521,9 +527,11 @@ function App() {
                     const name = memberName.trim() || '회원';
                     const currentModeLabel = MODE_CONFIGS.find(m => m.id === mode)?.label || mode;
                     const typeLabel = uploadedVideo ? '동영상' : '사진';
-                    link.download = `${name}-${currentModeLabel}-${typeLabel}-${dateStr}-${timeStr}.png`;
+                    const filename = `${name}-${currentModeLabel}-${typeLabel}-${dateStr}-${timeStr}.png`;
+                    link.download = filename;
                     link.href = shot;
                     link.click();
+                    alert(`저장되었습니다!\n\n파일명: ${filename}`);
                   }
                 }} className="shrink-0 p-4 rounded-full bg-blue-600 border border-white/40 shadow-lg transition-transform active:scale-95 hover:bg-blue-700 text-white flex items-center justify-center" title="다운로드"><Download className="w-6 h-6 md:w-8 md:h-8" /></button>
                 <button onClick={() => setShowGrid(!showGrid)} className={`shrink-0 p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="그리드"><Grid3X3 className="w-6 h-6 md:w-8 md:h-8" /></button>
