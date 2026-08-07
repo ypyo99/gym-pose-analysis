@@ -154,40 +154,62 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
         recordedChunksRef.current = [];
         capturedFramesRef.current = [];
         try {
+          const rawW = canvasRef.current.width || 1280;
+          const rawH = canvasRef.current.height || 720;
+          
+          let outW = rawW;
+          let outH = rawH;
+          let srcX = 0, srcY = 0, srcW = rawW, srcH = rawH;
+
+          // Always enforce 9:16 portrait ratio for video recording (center cropped like UI object-cover)
+          if (rawW > rawH) {
+            outH = rawH;
+            outW = Math.round(rawH * 9 / 16);
+            srcX = Math.round((rawW - outW) / 2);
+            srcY = 0;
+            srcW = outW;
+            srcH = rawH;
+          } else {
+            const targetW = Math.round(rawH * 9 / 16);
+            if (rawW > targetW) {
+              outH = rawH;
+              outW = targetW;
+              srcX = Math.round((rawW - outW) / 2);
+              srcY = 0;
+              srcW = outW;
+              srcH = rawH;
+            }
+          }
+
+          // Ensure width and height are even numbers for codec compatibility
+          if (outW % 2 !== 0) outW -= 1;
+          if (outH % 2 !== 0) outH -= 1;
+
           const recCanvas = document.createElement('canvas');
-          const videoW = canvasRef.current.width || 1280;
-          const videoH = canvasRef.current.height || 720;
-          recCanvas.width = videoW;
-          recCanvas.height = videoH;
+          recCanvas.width = outW;
+          recCanvas.height = outH;
           recordingCanvasRef.current = recCanvas;
 
           const renderRecordingFrame = () => {
             if (recordingCanvasRef.current) {
               const recCtx = recordingCanvasRef.current.getContext('2d');
               if (recCtx) {
-                const w = recordingCanvasRef.current.width;
-                const h = recordingCanvasRef.current.height;
                 recCtx.save();
                 recCtx.fillStyle = '#111827';
-                recCtx.fillRect(0, 0, w, h);
+                recCtx.fillRect(0, 0, outW, outH);
 
                 if (viewMode === '2d') {
-                  if (lastImageRef.current) {
-                    try {
-                      recCtx.drawImage(lastImageRef.current as any, 0, 0, w, h);
-                    } catch (e) {}
-                  }
                   if (canvasRef.current) {
-                    recCtx.drawImage(canvasRef.current, 0, 0, w, h);
+                    recCtx.drawImage(canvasRef.current, srcX, srcY, srcW, srcH, 0, 0, outW, outH);
                   }
                 } else {
                   if (canvasRef.current) {
-                    recCtx.drawImage(canvasRef.current, 0, 0, w, h);
+                    recCtx.drawImage(canvasRef.current, srcX, srcY, srcW, srcH, 0, 0, outW, outH);
                   }
                   const threeCanvas = document.querySelector('.pose-3d-canvas canvas') as HTMLCanvasElement;
                   if (threeCanvas && threeCanvas.width > 0 && threeCanvas.height > 0) {
                     try {
-                      recCtx.drawImage(threeCanvas, 0, 0, w, h);
+                      recCtx.drawImage(threeCanvas, 0, 0, outW, outH);
                     } catch (e) {}
                   }
                 }
