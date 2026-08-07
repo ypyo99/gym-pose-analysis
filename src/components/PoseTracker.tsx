@@ -74,34 +74,50 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       const width = canvasRef.current.width;
       const height = canvasRef.current.height;
       
+      const isLandscape = width > height;
+      let outW = width;
+      let outH = height;
+      let srcX = 0, srcY = 0, srcW = width, srcH = height;
+
+      if (isLandscape && !imageSrc) {
+        // Camera gave landscape video but screen is portrait → crop center to 9:16
+        outH = height;
+        outW = Math.round(height * 9 / 16);
+        srcX = Math.round((width - outW) / 2);
+        srcY = 0;
+        srcW = outW;
+        srcH = height;
+      }
+
       const tempCanvas = document.createElement('canvas');
-      tempCanvas.width = width;
-      tempCanvas.height = height;
+      tempCanvas.width = outW;
+      tempCanvas.height = outH;
       const ctx = tempCanvas.getContext('2d');
       if (!ctx) return null;
       
       // Fill with background color first
       ctx.fillStyle = '#111827'; // gray-900 to match 3D viewer background
-      ctx.fillRect(0, 0, width, height);
+      ctx.fillRect(0, 0, outW, outH);
       
       if (viewMode === '2d') {
-        // Draw the original camera/photo image first
-        ctx.drawImage(img, 0, 0, width, height);
+        // Draw the original camera/photo image first (cropped if landscape)
+        ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, outW, outH);
         
-        // Draw the 2D canvas on top (which contains skeletons, angles, grids)
-        ctx.drawImage(canvasRef.current, 0, 0, width, height);
+        // Draw the 2D canvas on top (skeleton overlay, cropped same way)
+        ctx.drawImage(canvasRef.current, srcX, srcY, srcW, srcH, 0, 0, outW, outH);
       } else {
         // In 3D mode, skip original photo. Draw grid (from 2D canvas) and 3D canvas.
-        ctx.drawImage(canvasRef.current, 0, 0, width, height);
+        ctx.drawImage(canvasRef.current, srcX, srcY, srcW, srcH, 0, 0, outW, outH);
         
         const threeCanvas = document.querySelector('.pose-3d-canvas canvas') as HTMLCanvasElement;
         if (threeCanvas) {
-          ctx.drawImage(threeCanvas, 0, 0, width, height);
+          ctx.drawImage(threeCanvas, 0, 0, outW, outH);
         }
       }
       
       return tempCanvas.toDataURL(mimeType, quality);
     };
+
 
     return {
       capture: (memberName: string, modeLabel?: string) => {
@@ -688,9 +704,6 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           className={`absolute w-full h-full object-cover z-0 ${viewMode === '3d' ? 'opacity-0' : 'opacity-100'}`}
           videoConstraints={{
             facingMode: facingMode,
-            width: { ideal: 720 },
-            height: { ideal: 1280 },
-            aspectRatio: { ideal: 9 / 16 },
             // @ts-ignore
             advanced: [{ zoom: 0.6 }]
           }}
