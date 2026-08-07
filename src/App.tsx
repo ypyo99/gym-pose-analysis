@@ -393,7 +393,7 @@ function App() {
             onClick={() => handleModeSwitch('photo_upload')}
             className={`px-4 py-2 rounded-full text-sm md:text-base font-bold transition-colors ${appMode === 'photo_upload' ? 'bg-white text-black' : 'text-gray-300 hover:text-white'}`}
           >
-            사진 업로드
+            업로드
           </button>
         </div>
       </div>
