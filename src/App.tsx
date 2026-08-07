@@ -283,7 +283,10 @@ function App() {
           facingMode={facingMode} 
           imageSrc={appMode === 'photo_upload' ? uploadedImage : null} 
           viewMode={viewMode}
-          onBackgroundClick={() => setShowPoseSelector(false)}
+          onBackgroundClick={() => {
+            setShowPoseSelector(false);
+            setShowUI(prev => !prev);
+          }}
         />
       </div>
 
@@ -323,7 +326,7 @@ function App() {
       )}
 
       {/* Top Bar */}
-      <div className="absolute top-0 left-0 w-full p-3 md:p-4 z-30 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent pointer-events-auto">
+      <div className={`absolute top-0 left-0 w-full p-3 md:p-4 z-30 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent transition-opacity duration-300 ${showUI ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
         <div className="flex items-center gap-3 md:gap-4">
           <img 
             src="/logo.jpg" 
@@ -359,7 +362,7 @@ function App() {
       </div>
 
       {/* Mode Selection Tabs */}
-      <div className="absolute top-20 left-0 w-full z-40 flex justify-center pointer-events-auto px-4">
+      <div className={`absolute top-20 left-0 w-full z-40 flex justify-center px-4 transition-opacity duration-300 ${showUI ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
         <div className="flex bg-black/60 backdrop-blur-md rounded-full p-1 border border-white/20 shadow-lg">
           <button 
             onClick={() => handleModeSwitch('photo_capture')}
@@ -384,7 +387,7 @@ function App() {
 
       {/* Pose Selector Overlay */}
       {showPoseSelector && (
-        <div className="absolute bottom-40 left-0 w-full z-30 flex justify-center pointer-events-auto px-4">
+        <div className={`absolute bottom-40 left-0 w-full z-30 flex justify-center px-4 transition-opacity duration-300 ${showUI ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
           <div className="grid grid-cols-3 md:flex gap-2 md:gap-4 justify-center w-full max-w-sm md:max-w-2xl bg-black/80 backdrop-blur-md p-4 rounded-3xl border border-white/20 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
             {MODE_CONFIGS.map((config) => (
               <button
@@ -404,7 +407,7 @@ function App() {
       )}
 
       {/* Bottom Controls */}
-      <div className="absolute bottom-0 left-0 w-full p-6 z-40 bg-gradient-to-t from-black via-black/80 to-transparent flex flex-col items-center justify-end pointer-events-auto min-h-[150px]">
+      <div className={`absolute bottom-0 left-0 w-full p-6 z-40 bg-gradient-to-t from-black via-black/80 to-transparent flex flex-col items-center justify-end min-h-[150px] transition-opacity duration-300 ${showUI ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
         
         {/* Photo Capture Mode Controls */}
         {appMode === 'photo_capture' && (
@@ -512,7 +515,7 @@ function App() {
 
       {/* Recording Indicator */}
       {recordingState === 'recording' && (
-        <div className="absolute top-24 right-6 z-40 flex items-center gap-2 bg-black/50 px-4 py-2 rounded-full border border-red-500/50 backdrop-blur-md pointer-events-none">
+        <div className={`absolute top-24 right-6 z-40 flex items-center gap-2 bg-black/50 px-4 py-2 rounded-full border border-red-500/50 backdrop-blur-md pointer-events-none transition-opacity duration-300 ${showUI ? 'opacity-100' : 'opacity-0'}`}>
           <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
           <span className="text-white font-bold text-sm md:text-base">REC</span>
         </div>
