@@ -575,10 +575,10 @@ function App() {
                 </div>
 
                 {appMode === 'video_capture' && recordedFrames.length > 1 ? (
-                  <div className="flex w-full gap-2 overflow-x-auto pb-2 snap-x custom-scrollbar">
+                  <div className="flex flex-col w-full gap-4 pb-2">
                     {recordedFrames.map((frame, idx) => (
-                      <div key={idx} className="shrink-0 w-[45%] md:w-1/3 snap-center rounded-xl overflow-hidden border border-white/10 shadow-lg bg-black">
-                        <img src={frame} alt={`Frame ${idx + 1}`} className="w-full h-auto object-cover aspect-video" />
+                      <div key={idx} className="w-full rounded-2xl overflow-hidden border border-white/10 shadow-lg bg-black">
+                        <img src={frame} alt={`Frame ${idx + 1}`} className="w-full h-auto object-contain max-h-[40vh] mx-auto" />
                       </div>
                     ))}
                   </div>

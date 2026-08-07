@@ -665,6 +665,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
         {!imageSrc && (
         <Webcam
           audio={true}
+          muted={true}
           key={facingMode}
           ref={webcamRef}
           mirrored={facingMode === 'user'}
