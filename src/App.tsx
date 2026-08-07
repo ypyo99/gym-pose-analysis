@@ -413,20 +413,18 @@ function App() {
         {appMode === 'photo_capture' && (
           <div className="flex items-center justify-center gap-4 md:gap-6 w-full px-2 md:px-8">
             {!currentScreenshot ? (
-              <div className="flex items-center justify-between w-full">
-                <div className="flex-1 flex justify-start gap-2 md:gap-4">
-                  <button onClick={() => setShowPoseSelector(p => !p)} className={`px-4 py-3 md:px-6 md:py-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center gap-2 font-bold ${showPoseSelector ? 'bg-purple-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="운동 종목 선택">
-                    <span className="text-sm md:text-lg">{MODE_CONFIGS.find(m => m.id === mode)?.label}</span>
+              <>
+                <div className="fixed right-4 top-1/2 -translate-y-1/2 flex flex-col items-center gap-4 z-50">
+                  <button onClick={() => setShowPoseSelector(p => !p)} className={`shrink-0 px-4 py-3 md:px-6 md:py-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center font-bold ${showPoseSelector ? 'bg-purple-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="운동 종목 선택">
+                    <span className="text-sm md:text-lg whitespace-nowrap">{MODE_CONFIGS.find(m => m.id === mode)?.label}</span>
                   </button>
+                  <button onClick={() => setShowGrid(!showGrid)} className={`shrink-0 p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="그리드"><Grid3X3 className="w-6 h-6 md:w-8 md:h-8" /></button>
+                  <button onClick={() => setViewMode(v => v === '2d' ? '3d' : '2d')} className={`shrink-0 p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="골격 표시 (3D)"><PersonStanding className="w-6 h-6 md:w-8 md:h-8" /></button>
                 </div>
-                <div className="flex-none mx-2 md:mx-6">
-                  <button onClick={handleCapturePhoto} className="p-6 md:p-8 rounded-full bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-transform active:scale-90 hover:bg-red-600" title="촬영"><Camera className="w-8 h-8 md:w-10 md:h-10 text-white fill-current" /></button>
+                <div className="flex items-center justify-center w-full">
+                  <button onClick={handleCapturePhoto} className="p-6 md:p-8 rounded-full bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-transform active:scale-90 hover:bg-red-600 flex items-center justify-center" title="촬영"><Camera className="w-8 h-8 md:w-10 md:h-10 text-white fill-current" /></button>
                 </div>
-                <div className="flex-1 flex justify-end gap-2 md:gap-4">
-                  <button onClick={() => setShowGrid(!showGrid)} className={`p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="그리드"><Grid3X3 className="w-6 h-6 md:w-8 md:h-8" /></button>
-                  <button onClick={() => setViewMode(v => v === '2d' ? '3d' : '2d')} className={`p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="골격 표시 (3D)"><PersonStanding className="w-6 h-6 md:w-8 md:h-8" /></button>
-                </div>
-              </div>
+              </>
             ) : (
               <div className="fixed right-4 top-1/2 -translate-y-1/2 flex flex-col items-center gap-4 z-50">
                 <button onClick={() => setShowPoseSelector(p => !p)} className={`shrink-0 px-4 py-3 md:px-6 md:py-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center font-bold ${showPoseSelector ? 'bg-purple-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="운동 종목 선택">
@@ -451,20 +449,18 @@ function App() {
                   <button onClick={stopRecording} className="p-6 md:p-8 rounded-full bg-red-600 shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-transform active:scale-90 animate-pulse hover:bg-red-700" title="정지"><Square className="w-8 h-8 md:w-10 md:h-10 text-white fill-current" /></button>
                 </div>
               ) : (
-                <div className="flex items-center justify-between w-full">
-                  <div className="flex-1 flex justify-start gap-2 md:gap-4">
-                    <button onClick={() => setShowPoseSelector(p => !p)} className={`px-4 py-3 md:px-6 md:py-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center gap-2 font-bold ${showPoseSelector ? 'bg-purple-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="운동 종목 선택">
-                      <span className="text-sm md:text-lg">{MODE_CONFIGS.find(m => m.id === mode)?.label}</span>
+                <>
+                  <div className="fixed right-4 top-1/2 -translate-y-1/2 flex flex-col items-center gap-4 z-50">
+                    <button onClick={() => setShowPoseSelector(p => !p)} className={`shrink-0 px-4 py-3 md:px-6 md:py-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center font-bold ${showPoseSelector ? 'bg-purple-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="운동 종목 선택">
+                      <span className="text-sm md:text-lg whitespace-nowrap">{MODE_CONFIGS.find(m => m.id === mode)?.label}</span>
                     </button>
+                    <button onClick={() => setShowGrid(!showGrid)} className={`shrink-0 p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="그리드"><Grid3X3 className="w-6 h-6 md:w-8 md:h-8" /></button>
+                    <button onClick={() => setViewMode(v => v === '2d' ? '3d' : '2d')} className={`shrink-0 p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="골격 표시 (3D)"><PersonStanding className="w-6 h-6 md:w-8 md:h-8" /></button>
                   </div>
-                  <div className="flex-none mx-2 md:mx-6">
-                    <button onClick={startRecordingFlow} disabled={recordingState === 'countdown'} className={`p-6 md:p-8 rounded-full ${recordingState === 'countdown' ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600'} shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-transform active:scale-90`} title="녹화"><Video className="w-8 h-8 md:w-10 md:h-10 text-white fill-current" /></button>
+                  <div className="flex items-center justify-center w-full">
+                    <button onClick={startRecordingFlow} disabled={recordingState === 'countdown'} className={`p-6 md:p-8 rounded-full ${recordingState === 'countdown' ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600'} shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-transform active:scale-90 flex items-center justify-center`} title="녹화"><Video className="w-8 h-8 md:w-10 md:h-10 text-white fill-current" /></button>
                   </div>
-                  <div className="flex-1 flex justify-end gap-2 md:gap-4">
-                    <button onClick={() => setShowGrid(!showGrid)} className={`p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="그리드"><Grid3X3 className="w-6 h-6 md:w-8 md:h-8" /></button>
-                    <button onClick={() => setViewMode(v => v === '2d' ? '3d' : '2d')} className={`p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="골격 표시 (3D)"><PersonStanding className="w-6 h-6 md:w-8 md:h-8" /></button>
-                  </div>
-                </div>
+                </>
               )
             ) : (
               <>
