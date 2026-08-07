@@ -670,8 +670,8 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           className={`absolute w-full h-full object-cover z-0 ${viewMode === '3d' ? 'opacity-0' : 'opacity-100'}`}
           videoConstraints={{
             facingMode: facingMode,
-            width: { ideal: 3840 },
-            height: { ideal: 3840 },
+            width: { ideal: 1440 },
+            height: { ideal: 1440 },
             // @ts-ignore
             advanced: [{ zoom: 0.6 }]
           }}
