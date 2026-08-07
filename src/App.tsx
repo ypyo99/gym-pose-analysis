@@ -347,9 +347,9 @@ function App() {
             onClick={() => setShowSettings(true)}
             className="w-12 h-12 md:w-16 md:h-16 object-cover rounded-2xl shadow-lg opacity-90 hover:opacity-100 transition-opacity cursor-pointer active:scale-95" 
           />
-          <div className="flex items-center gap-1.5 md:gap-3 bg-black/60 backdrop-blur-md px-3 py-1.5 md:px-4 md:py-2 rounded-xl border border-white/10 shadow-lg hidden sm:flex">
+          <div className="flex items-center gap-1.5 md:gap-3 bg-black/60 backdrop-blur-md px-2.5 py-1 md:px-4 md:py-2 rounded-xl border border-white/10 shadow-lg flex">
             <Dumbbell className="w-4 h-4 md:w-8 md:h-8 text-cyan-400 shrink-0" />
-            <h1 className="text-base sm:text-xl md:text-2xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-500 whitespace-nowrap">
+            <h1 className="text-xs sm:text-lg md:text-2xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-500 whitespace-nowrap">
               AI PT STUDIO
             </h1>
           </div>
