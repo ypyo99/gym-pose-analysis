@@ -143,7 +143,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           mediaRecorderRef.current = mediaRecorder;
           
           frameIntervalRef.current = window.setInterval(() => {
-            const dataUrl = createCompositeImage('image/jpeg', 0.6);
+            const dataUrl = createCompositeImage('image/jpeg', 0.4);
             if (dataUrl) capturedFramesRef.current.push(dataUrl);
           }, 500) as unknown as number;
         } catch (e) {
@@ -168,7 +168,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
             const frames = capturedFramesRef.current;
             const keyFrames: string[] = [];
             if (frames.length > 0) {
-              const numFrames = Math.min(5, frames.length);
+              const numFrames = Math.min(3, frames.length);
               if (numFrames === 1) {
                 keyFrames.push(frames[0]);
               } else {
@@ -178,7 +178,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
                 }
               }
             } else {
-               const current = createCompositeImage('image/jpeg', 0.6);
+               const current = createCompositeImage('image/jpeg', 0.4);
                if (current) keyFrames.push(current);
             }
             
