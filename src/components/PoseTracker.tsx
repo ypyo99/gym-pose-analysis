@@ -366,11 +366,12 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
 
       // Calculate squat angle
       if (mode === 'squat') {
-        const hip = results.poseLandmarks[24]; // Right hip
-        const knee = results.poseLandmarks[26]; // Right knee
-        const ankle = results.poseLandmarks[28]; // Right ankle
+        const isRightVisible = (results.poseLandmarks[26]?.visibility || 0) >= (results.poseLandmarks[25]?.visibility || 0);
+        const hip = isRightVisible ? results.poseLandmarks[24] : results.poseLandmarks[23];
+        const knee = isRightVisible ? results.poseLandmarks[26] : results.poseLandmarks[25];
+        const ankle = isRightVisible ? results.poseLandmarks[28] : results.poseLandmarks[27];
 
-        if (hip && knee && ankle && hip.visibility! > 0.5 && knee.visibility! > 0.5 && ankle.visibility! > 0.5) {
+        if (hip && knee && ankle && (hip.visibility ?? 0) > 0.3 && (knee.visibility ?? 0) > 0.3 && (ankle.visibility ?? 0) > 0.3) {
           const p1: Point = { x: hip.x * videoWidth, y: hip.y * videoHeight };
           const p2: Point = { x: knee.x * videoWidth, y: knee.y * videoHeight };
           const p3: Point = { x: ankle.x * videoWidth, y: ankle.y * videoHeight };
@@ -399,12 +400,13 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           setFeedbackColor('text-white');
         }
       } else if (mode === 'deadlift') {
-        const ear = results.poseLandmarks[8]; // Right ear
-        const shoulder = results.poseLandmarks[12]; // Right shoulder
-        const hip = results.poseLandmarks[24]; // Right hip
-        const knee = results.poseLandmarks[26]; // Right knee
+        const isRightVisible = (results.poseLandmarks[26]?.visibility || 0) >= (results.poseLandmarks[25]?.visibility || 0);
+        const ear = isRightVisible ? results.poseLandmarks[8] : results.poseLandmarks[7];
+        const shoulder = isRightVisible ? results.poseLandmarks[12] : results.poseLandmarks[11];
+        const hip = isRightVisible ? results.poseLandmarks[24] : results.poseLandmarks[23];
+        const knee = isRightVisible ? results.poseLandmarks[26] : results.poseLandmarks[25];
 
-        if (ear && shoulder && hip && knee && ear.visibility! > 0.5 && shoulder.visibility! > 0.5 && hip.visibility! > 0.5 && knee.visibility! > 0.5) {
+        if (ear && shoulder && hip && knee && (ear.visibility ?? 0) > 0.3 && (shoulder.visibility ?? 0) > 0.3 && (hip.visibility ?? 0) > 0.3 && (knee.visibility ?? 0) > 0.3) {
           const pEar: Point = { x: ear.x * videoWidth, y: ear.y * videoHeight };
           const pShoulder: Point = { x: shoulder.x * videoWidth, y: shoulder.y * videoHeight };
           const pHip: Point = { x: hip.x * videoWidth, y: hip.y * videoHeight };
@@ -445,11 +447,11 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           setFeedbackColor('text-white');
         }
       } else if (mode === 'turtle') {
-        const isRightVisible = (results.poseLandmarks[8]?.visibility || 0) > (results.poseLandmarks[7]?.visibility || 0);
+        const isRightVisible = (results.poseLandmarks[8]?.visibility || 0) >= (results.poseLandmarks[7]?.visibility || 0);
         const ear = isRightVisible ? results.poseLandmarks[8] : results.poseLandmarks[7];
         const shoulder = isRightVisible ? results.poseLandmarks[12] : results.poseLandmarks[11];
         
-        if (ear && shoulder && ear.visibility! > 0.5 && shoulder.visibility! > 0.5) {
+        if (ear && shoulder && (ear.visibility ?? 0) > 0.3 && (shoulder.visibility ?? 0) > 0.3) {
           const pEar: Point = { x: ear.x * videoWidth, y: ear.y * videoHeight };
           const pShoulder: Point = { x: shoulder.x * videoWidth, y: shoulder.y * videoHeight };
           
@@ -502,8 +504,8 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
         const rightHip = results.poseLandmarks[24];
         
         if (leftShoulder && rightShoulder && leftHip && rightHip && 
-            leftShoulder.visibility! > 0.5 && rightShoulder.visibility! > 0.5 &&
-            leftHip.visibility! > 0.5 && rightHip.visibility! > 0.5) {
+            (leftShoulder.visibility ?? 0) > 0.3 && (rightShoulder.visibility ?? 0) > 0.3 &&
+            (leftHip.visibility ?? 0) > 0.3 && (rightHip.visibility ?? 0) > 0.3) {
             
           const ls: Point = { x: leftShoulder.x * videoWidth, y: leftShoulder.y * videoHeight };
           const rs: Point = { x: rightShoulder.x * videoWidth, y: rightShoulder.y * videoHeight };
@@ -557,12 +559,12 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           setFeedbackColor('text-white');
         }
       } else if (mode === 'plank') {
-        const isRightVisible = (results.poseLandmarks[12]?.visibility || 0) > (results.poseLandmarks[11]?.visibility || 0);
+        const isRightVisible = (results.poseLandmarks[12]?.visibility || 0) >= (results.poseLandmarks[11]?.visibility || 0);
         const shoulder = isRightVisible ? results.poseLandmarks[12] : results.poseLandmarks[11];
         const hip = isRightVisible ? results.poseLandmarks[24] : results.poseLandmarks[23];
         const ankle = isRightVisible ? results.poseLandmarks[28] : results.poseLandmarks[27];
         
-        if (shoulder && hip && ankle && shoulder.visibility! > 0.5 && hip.visibility! > 0.5 && ankle.visibility! > 0.5) {
+        if (shoulder && hip && ankle && (shoulder.visibility ?? 0) > 0.3 && (hip.visibility ?? 0) > 0.3 && (ankle.visibility ?? 0) > 0.3) {
           const p1: Point = { x: shoulder.x * videoWidth, y: shoulder.y * videoHeight };
           const p2: Point = { x: hip.x * videoWidth, y: hip.y * videoHeight };
           const p3: Point = { x: ankle.x * videoWidth, y: ankle.y * videoHeight };
