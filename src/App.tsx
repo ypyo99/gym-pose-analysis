@@ -468,7 +468,12 @@ function App() {
                 <button onClick={handleAnalyze} className="shrink-0 p-4 md:p-6 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center text-white hover:opacity-90"><Sparkles className="w-6 h-6 md:w-8 md:h-8" /></button>
                 <button onClick={() => {
                    const link = document.createElement('a');
-                   link.download = `video-${Date.now()}.webm`;
+                   const now = new Date();
+                   const dateStr = now.getFullYear().toString().slice(-2) + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
+                   const timeStr = String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0') + String(now.getSeconds()).padStart(2, '0');
+                   const name = memberName.trim() || '회원';
+                   const currentModeLabel = MODE_CONFIGS.find(m => m.id === mode)?.label || mode;
+                   link.download = `${name}-${currentModeLabel}-영상-${dateStr}-${timeStr}.webm`;
                    link.href = recordedVideoUrl;
                    link.click();
                 }} className="shrink-0 p-4 rounded-full bg-blue-600 border border-white/40 shadow-lg transition-transform active:scale-95 hover:bg-blue-700 text-white flex items-center justify-center" title="다운로드"><Download className="w-6 h-6 md:w-8 md:h-8" /></button>
