@@ -680,7 +680,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
             if (track && track.getCapabilities && track.applyConstraints) {
               const caps = track.getCapabilities() as any;
               if (caps.zoom) {
-                track.applyConstraints({ advanced: [{ zoom: Math.max(caps.zoom.min || 0.6, 0.6) }] }).catch(console.warn);
+                track.applyConstraints({ advanced: [{ zoom: Math.max(caps.zoom.min || 0.6, 0.6) } as any] }).catch(console.warn);
               }
             }
           }}
