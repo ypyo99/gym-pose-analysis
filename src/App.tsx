@@ -501,7 +501,12 @@ function App() {
                   const shot = trackerRef.current?.getScreenshot();
                   if (shot) {
                     const link = document.createElement('a');
-                    link.download = `upload-result-${Date.now()}.png`;
+                    const now = new Date();
+                    const dateStr = now.getFullYear().toString().slice(-2) + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
+                    const timeStr = String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0') + String(now.getSeconds()).padStart(2, '0');
+                    const name = memberName.trim() || '회원';
+                    const currentModeLabel = MODE_CONFIGS.find(m => m.id === mode)?.label || mode;
+                    link.download = `${name}-${currentModeLabel}-사진-${dateStr}-${timeStr}.png`;
                     link.href = shot;
                     link.click();
                   }
