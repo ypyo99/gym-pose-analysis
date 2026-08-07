@@ -32,14 +32,14 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
   const [feedbackColor, setFeedbackColor] = useState<string>('text-white');
   const [worldLandmarks, setWorldLandmarks] = useState<any>(null);
   const [poseLandmarksData, setPoseLandmarksData] = useState<{landmarks: any, width: number, height: number} | null>(null);
-  const [zoom, setZoom] = useState<number>(1);
+  const [zoom, setZoom] = useState<number>(0.6);
   const lastImageRef = useRef<HTMLImageElement | HTMLVideoElement | HTMLCanvasElement | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
   const frameIntervalRef = useRef<number | null>(null);
   const capturedFramesRef = useRef<string[]>([]);
   
-  const touchStartZoom = useRef<number>(1);
+  const touchStartZoom = useRef<number>(0.6);
   const initialPinchDistance = useRef<number | null>(null);
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -58,7 +58,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       const currentDistance = Math.sqrt(dx * dx + dy * dy);
       const distanceRatio = currentDistance / initialPinchDistance.current;
       let newZoom = touchStartZoom.current * distanceRatio;
-      setZoom(Math.max(1, Math.min(3, newZoom)));
+      setZoom(Math.max(0.5, Math.min(3, newZoom)));
     }
   };
 
