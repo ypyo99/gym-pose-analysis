@@ -299,6 +299,7 @@ function App() {
           facingMode={facingMode} 
           imageSrc={appMode === 'photo_upload' ? uploadedImage : null} 
           videoSrc={appMode === 'photo_upload' ? uploadedVideo : null}
+          isUploadMode={appMode === 'photo_upload'}
           viewMode={viewMode}
           onBackgroundClick={() => {
             setShowPoseSelector(false);

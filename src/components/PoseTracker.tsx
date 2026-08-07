@@ -16,6 +16,7 @@ interface PoseTrackerProps {
   facingMode?: 'user' | 'environment';
   imageSrc?: string | null;
   videoSrc?: string | null;
+  isUploadMode?: boolean;
   viewMode?: '2d' | '3d';
   onBackgroundClick?: () => void;
 }
@@ -27,7 +28,7 @@ export interface PoseTrackerRef {
   stopRecording: () => Promise<{ blob: Blob | null, frames: string[] }>;
 }
 
-const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGrid = false, showUI = true, facingMode = 'user', imageSrc = null, videoSrc = null, viewMode = '2d', onBackgroundClick }, ref) => {
+const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGrid = false, showUI = true, facingMode = 'user', imageSrc = null, videoSrc = null, isUploadMode = false, viewMode = '2d', onBackgroundClick }, ref) => {
   const webcamRef = useRef<Webcam>(null);
   const uploadedVideoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -665,7 +666,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
         }
       };
       processVideoFrame();
-    } else {
+    } else if (!isUploadMode) {
       const processFrame = async () => {
         if (!isComponentMounted) return;
         
@@ -686,6 +687,8 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
         }
       };
       processFrame();
+    } else {
+      setFeedback('');
     }
 
     return () => {
@@ -694,7 +697,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       pose.close();
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [onResults, facingMode, imageSrc, videoSrc]);
+  }, [onResults, facingMode, imageSrc, videoSrc, isUploadMode]);
 
   return (
     <div 
@@ -720,7 +723,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
         className="absolute inset-0 flex items-center justify-center origin-center transition-transform duration-100 ease-out pointer-events-none"
         style={{ transform: `scale(${zoom})` }}
       >
-        {!imageSrc && !videoSrc && (
+        {!imageSrc && !videoSrc && !isUploadMode && (
         <Webcam
           audio={true}
           muted={true}
