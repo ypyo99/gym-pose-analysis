@@ -39,7 +39,6 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
   const frameIntervalRef = useRef<number | null>(null);
   const capturedFramesRef = useRef<string[]>([]);
   
-  const touchStartY = useRef<number | null>(null);
   const touchStartZoom = useRef<number>(1);
   const initialPinchDistance = useRef<number | null>(null);
 
