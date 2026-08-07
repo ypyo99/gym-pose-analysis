@@ -612,7 +612,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       smoothLandmarks: true,
       minDetectionConfidence: 0.5,
       minTrackingConfidence: 0.5,
-      selfieMode: !imageSrc && facingMode === 'user', // Mirror only for user camera, not photos
+      selfieMode: !imageSrc && !videoSrc && facingMode === 'user', // Mirror only for user camera, not photos/videos
     });
 
     pose.onResults((results: Results) => {
@@ -692,7 +692,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       pose.close();
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [onResults, facingMode, imageSrc]);
+  }, [onResults, facingMode, imageSrc, videoSrc]);
 
   return (
     <div 
@@ -766,6 +766,9 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           muted
           playsInline
           controls
+          onLoadedData={(e) => {
+            (e.target as HTMLVideoElement).play().catch(err => console.warn("Video play error:", err));
+          }}
           className={`absolute w-full h-full object-contain z-0 ${viewMode === '3d' ? 'opacity-0' : 'opacity-100'}`}
         />
       )}

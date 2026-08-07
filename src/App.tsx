@@ -159,7 +159,8 @@ function App() {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.type.startsWith('video/')) {
+      const isVideoFile = file.type.startsWith('video/') || /\.(mp4|webm|ogg|mov|m4v)$/i.test(file.name);
+      if (isVideoFile) {
         const videoUrl = URL.createObjectURL(file);
         setUploadedVideo(videoUrl);
         setUploadedImage(null);
@@ -172,6 +173,7 @@ function App() {
         reader.readAsDataURL(file);
       }
     }
+    if (e.target) e.target.value = '';
   };
 
   const handleAnalyze = async () => {
