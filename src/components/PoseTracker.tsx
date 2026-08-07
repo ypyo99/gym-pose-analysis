@@ -693,7 +693,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           <Pose3DViewer worldLandmarks={worldLandmarks} poseLandmarksData={poseLandmarksData} onBackgroundClick={onBackgroundClick} mode={mode} />
           {!worldLandmarks && (
             <div className="absolute inset-0 flex items-center justify-center text-white text-lg">
-              3D 좌표를 추출 중입니다... 전신이 보이게 해주세요.
+              3D 좌표를 추출 중입니다...
             </div>
           )}
         </div>
