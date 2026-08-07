@@ -3,7 +3,7 @@ import PoseTracker, { type PoseTrackerRef } from './components/PoseTracker';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import ReactMarkdown from 'react-markdown';
 import * as htmlToImage from 'html-to-image';
-import { Sparkles, Grid3X3, Camera, Settings, PersonStanding, Download, Dumbbell, Video, Square, Play, X, Upload } from 'lucide-react';
+import { Sparkles, Grid3X3, Camera, Settings, PersonStanding, Download, Dumbbell, Video, Square, Play, X, Upload, RefreshCcw } from 'lucide-react';
 
 export type AppMode = 'photo_capture' | 'video_capture' | 'photo_upload';
 export type ExerciseMode = 'squat' | 'deadlift' | 'turtle' | 'asymmetry' | 'plank';
@@ -22,6 +22,7 @@ function App() {
   const [memberName, setMemberName] = useState<string>('');
   const [showGrid, setShowGrid] = useState<boolean>(false);
   const [viewMode, setViewMode] = useState<'2d' | '3d'>('2d');
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
   
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
@@ -278,7 +279,7 @@ function App() {
           ref={trackerRef} 
           mode={mode} 
           showGrid={showGrid} 
-          facingMode="user" 
+          facingMode={facingMode} 
           imageSrc={appMode === 'photo_upload' ? uploadedImage : null} 
           viewMode={viewMode}
           onBackgroundClick={() => setShowPoseSelector(false)}
@@ -337,6 +338,15 @@ function App() {
           </div>
         </div>
         <div className="flex items-center gap-2 md:gap-4">
+          {appMode !== 'photo_upload' && (
+            <button 
+              onClick={() => setFacingMode(prev => prev === 'user' ? 'environment' : 'user')} 
+              className="p-2 md:p-3 bg-white/20 backdrop-blur-md rounded-full text-white border border-white/30 hover:bg-white/30 transition-all shadow-md active:scale-95"
+              title="카메라 전환"
+            >
+              <RefreshCcw className="w-5 h-5 md:w-6 md:h-6" />
+            </button>
+          )}
           <input
             type="text"
             placeholder="회원 이름"
