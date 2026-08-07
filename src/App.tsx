@@ -463,19 +463,19 @@ function App() {
                 </>
               )
             ) : (
-              <>
-                <button onClick={handleAnalyze} className="px-6 py-4 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center gap-2 text-white font-bold text-base md:text-lg hover:opacity-90"><Sparkles className="w-6 h-6" /></button>
+              <div className="fixed right-4 top-1/2 -translate-y-1/2 flex flex-col items-center gap-4 z-50">
+                <button onClick={handleAnalyze} className="shrink-0 p-4 md:p-6 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center text-white hover:opacity-90"><Sparkles className="w-6 h-6 md:w-8 md:h-8" /></button>
                 <button onClick={() => {
                    const link = document.createElement('a');
                    link.download = `video-${Date.now()}.webm`;
                    link.href = recordedVideoUrl;
                    link.click();
-                }} className="p-4 rounded-full bg-blue-600 border border-white/40 shadow-lg transition-transform active:scale-95 hover:bg-blue-700 text-white" title="다운로드"><Download className="w-6 h-6 md:w-8 md:h-8" /></button>
-                <button onClick={() => setIsPlaying(!isPlaying)} className="p-4 rounded-full bg-green-600 border border-white/40 shadow-lg transition-transform active:scale-95 hover:bg-green-700 text-white" title={isPlaying ? "일시정지" : "재생"}>
+                }} className="shrink-0 p-4 rounded-full bg-blue-600 border border-white/40 shadow-lg transition-transform active:scale-95 hover:bg-blue-700 text-white flex items-center justify-center" title="다운로드"><Download className="w-6 h-6 md:w-8 md:h-8" /></button>
+                <button onClick={() => setIsPlaying(!isPlaying)} className="shrink-0 p-4 rounded-full bg-green-600 border border-white/40 shadow-lg transition-transform active:scale-95 hover:bg-green-700 text-white flex items-center justify-center" title={isPlaying ? "일시정지" : "재생"}>
                   {isPlaying ? <Square className="w-6 h-6 md:w-8 md:h-8 fill-current" /> : <Play className="w-6 h-6 md:w-8 md:h-8 fill-current ml-1" />}
                 </button>
-                <button onClick={handleExit} className="p-4 rounded-full bg-gray-600 border border-white/40 shadow-lg transition-transform active:scale-95 hover:bg-gray-700 text-white" title="취소"><X className="w-6 h-6 md:w-8 md:h-8" /></button>
-              </>
+                <button onClick={handleExit} className="shrink-0 p-4 rounded-full bg-gray-600 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center hover:bg-gray-700 text-white" title="취소"><X className="w-6 h-6 md:w-8 md:h-8" /></button>
+              </div>
             )}
           </div>
         )}
@@ -486,11 +486,11 @@ function App() {
             {!uploadedImage ? (
               <button onClick={() => fileInputRef.current?.click()} className="px-8 py-4 rounded-full bg-blue-600 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center gap-3 text-white font-bold text-xl hover:bg-blue-700"><Upload className="w-8 h-8" /> 앨범에서 사진 선택</button>
             ) : (
-              <>
-                <button onClick={() => setShowPoseSelector(p => !p)} className={`px-4 py-3 md:px-6 md:py-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center gap-2 font-bold ${showPoseSelector ? 'bg-purple-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="운동 종목 선택">
-                  <span className="text-sm md:text-lg">{MODE_CONFIGS.find(m => m.id === mode)?.label}</span>
+              <div className="fixed right-4 top-1/2 -translate-y-1/2 flex flex-col items-center gap-4 z-50">
+                <button onClick={() => setShowPoseSelector(p => !p)} className={`shrink-0 px-4 py-3 md:px-6 md:py-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center font-bold ${showPoseSelector ? 'bg-purple-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="운동 종목 선택">
+                  <span className="text-sm md:text-lg whitespace-nowrap">{MODE_CONFIGS.find(m => m.id === mode)?.label}</span>
                 </button>
-                <button onClick={handleAnalyze} className="px-6 py-4 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center gap-2 text-white font-bold text-base md:text-lg hover:opacity-90"><Sparkles className="w-6 h-6" /></button>
+                <button onClick={handleAnalyze} className="shrink-0 p-4 md:p-6 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center text-white hover:opacity-90"><Sparkles className="w-6 h-6 md:w-8 md:h-8" /></button>
                 <button onClick={() => {
                   const shot = trackerRef.current?.getScreenshot();
                   if (shot) {
@@ -499,11 +499,11 @@ function App() {
                     link.href = shot;
                     link.click();
                   }
-                }} className="p-4 rounded-full bg-blue-600 border border-white/40 shadow-lg transition-transform active:scale-95 hover:bg-blue-700 text-white" title="다운로드"><Download className="w-6 h-6 md:w-8 md:h-8" /></button>
-                <button onClick={() => setShowGrid(!showGrid)} className={`p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="그리드"><Grid3X3 className="w-6 h-6 md:w-8 md:h-8" /></button>
-                <button onClick={() => setViewMode(v => v === '2d' ? '3d' : '2d')} className={`p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="골격 표시 (3D)"><PersonStanding className="w-6 h-6 md:w-8 md:h-8" /></button>
-                <button onClick={handleExit} className="p-4 rounded-full bg-gray-600 border border-white/40 shadow-lg transition-transform active:scale-95 hover:bg-gray-700 text-white" title="취소 (사진 다시 선택)"><X className="w-6 h-6 md:w-8 md:h-8" /></button>
-              </>
+                }} className="shrink-0 p-4 rounded-full bg-blue-600 border border-white/40 shadow-lg transition-transform active:scale-95 hover:bg-blue-700 text-white flex items-center justify-center" title="다운로드"><Download className="w-6 h-6 md:w-8 md:h-8" /></button>
+                <button onClick={() => setShowGrid(!showGrid)} className={`shrink-0 p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="그리드"><Grid3X3 className="w-6 h-6 md:w-8 md:h-8" /></button>
+                <button onClick={() => setViewMode(v => v === '2d' ? '3d' : '2d')} className={`shrink-0 p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="골격 표시 (3D)"><PersonStanding className="w-6 h-6 md:w-8 md:h-8" /></button>
+                <button onClick={handleExit} className="shrink-0 p-4 rounded-full bg-gray-600 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center hover:bg-gray-700 text-white" title="취소 (사진 다시 선택)"><X className="w-6 h-6 md:w-8 md:h-8" /></button>
+              </div>
             )}
           </div>
         )}
