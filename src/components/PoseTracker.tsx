@@ -154,7 +154,13 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           
           frameIntervalRef.current = window.setInterval(() => {
             const dataUrl = createCompositeImage('image/jpeg', 0.4);
-            if (dataUrl) capturedFramesRef.current.push(dataUrl);
+            if (dataUrl) {
+              capturedFramesRef.current.push(dataUrl);
+              // 메모리 최적화: 프레임이 30개를 초과하면 절반(홀수 인덱스)을 버려서 간격을 동적으로 늘림
+              if (capturedFramesRef.current.length > 30) {
+                capturedFramesRef.current = capturedFramesRef.current.filter((_, i) => i === 0 || i === capturedFramesRef.current.length - 1 || i % 2 === 0);
+              }
+            }
           }, 500) as unknown as number;
         } catch (e) {
           console.error("Recording start failed:", e);
