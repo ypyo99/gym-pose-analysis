@@ -681,7 +681,9 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           mirrored={facingMode === 'user'}
           className={`absolute w-full h-full object-contain z-0 ${viewMode === '3d' ? 'opacity-0' : 'opacity-100'}`}
           videoConstraints={{
-            facingMode: facingMode
+            facingMode: facingMode,
+            width: { ideal: 1080 },
+            height: { ideal: 1920 }
           }}
           onUserMediaError={(err) => console.error("Webcam access error:", err)}
         />
