@@ -24,6 +24,7 @@ interface PoseTrackerProps {
 export interface PoseTrackerRef {
   capture: (memberName: string, modeLabel?: string) => void;
   getScreenshot: () => string | null;
+  getCleanScreenshot: () => string | null;
   startRecording: () => void;
   stopRecording: () => Promise<{ blob: Blob | null, frames: string[] }>;
 }
@@ -38,6 +39,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
   const [poseLandmarksData, setPoseLandmarksData] = useState<{landmarks: any, width: number, height: number} | null>(null);
   const [zoom, setZoom] = useState<number>(1);
   const lastImageRef = useRef<HTMLImageElement | HTMLVideoElement | HTMLCanvasElement | null>(null);
+  const lastResultsRef = useRef<Results | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
   const frameIntervalRef = useRef<number | null>(null);
@@ -155,6 +157,20 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       },
       getScreenshot: () => {
         return createCompositeImage('image/jpeg', 0.8);
+      },
+      getCleanScreenshot: () => {
+        if (!lastImageRef.current) return null;
+        const img = lastImageRef.current;
+        const tempCanvas = document.createElement('canvas');
+        const w = (img as any).videoWidth || (img as any).naturalWidth || img.width;
+        const h = (img as any).videoHeight || (img as any).naturalHeight || img.height;
+        if (!w || !h) return null;
+        tempCanvas.width = w;
+        tempCanvas.height = h;
+        const ctx = tempCanvas.getContext('2d');
+        if (!ctx) return null;
+        ctx.drawImage(img as any, 0, 0, w, h);
+        return tempCanvas.toDataURL('image/jpeg', 0.9);
       },
       startRecording: () => {
         if (!canvasRef.current) return;
@@ -324,6 +340,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
     if (!canvasRef.current) return;
     
     lastImageRef.current = results.image as any;
+    lastResultsRef.current = results;
 
     const videoWidth = (results.image as any).videoWidth || (results.image as any).naturalWidth || results.image.width;
     const videoHeight = (results.image as any).videoHeight || (results.image as any).naturalHeight || results.image.height;
@@ -716,9 +733,15 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       }
       animId = requestAnimationFrame(update3DOverlay);
     };
-    animId = requestAnimationFrame(update3DOverlay);
     return () => cancelAnimationFrame(animId);
   }, [viewMode]);
+
+  // Re-render static image canvas overlays when viewMode, mode, or grid changes
+  useEffect(() => {
+    if (imageSrc && lastResultsRef.current) {
+      onResults(lastResultsRef.current);
+    }
+  }, [viewMode, mode, showGrid, imageSrc, onResults]);
 
   useEffect(() => {
     let isComponentMounted = true;

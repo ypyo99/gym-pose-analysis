@@ -111,7 +111,7 @@ function App() {
 
   const handleCapturePhoto = () => {
     if (trackerRef.current) {
-      const shot = trackerRef.current.getScreenshot();
+      const shot = trackerRef.current.getCleanScreenshot() || trackerRef.current.getScreenshot();
       if (shot) setCurrentScreenshot(shot);
     }
   };
