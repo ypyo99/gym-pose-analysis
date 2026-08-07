@@ -26,6 +26,7 @@ function App() {
   const [showUI, setShowUI] = useState<boolean>(true);
   
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [uploadedVideo, setUploadedVideo] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [analysisResult, setAnalysisResult] = useState<string | null>(null);
   const [currentScreenshot, setCurrentScreenshot] = useState<string | null>(null);
@@ -65,6 +66,7 @@ function App() {
     setRecordedVideoUrl(null);
     setRecordedFrames([]);
     setUploadedImage(null);
+    setUploadedVideo(null);
     setIsPlaying(false);
     setRecordingState('idle');
     setShowPoseSelector(false);
@@ -157,11 +159,18 @@ function App() {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setUploadedImage(event.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+      if (file.type.startsWith('video/')) {
+        const videoUrl = URL.createObjectURL(file);
+        setUploadedVideo(videoUrl);
+        setUploadedImage(null);
+      } else {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          setUploadedImage(event.target?.result as string);
+          setUploadedVideo(null);
+        };
+        reader.readAsDataURL(file);
+      }
     }
   };
 
@@ -283,6 +292,7 @@ function App() {
           showUI={showUI}
           facingMode={facingMode} 
           imageSrc={appMode === 'photo_upload' ? uploadedImage : null} 
+          videoSrc={appMode === 'photo_upload' ? uploadedVideo : null}
           viewMode={viewMode}
           onBackgroundClick={() => {
             setShowPoseSelector(false);
@@ -293,7 +303,7 @@ function App() {
 
       <input 
         type="file" 
-        accept="image/*" 
+        accept="image/*,video/*" 
         ref={fileInputRef} 
         onChange={handleImageUpload} 
         className="hidden" 
@@ -489,8 +499,8 @@ function App() {
         {/* Photo Upload Mode Controls */}
         {appMode === 'photo_upload' && (
           <div className="flex items-center justify-center gap-4 md:gap-6 w-full">
-            {!uploadedImage ? (
-              <button onClick={() => fileInputRef.current?.click()} className="px-8 py-4 rounded-full bg-blue-600 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center gap-3 text-white font-bold text-xl hover:bg-blue-700"><Upload className="w-8 h-8" /> 앨범에서 사진 선택</button>
+            {!uploadedImage && !uploadedVideo ? (
+              <button onClick={() => fileInputRef.current?.click()} className="px-8 py-4 rounded-full bg-blue-600 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center gap-3 text-white font-bold text-xl hover:bg-blue-700"><Upload className="w-8 h-8" /> 앨범에서 사진/동영상 선택</button>
             ) : (
               <div className="fixed right-4 top-1/2 -translate-y-1/2 flex flex-col items-center gap-4 z-50">
                 <button onClick={() => setShowPoseSelector(p => !p)} className={`shrink-0 px-4 py-3 md:px-6 md:py-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center font-bold ${showPoseSelector ? 'bg-purple-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="운동 종목 선택">
@@ -506,7 +516,8 @@ function App() {
                     const timeStr = String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0') + String(now.getSeconds()).padStart(2, '0');
                     const name = memberName.trim() || '회원';
                     const currentModeLabel = MODE_CONFIGS.find(m => m.id === mode)?.label || mode;
-                    link.download = `${name}-${currentModeLabel}-사진-${dateStr}-${timeStr}.png`;
+                    const typeLabel = uploadedVideo ? '동영상' : '사진';
+                    link.download = `${name}-${currentModeLabel}-${typeLabel}-${dateStr}-${timeStr}.png`;
                     link.href = shot;
                     link.click();
                   }

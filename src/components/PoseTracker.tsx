@@ -15,6 +15,7 @@ interface PoseTrackerProps {
   showUI?: boolean;
   facingMode?: 'user' | 'environment';
   imageSrc?: string | null;
+  videoSrc?: string | null;
   viewMode?: '2d' | '3d';
   onBackgroundClick?: () => void;
 }
@@ -26,8 +27,9 @@ export interface PoseTrackerRef {
   stopRecording: () => Promise<{ blob: Blob | null, frames: string[] }>;
 }
 
-const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGrid = false, showUI = true, facingMode = 'user', imageSrc = null, viewMode = '2d', onBackgroundClick }, ref) => {
+const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGrid = false, showUI = true, facingMode = 'user', imageSrc = null, videoSrc = null, viewMode = '2d', onBackgroundClick }, ref) => {
   const webcamRef = useRef<Webcam>(null);
+  const uploadedVideoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [feedback, setFeedback] = useState<string>('');
   const [feedbackColor, setFeedbackColor] = useState<string>('text-white');
@@ -635,12 +637,32 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       img.onload = async () => {
         if (!isComponentMounted) return;
         try {
+          lastImageRef.current = img;
           await pose.send({ image: img });
         } catch (error) {
           console.warn("Pose send error for image:", error);
         }
       };
       img.src = imageSrc;
+    } else if (videoSrc) {
+      const processVideoFrame = async () => {
+        if (!isComponentMounted) return;
+        animationFrameId = requestAnimationFrame(processVideoFrame);
+
+        const video = uploadedVideoRef.current;
+        if (video && video.readyState >= 2 && !isProcessing) {
+          isProcessing = true;
+          lastImageRef.current = video;
+          try {
+            await pose.send({ image: video });
+          } catch (error) {
+            console.warn("Pose send error for uploaded video:", error);
+          } finally {
+            isProcessing = false;
+          }
+        }
+      };
+      processVideoFrame();
     } else {
       const processFrame = async () => {
         if (!isComponentMounted) return;
@@ -651,6 +673,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
         const video = webcamRef.current?.video;
         if (video && video.readyState >= 2 && !isProcessing) {
           isProcessing = true;
+          lastImageRef.current = video;
           try {
             await pose.send({ image: video });
           } catch (error) {
@@ -695,7 +718,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
         className="absolute inset-0 flex items-center justify-center origin-center transition-transform duration-100 ease-out pointer-events-none"
         style={{ transform: `scale(${zoom})` }}
       >
-        {!imageSrc && (
+        {!imageSrc && !videoSrc && (
         <Webcam
           audio={true}
           muted={true}
@@ -725,6 +748,27 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           onUserMediaError={(err) => console.error("Webcam access error:", err)}
         />
       )}
+
+      {imageSrc && (
+        <img
+          src={imageSrc}
+          alt="Upload"
+          className={`absolute w-full h-full object-contain z-0 ${viewMode === '3d' ? 'opacity-0' : 'opacity-100'}`}
+        />
+      )}
+
+      {videoSrc && (
+        <video
+          ref={uploadedVideoRef}
+          src={videoSrc}
+          autoPlay
+          loop
+          muted
+          playsInline
+          controls
+          className={`absolute w-full h-full object-contain z-0 ${viewMode === '3d' ? 'opacity-0' : 'opacity-100'}`}
+        />
+      )}
       
       {viewMode === '3d' && (
         <div className="absolute inset-0 z-10 bg-gray-900 pointer-events-auto">
@@ -739,7 +783,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
 
       <canvas
         ref={canvasRef}
-        className={`absolute w-full h-full z-20 pointer-events-none ${imageSrc ? 'object-contain' : 'object-cover'} ${viewMode === '2d' && imageSrc ? 'bg-black' : ''}`}
+        className={`absolute w-full h-full z-20 pointer-events-none ${imageSrc || videoSrc ? 'object-contain' : 'object-cover'} ${viewMode === '2d' && (imageSrc || videoSrc) ? 'bg-black' : ''}`}
       />
       </div>
     </div>
