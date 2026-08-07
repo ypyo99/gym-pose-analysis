@@ -12,6 +12,7 @@ const drawLandmarks = (window as any).drawLandmarks;
 interface PoseTrackerProps {
   mode: 'squat' | 'deadlift' | 'turtle' | 'asymmetry' | 'plank';
   showGrid?: boolean;
+  showUI?: boolean;
   facingMode?: 'user' | 'environment';
   imageSrc?: string | null;
   viewMode?: '2d' | '3d';
@@ -25,7 +26,7 @@ export interface PoseTrackerRef {
   stopRecording: () => Promise<{ blob: Blob | null, frames: string[] }>;
 }
 
-const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGrid = false, facingMode = 'user', imageSrc = null, viewMode = '2d', onBackgroundClick }, ref) => {
+const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGrid = false, showUI = true, facingMode = 'user', imageSrc = null, viewMode = '2d', onBackgroundClick }, ref) => {
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [feedback, setFeedback] = useState<string>('');
@@ -680,7 +681,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
     >
       {/* Feedback Overlay */}
       {feedback && (
-        <div className="absolute top-36 md:top-40 left-0 w-full flex justify-center z-20 pointer-events-none px-4">
+        <div className={`absolute top-36 md:top-40 left-0 w-full flex justify-center z-20 pointer-events-none px-4 transition-opacity duration-300 ${showUI ? 'opacity-100' : 'opacity-0'}`}>
           <div className="bg-black/70 px-5 py-3 md:px-8 md:py-4 rounded-3xl backdrop-blur-md border border-white/20 shadow-[0_10px_40px_rgba(0,0,0,0.8)] max-w-full text-center">
             <h1 className={`text-xl md:text-3xl lg:text-4xl font-extrabold tracking-wide drop-shadow-md whitespace-pre-wrap ${feedbackColor}`}>
               {feedback}

@@ -280,6 +280,7 @@ function App() {
           ref={trackerRef} 
           mode={mode} 
           showGrid={showGrid} 
+          showUI={showUI}
           facingMode={facingMode} 
           imageSrc={appMode === 'photo_upload' ? uploadedImage : null} 
           viewMode={viewMode}
