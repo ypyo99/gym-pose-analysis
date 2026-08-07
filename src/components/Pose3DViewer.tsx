@@ -178,6 +178,7 @@ const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks, poseLandmar
   }, [transformedLandmarks, mode, poseLandmarksData]);
 
   const pointerDownPos = useRef<{ x: number; y: number } | null>(null);
+  const isOrbitingRef = useRef(false);
 
   const handlePointerDown = (e: React.PointerEvent) => {
     pointerDownPos.current = { x: e.clientX, y: e.clientY };
@@ -188,8 +189,8 @@ const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks, poseLandmar
       const dx = Math.abs(e.clientX - pointerDownPos.current.x);
       const dy = Math.abs(e.clientY - pointerDownPos.current.y);
       const dist = Math.sqrt(dx * dx + dy * dy);
-      // If movement is less than 6px, treat it as a click/tap on screen to toggle UI
-      if (dist < 6 && onBackgroundClick) {
+      // If NOT currently dragging/orbiting and movement is less than 5px, toggle UI
+      if (!isOrbitingRef.current && dist < 5 && onBackgroundClick) {
         onBackgroundClick();
       }
     }
@@ -216,6 +217,14 @@ const Pose3DViewer: React.FC<Pose3DViewerProps> = ({ worldLandmarks, poseLandmar
           enableZoom={true}
           enableRotate={true}
           autoRotate={false}
+          onStart={() => {
+            isOrbitingRef.current = true;
+          }}
+          onEnd={() => {
+            setTimeout(() => {
+              isOrbitingRef.current = false;
+            }, 150);
+          }}
         />
         
         <group position={[0, -1, 0]}>

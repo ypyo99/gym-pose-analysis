@@ -82,19 +82,21 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       const width = canvasRef.current.width;
       const height = canvasRef.current.height;
       
-      const isLandscape = width > height;
-      let outW = width;
+      // Unconditionally crop to 9:16 portrait ratio
       let outH = height;
-      let srcX = 0, srcY = 0, srcW = width, srcH = height;
+      let outW = Math.round(height * 9 / 16);
+      let srcX = Math.round((width - outW) / 2);
+      let srcY = 0;
+      let srcW = outW;
+      let srcH = height;
 
-      if (isLandscape && !imageSrc) {
-        // Camera gave landscape video but screen is portrait → crop center to 9:16
-        outH = height;
-        outW = Math.round(height * 9 / 16);
-        srcX = Math.round((width - outW) / 2);
-        srcY = 0;
-        srcW = outW;
-        srcH = height;
+      if (width < outW) {
+        outW = width;
+        outH = Math.round(width * 16 / 9);
+        srcX = 0;
+        srcY = Math.round((height - outH) / 2);
+        srcW = width;
+        srcH = outH;
       }
 
       const tempCanvas = document.createElement('canvas');
@@ -161,15 +163,33 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       getCleanScreenshot: () => {
         if (!lastImageRef.current) return null;
         const img = lastImageRef.current;
+        const rawW = (img as any).videoWidth || (img as any).naturalWidth || img.width;
+        const rawH = (img as any).videoHeight || (img as any).naturalHeight || img.height;
+        if (!rawW || !rawH) return null;
+
+        // Unconditionally crop to 9:16 portrait ratio
+        let outH = rawH;
+        let outW = Math.round(rawH * 9 / 16);
+        let srcX = Math.round((rawW - outW) / 2);
+        let srcY = 0;
+        let srcW = outW;
+        let srcH = rawH;
+
+        if (rawW < outW) {
+          outW = rawW;
+          outH = Math.round(rawW * 16 / 9);
+          srcX = 0;
+          srcY = Math.round((rawH - outH) / 2);
+          srcW = rawW;
+          srcH = outH;
+        }
+
         const tempCanvas = document.createElement('canvas');
-        const w = (img as any).videoWidth || (img as any).naturalWidth || img.width;
-        const h = (img as any).videoHeight || (img as any).naturalHeight || img.height;
-        if (!w || !h) return null;
-        tempCanvas.width = w;
-        tempCanvas.height = h;
+        tempCanvas.width = outW;
+        tempCanvas.height = outH;
         const ctx = tempCanvas.getContext('2d');
         if (!ctx) return null;
-        ctx.drawImage(img as any, 0, 0, w, h);
+        ctx.drawImage(img as any, srcX, srcY, srcW, srcH, 0, 0, outW, outH);
         return tempCanvas.toDataURL('image/jpeg', 0.9);
       },
       startRecording: () => {

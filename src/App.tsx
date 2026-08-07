@@ -327,6 +327,16 @@ function App() {
         className="hidden" 
       />
 
+      {/* Viewing / Playback Badge */}
+      {((appMode === 'photo_capture' && currentScreenshot) || (appMode === 'video_capture' && recordedVideoUrl) || (appMode === 'photo_upload' && (uploadedImage || uploadedVideo))) && (
+        <div className="absolute bottom-28 z-30 pointer-events-none flex justify-center w-full">
+          <div className="bg-black/70 backdrop-blur-md px-6 py-3 rounded-full border border-white/20 shadow-lg flex items-center gap-3">
+            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="text-white font-bold text-lg tracking-wider">재생 중...</span>
+          </div>
+        </div>
+      )}
+
       {/* Top Bar */}
       <div className={`absolute top-0 left-0 w-full p-3 md:p-4 z-30 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent transition-opacity duration-300 ${showUI ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
         <div className="flex items-center gap-3 md:gap-4">
