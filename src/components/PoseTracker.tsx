@@ -133,6 +133,16 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
         capturedFramesRef.current = [];
         try {
           const stream = canvasRef.current.captureStream(30);
+          
+          // 캠에서 오디오 트랙을 가져와서 캔버스 스트림에 합침
+          if (webcamRef.current && webcamRef.current.video && webcamRef.current.video.srcObject) {
+            const webcamStream = webcamRef.current.video.srcObject as MediaStream;
+            const audioTracks = webcamStream.getAudioTracks();
+            if (audioTracks.length > 0) {
+              stream.addTrack(audioTracks[0]);
+            }
+          }
+          
           const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
           mediaRecorder.ondataavailable = (e) => {
             if (e.data.size > 0) {
