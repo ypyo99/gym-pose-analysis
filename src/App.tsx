@@ -3,7 +3,7 @@ import PoseTracker, { type PoseTrackerRef } from './components/PoseTracker';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import ReactMarkdown from 'react-markdown';
 import * as htmlToImage from 'html-to-image';
-import { Sparkles, Grid3X3, Camera, Settings, PersonStanding, Download, Dumbbell, Video, Square, X, Upload } from 'lucide-react';
+import { Sparkles, Grid3X3, Camera, Settings, PersonStanding, Download, Dumbbell, Video, Square, X, Upload, RotateCcw } from 'lucide-react';
 
 export type AppMode = 'photo_capture' | 'video_capture' | 'photo_upload';
 export type ExerciseMode = 'squat' | 'deadlift' | 'turtle' | 'asymmetry' | 'plank';
@@ -145,6 +145,13 @@ function App() {
       }
     } catch (e) {
       console.warn('Haptic vibration failed:', e);
+    }
+  };
+
+  const handleResetCamera = () => {
+    triggerHaptic(50);
+    if (trackerRef.current) {
+      trackerRef.current.resetCamera();
     }
   };
 
@@ -580,8 +587,9 @@ function App() {
                   <button onClick={() => setShowGrid(!showGrid)} className={`shrink-0 p-2.5 sm:p-3.5 md:p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="그리드"><Grid3X3 className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" /></button>
                   <button onClick={() => setViewMode(v => v === '2d' ? '3d' : '2d')} className={`shrink-0 p-2.5 sm:p-3.5 md:p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="골격 표시 (3D)"><PersonStanding className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" /></button>
                 </div>
-                <div className="flex items-center justify-center w-full">
+                <div className="flex items-center justify-center w-full gap-3 sm:gap-4">
                   <button onClick={handleCapturePhoto} className="p-3.5 sm:p-4 md:p-5 rounded-full bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-transform active:scale-90 hover:bg-red-600 flex items-center justify-center" title="촬영"><Camera className="w-6 h-6 md:w-8 md:h-8 text-white fill-current" /></button>
+                  <button onClick={handleResetCamera} className="p-3 sm:p-3.5 md:p-4 rounded-full bg-black/60 hover:bg-black/80 border border-white/40 shadow-lg text-white transition-transform active:scale-95 flex items-center justify-center" title="카메라 리셋"><RotateCcw className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" /></button>
                 </div>
               </>
             ) : (
@@ -616,8 +624,9 @@ function App() {
                     <button onClick={() => setShowGrid(!showGrid)} className={`shrink-0 p-2.5 sm:p-3.5 md:p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="그리드"><Grid3X3 className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" /></button>
                     <button onClick={() => setViewMode(v => v === '2d' ? '3d' : '2d')} className={`shrink-0 p-2.5 sm:p-3.5 md:p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="골격 표시 (3D)"><PersonStanding className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" /></button>
                   </div>
-                  <div className="flex items-center justify-center w-full">
+                  <div className="flex items-center justify-center w-full gap-3 sm:gap-4">
                     <button onClick={startRecordingFlow} disabled={recordingState === 'countdown'} className={`p-3.5 sm:p-4 md:p-5 rounded-full ${recordingState === 'countdown' ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600'} shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-transform active:scale-90 flex items-center justify-center`} title="녹화"><Video className="w-6 h-6 md:w-8 md:h-8 text-white fill-current" /></button>
+                    <button onClick={handleResetCamera} disabled={recordingState === 'countdown'} className="p-3 sm:p-3.5 md:p-4 rounded-full bg-black/60 hover:bg-black/80 border border-white/40 shadow-lg text-white transition-transform active:scale-95 flex items-center justify-center" title="카메라 리셋"><RotateCcw className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" /></button>
                   </div>
                 </>
               )

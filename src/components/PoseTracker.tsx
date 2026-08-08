@@ -28,12 +28,14 @@ export interface PoseTrackerRef {
   getCleanScreenshot: () => string | null;
   startRecording: () => void;
   stopRecording: () => Promise<{ blob: Blob | null, frames: string[] }>;
+  resetCamera: () => void;
 }
 
 const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGrid = false, showUI = true, facingMode = 'environment', imageSrc = null, videoSrc = null, isUploadMode = false, isRecordedPlayback = false, viewMode = '2d', onBackgroundClick }, ref) => {
   const webcamRef = useRef<Webcam>(null);
   const uploadedVideoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [cameraResetKey, setCameraResetKey] = useState<number>(0);
   const [feedback, setFeedback] = useState<string>('');
   const [feedbackColor, setFeedbackColor] = useState<string>('text-white');
   const [worldLandmarks, setWorldLandmarks] = useState<any>(null);
@@ -409,6 +411,12 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           
           mediaRecorderRef.current.stop();
         });
+      },
+      resetCamera: () => {
+        setFeedback('카메라가 리셋되었습니다');
+        setFeedbackColor('text-blue-400');
+        setCameraResetKey(prev => prev + 1);
+        setTimeout(() => setFeedback(''), 1500);
       }
     };
   });
@@ -1073,7 +1081,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       } catch (e) {}
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [facingMode, imageSrc, videoSrc, isUploadMode, isRecordedPlayback]);
+  }, [facingMode, imageSrc, videoSrc, isUploadMode, isRecordedPlayback, cameraResetKey]);
 
   return (
     <div 
@@ -1109,7 +1117,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
             autoGainControl: true,
           }}
           muted={true}
-          key={facingMode}
+          key={`${facingMode}_${cameraResetKey}`}
           ref={webcamRef}
           mirrored={facingMode === 'user'}
           className={`absolute w-full h-full object-cover z-0 ${viewMode === '3d' ? 'opacity-0' : 'opacity-100'}`}
