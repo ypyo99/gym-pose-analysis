@@ -103,6 +103,15 @@ function App() {
       
       setMonthlyCost(cost);
     };
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        loadInitialCost();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', loadInitialCost);
+    
     loadInitialCost();
 
     const savedAppMode = localStorage.getItem('appMode') as AppMode;
@@ -133,6 +142,8 @@ function App() {
       window.removeEventListener('touchstart', unlockAudio);
       window.removeEventListener('click', unlockAudio);
       window.removeEventListener('pointerdown', handleGlobalPointerDown);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', loadInitialCost);
     };
   }, []);
 
