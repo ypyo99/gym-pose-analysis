@@ -529,22 +529,35 @@ function App() {
         const actualCost = calculateCostKRW(targetModel, usage.promptTokenCount || 0, usage.candidatesTokenCount || 0);
         setLastRequestCost(actualCost);
 
-        setMonthlyCost(prev => {
-          const next = prev + actualCost;
-          localStorage.setItem(getCostStorageKey(), next.toString());
-
-          if (isSupabaseConfigured()) {
-            const monthId = getCostStorageKey().replace('ai_cost_', '').replace('_', '-');
-            supabase
-              .from('monthly_costs')
-              .upsert({ month: monthId, total_cost: next })
-              .then(({ error }) => {
-                if (error) console.error('Failed to update Supabase cost:', error);
-              });
-          }
-
-          return next;
-        });
+        if (isSupabaseConfigured()) {
+          const monthId = getCostStorageKey().replace('ai_cost_', '').replace('_', '-');
+          supabase.from('monthly_costs').select('total_cost').eq('month', monthId).single().then(({ data, error }) => {
+            if (error && error.code !== 'PGRST116') {
+              console.error('Supabase fetch error:', error);
+            }
+            let latestCost = 0;
+            if (data && typeof data.total_cost === 'number') {
+              latestCost = data.total_cost;
+            } else {
+              latestCost = monthlyCost; // fallback to current state if empty
+            }
+            const next = latestCost + actualCost;
+            
+            supabase.from('monthly_costs').upsert({ month: monthId, total_cost: next }).then(({ error: upsertError }) => {
+              if (upsertError) console.error('Failed to update Supabase cost:', upsertError);
+              else {
+                setMonthlyCost(next);
+                localStorage.setItem(getCostStorageKey(), next.toString());
+              }
+            });
+          });
+        } else {
+          setMonthlyCost(prev => {
+            const next = prev + actualCost;
+            localStorage.setItem(getCostStorageKey(), next.toString());
+            return next;
+          });
+        }
       }
 
       const rawText = response.text() || '';
