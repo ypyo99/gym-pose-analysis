@@ -804,6 +804,18 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
     return () => cancelAnimationFrame(animId);
   }, [viewMode]);
 
+  const onResultsRef = useRef(onResults);
+  useEffect(() => {
+    onResultsRef.current = onResults;
+  }, [onResults]);
+
+  // Re-render static image canvas overlays when viewMode, mode, or grid changes
+  useEffect(() => {
+    if (imageSrc && lastResultsRef.current) {
+      onResults(lastResultsRef.current);
+    }
+  }, [viewMode, mode, showGrid, imageSrc, onResults]);
+
   // Clear canvas & previous frame references immediately when sources or modes change
   useEffect(() => {
     if (canvasRef.current) {
@@ -838,7 +850,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
 
     pose.onResults((results: Results) => {
       if (isComponentMounted) {
-        onResults(results);
+        onResultsRef.current(results);
       }
     });
 
@@ -935,7 +947,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       } catch (e) {}
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [onResults, facingMode, imageSrc, videoSrc, isUploadMode]);
+  }, [facingMode, imageSrc, videoSrc, isUploadMode]);
 
   return (
     <div 
