@@ -51,6 +51,19 @@ function App() {
     if (savedAppMode && ['photo_capture', 'video_capture', 'photo_upload'].includes(savedAppMode)) {
       setAppMode(savedAppMode);
     }
+
+    const unlockAudio = () => {
+      const ctx = getAudioContext();
+      if (ctx && ctx.state === 'suspended') {
+        ctx.resume().catch(console.warn);
+      }
+    };
+    window.addEventListener('touchstart', unlockAudio, { passive: true });
+    window.addEventListener('click', unlockAudio, { passive: true });
+    return () => {
+      window.removeEventListener('touchstart', unlockAudio);
+      window.removeEventListener('click', unlockAudio);
+    };
   }, []);
 
   const handleModeSwitch = (newMode: AppMode) => {
@@ -119,11 +132,34 @@ function App() {
     }
   };
 
+  const getAudioContext = (): AudioContext | null => {
+    try {
+      if (!(window as any).__globalAudioCtx) {
+        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioCtx) {
+          (window as any).__globalAudioCtx = new AudioCtx();
+        }
+      }
+      const ctx = (window as any).__globalAudioCtx;
+      if (ctx && ctx.state === 'suspended') {
+        ctx.resume().catch(console.warn);
+      }
+      return ctx || null;
+    } catch (e) {
+      console.warn('Failed to get AudioContext:', e);
+      return null;
+    }
+  };
+
   const playFeedbackSound = (type: 'capture' | 'record_start' | 'record_stop') => {
     try {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = new AudioCtx();
+      const ctx = getAudioContext();
+      if (!ctx) return;
+      
+      if (ctx.state === 'suspended') {
+        ctx.resume().catch(console.warn);
+      }
+
       const now = ctx.currentTime;
 
       if (type === 'capture') {
@@ -134,7 +170,7 @@ function App() {
         osc.frequency.setValueAtTime(1046.5, now);
         osc.frequency.exponentialRampToValueAtTime(1567.98, now + 0.08);
 
-        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.setValueAtTime(0.5, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
 
         osc.connect(gain);
@@ -147,7 +183,7 @@ function App() {
         const gain1 = ctx.createGain();
         osc1.type = 'sine';
         osc1.frequency.setValueAtTime(880, now);
-        gain1.gain.setValueAtTime(0.35, now);
+        gain1.gain.setValueAtTime(0.4, now);
         gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
         osc1.connect(gain1);
         gain1.connect(ctx.destination);
@@ -158,7 +194,7 @@ function App() {
         const gain2 = ctx.createGain();
         osc2.type = 'sine';
         osc2.frequency.setValueAtTime(1318.5, now + 0.1);
-        gain2.gain.setValueAtTime(0.4, now + 0.1);
+        gain2.gain.setValueAtTime(0.45, now + 0.1);
         gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
         osc2.connect(gain2);
         gain2.connect(ctx.destination);
@@ -172,7 +208,7 @@ function App() {
         osc.frequency.setValueAtTime(1318.5, now);
         osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.15);
 
-        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.setValueAtTime(0.45, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
 
         osc.connect(gain);
