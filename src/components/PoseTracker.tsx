@@ -525,16 +525,40 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
     
     // Draw 2D skeleton only in 2D mode
     if (viewMode === '2d' && results.poseLandmarks) {
+      const isTurtleMode = mode === 'turtle';
+      const isRightFacing = isTurtleMode ? ((results.poseLandmarks[8]?.visibility || 0) >= (results.poseLandmarks[7]?.visibility || 0)) : true;
+
       // Create a copy for drawing, hiding facial landmarks (0-10) for a cleaner UI
       // and hiding fingers (17-22) and feet/toes (29-32)
       const landmarksToDraw = results.poseLandmarks.map((lm, index) => {
-        if (
-          (index >= 0 && index <= 10) || // face
-          (index >= 17 && index <= 22) || // hands/fingers
-          (index >= 29 && index <= 32)    // feet/toes
-        ) {
+        // Face except ears (0-6)
+        if (index >= 0 && index <= 6) {
           return { ...lm, visibility: 0 };
         }
+        // Hands/fingers & feet/toes
+        if ((index >= 17 && index <= 22) || (index >= 29 && index <= 32)) {
+          return { ...lm, visibility: 0 };
+        }
+
+        // In Turtle Neck mode, hide the occluded/far-side arm, shoulder, and body keypoints
+        if (isTurtleMode) {
+          // If right side is facing camera, hide left side arm/shoulder/hip/leg (11, 13, 15, 23, 25, 27)
+          if (isRightFacing) {
+            if (index === 7 || index === 11 || index === 13 || index === 15 || index === 23 || index === 25 || index === 27) {
+              return { ...lm, visibility: 0 };
+            }
+          } else {
+            // If left side is facing camera, hide right side arm/shoulder/hip/leg (12, 14, 16, 24, 26, 28)
+            if (index === 8 || index === 12 || index === 14 || index === 16 || index === 24 || index === 26 || index === 28) {
+              return { ...lm, visibility: 0 };
+            }
+          }
+          // Also hide any low-visibility keypoints in turtle mode
+          if ((lm.visibility ?? 1) < 0.4) {
+            return { ...lm, visibility: 0 };
+          }
+        }
+
         return lm;
       });
 
