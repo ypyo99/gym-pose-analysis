@@ -636,7 +636,7 @@ function App() {
       )}
 
       {/* Bottom Controls */}
-      <div className={`absolute bottom-0 left-0 w-full px-3 pt-3 pb-[max(1.75rem,env(safe-area-inset-bottom))] sm:pb-6 md:pb-8 z-40 bg-gradient-to-t from-black via-black/85 to-transparent flex flex-col items-center justify-end transition-opacity duration-300 ${showUI ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+      <div className={`absolute bottom-0 left-0 w-full px-3 pt-3 pb-[max(1.75rem,env(safe-area-inset-bottom))] sm:pb-6 md:pb-8 z-40 bg-gradient-to-t from-black via-black/85 to-transparent flex flex-col items-center justify-end transition-opacity duration-300 ${showUI ? 'opacity-100' : 'opacity-0'}`}>
         
         {/* Photo Capture Mode Controls */}
         {appMode === 'photo_capture' && (
@@ -653,6 +653,7 @@ function App() {
                 <div className="flex items-center justify-center w-full gap-3 sm:gap-4">
                   <button onClick={handleCapturePhoto} className="p-3 sm:p-3.5 md:p-4.5 rounded-full bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-transform active:scale-90 hover:bg-red-600 flex items-center justify-center" title="촬영"><Camera className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white fill-current" /></button>
                   <button onClick={handleResetCamera} className="p-2.5 sm:p-3 md:p-3.5 rounded-full bg-black/60 hover:bg-black/80 border border-white/40 shadow-lg text-white transition-transform active:scale-95 flex items-center justify-center" title="카메라 리셋"><RotateCcw className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" /></button>
+                  <button onClick={handleAppExit} className="p-2.5 sm:p-3 md:p-3.5 rounded-full bg-red-600/90 hover:bg-red-700 text-white border border-white/40 shadow-[0_0_15px_rgba(239,68,68,0.6)] active:scale-95 transition-transform flex items-center justify-center" title="프로그램 종료 (메모리 해제)"><Power className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" /></button>
                 </div>
               </>
             ) : (
@@ -664,6 +665,7 @@ function App() {
                 <button onClick={handleDownloadScreenshot} className="shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full bg-blue-600 border border-white/40 shadow-lg transition-transform active:scale-95 hover:bg-blue-700 text-white flex items-center justify-center" title="다운로드"><Download className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
                 <button onClick={() => setShowGrid(!showGrid)} className={`shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="그리드"><Grid3X3 className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
                 <button onClick={() => setViewMode(v => v === '2d' ? '3d' : '2d')} className={`shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="골격 표시 (3D)"><PersonStanding className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
+                <button onClick={handleAppExit} className="shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full bg-red-600/90 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center hover:bg-red-700 text-white" title="프로그램 종료 (메모리 해제)"><Power className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
                 <button onClick={handleExit} className="shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full bg-gray-600 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center hover:bg-gray-700 text-white" title="취소"><X className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
               </div>
             )}
@@ -690,6 +692,7 @@ function App() {
                   <div className="flex items-center justify-center w-full gap-3 sm:gap-4">
                     <button onClick={startRecordingFlow} disabled={recordingState === 'countdown'} className={`p-3 sm:p-3.5 md:p-4.5 rounded-full ${recordingState === 'countdown' ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600'} shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-transform active:scale-90 flex items-center justify-center`} title="녹화"><Video className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white fill-current" /></button>
                     <button onClick={handleResetCamera} disabled={recordingState === 'countdown'} className="p-2.5 sm:p-3 md:p-3.5 rounded-full bg-black/60 hover:bg-black/80 border border-white/40 shadow-lg text-white transition-transform active:scale-95 flex items-center justify-center" title="카메라 리셋"><RotateCcw className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" /></button>
+                    <button onClick={handleAppExit} disabled={recordingState === 'countdown'} className="p-2.5 sm:p-3 md:p-3.5 rounded-full bg-red-600/90 hover:bg-red-700 text-white border border-white/40 shadow-[0_0_15px_rgba(239,68,68,0.6)] active:scale-95 transition-transform flex items-center justify-center" title="프로그램 종료 (메모리 해제)"><Power className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" /></button>
                   </div>
                 </>
               )
@@ -721,6 +724,7 @@ function App() {
                 }} className="shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full bg-blue-600 border border-white/40 shadow-lg transition-transform active:scale-95 hover:bg-blue-700 text-white flex items-center justify-center" title="다운로드"><Download className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
                 <button onClick={() => setShowGrid(!showGrid)} className={`shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="그리드"><Grid3X3 className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
                 <button onClick={() => setViewMode(v => v === '2d' ? '3d' : '2d')} className={`shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="골격 표시 (3D)"><PersonStanding className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
+                <button onClick={handleAppExit} className="shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full bg-red-600/90 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center hover:bg-red-700 text-white" title="프로그램 종료 (메모리 해제)"><Power className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
                 <button onClick={handleExit} className="shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full bg-gray-600 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center hover:bg-gray-700 text-white" title="취소"><X className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
               </div>
             )}
@@ -731,15 +735,18 @@ function App() {
         {appMode === 'photo_upload' && (
           <div className="flex items-center justify-center gap-3 sm:gap-4 md:gap-6 w-full">
             {!uploadedImage && !uploadedVideo ? (
-              <button 
-                onClick={() => {
-                  triggerHaptic(50);
-                  fileInputRef.current?.click();
-                }} 
-                className="px-4 py-2.5 sm:px-6 sm:py-3.5 md:px-7 md:py-4 rounded-full bg-blue-600 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center gap-2 sm:gap-2.5 text-white font-bold text-xs sm:text-base md:text-lg hover:bg-blue-700"
-              >
-                <Upload className="w-4 h-4 sm:w-6 sm:h-6 md:w-7 md:h-7" /> 앨범에서 사진/동영상 선택
-              </button>
+              <div className="flex items-center justify-center gap-3 sm:gap-4">
+                <button 
+                  onClick={() => {
+                    triggerHaptic(50);
+                    fileInputRef.current?.click();
+                  }} 
+                  className="px-4 py-2.5 sm:px-6 sm:py-3.5 md:px-7 md:py-4 rounded-full bg-blue-600 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center gap-2 sm:gap-2.5 text-white font-bold text-xs sm:text-base md:text-lg hover:bg-blue-700"
+                >
+                  <Upload className="w-4 h-4 sm:w-6 sm:h-6 md:w-7 md:h-7" /> 앨범에서 사진/동영상 선택
+                </button>
+                <button onClick={handleAppExit} className="p-2.5 sm:p-3 md:p-3.5 rounded-full bg-red-600/90 hover:bg-red-700 text-white border border-white/40 shadow-[0_0_15px_rgba(239,68,68,0.6)] active:scale-95 transition-transform flex items-center justify-center" title="프로그램 종료 (메모리 해제)"><Power className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" /></button>
+              </div>
             ) : (
               <div className="fixed right-2 sm:right-4 top-24 sm:top-28 bottom-24 sm:bottom-28 my-auto max-h-[60vh] flex flex-col justify-center items-center gap-2 sm:gap-3 z-50">
                 <button onClick={() => setShowPoseSelector(p => !p)} className={`shrink-0 px-2.5 py-1.5 sm:px-3.5 sm:py-2.5 md:px-5 md:py-3.5 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center font-bold ${showPoseSelector ? 'bg-purple-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="운동 종목 선택">
@@ -772,6 +779,7 @@ function App() {
                 }} className="shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full bg-blue-600 border border-white/40 shadow-lg transition-transform active:scale-95 hover:bg-blue-700 text-white flex items-center justify-center" title="다운로드"><Download className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
                 <button onClick={() => setShowGrid(!showGrid)} className={`shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="그리드"><Grid3X3 className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
                 <button onClick={() => setViewMode(v => v === '2d' ? '3d' : '2d')} className={`shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="골격 표시 (3D)"><PersonStanding className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
+                <button onClick={handleAppExit} className="shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full bg-red-600/90 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center hover:bg-red-700 text-white" title="프로그램 종료 (메모리 해제)"><Power className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
                 <button onClick={handleExit} className="shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full bg-gray-600 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center hover:bg-gray-700 text-white" title="취소 (사진 다시 선택)"><X className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
               </div>
             )}
@@ -919,15 +927,6 @@ function App() {
           </div>
         </div>
       )}
-
-      {/* Floating Program Exit Button (Bottom Right) */}
-      <button 
-        onClick={handleAppExit}
-        className={`fixed right-3 sm:right-5 bottom-3 sm:bottom-5 z-50 p-2.5 sm:p-3 md:p-3.5 rounded-full bg-red-600/90 hover:bg-red-700 text-white border border-white/40 shadow-[0_0_15px_rgba(239,68,68,0.6)] active:scale-95 transition-transform flex items-center justify-center pointer-events-auto ${showUI ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-        title="프로그램 종료 (메모리 완전 해제)"
-      >
-        <Power className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
-      </button>
     </div>
   );
 }
