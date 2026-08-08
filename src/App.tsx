@@ -554,7 +554,7 @@ function App() {
 
       {/* Viewing / Playback Badge */}
       {((appMode === 'photo_capture' && currentScreenshot) || (appMode === 'video_capture' && recordedVideoUrl) || (appMode === 'photo_upload' && (uploadedImage || uploadedVideo))) && (
-        <div className="absolute bottom-24 sm:bottom-28 z-30 pointer-events-none flex justify-center w-full">
+        <div className="absolute bottom-[max(1.75rem,env(safe-area-inset-bottom))] sm:bottom-6 md:bottom-8 z-30 pointer-events-none flex justify-center w-full">
           <div className="bg-black/70 backdrop-blur-md px-4 py-2 sm:px-6 sm:py-3 rounded-full border border-white/20 shadow-lg flex items-center gap-2 sm:gap-3">
             <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-green-500 rounded-full animate-pulse"></div>
             <span className="text-white font-bold text-sm sm:text-lg tracking-wider">재생 중...</span>
