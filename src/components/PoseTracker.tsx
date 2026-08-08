@@ -1082,18 +1082,17 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
             width: { ideal: 640, max: 1280 },
             height: { ideal: 480, max: 720 },
             frameRate: { ideal: 30, max: 30 },
-            // @ts-ignore
-            advanced: [{ zoom: 0.6 }]
+            ...(facingMode === 'environment' ? { advanced: [{ zoom: 0.6 }] as any } : {})
           }}
           onUserMedia={(stream) => {
+            if (facingMode !== 'environment') return;
             const track = stream.getVideoTracks()[0];
             if (track && track.getCapabilities && track.applyConstraints) {
               const caps = track.getCapabilities() as any;
               if (caps.zoom) {
-                // Use 0.6x zoom (ultra-wide). If device minimum is higher, use that instead.
+                // Use 0.6x zoom (ultra-wide) only for rear camera
                 const targetZoom = Math.max(caps.zoom.min ?? 0.6, 0.1);
                 const finalZoom = Math.min(targetZoom, 0.6);
-                // finalZoom will be 0.6 if supported, otherwise the device minimum
                 const safeZoom = finalZoom < (caps.zoom.min ?? 0) ? (caps.zoom.min ?? 1) : finalZoom;
                 track.applyConstraints({ advanced: [{ zoom: safeZoom } as any] }).catch(console.warn);
               }
