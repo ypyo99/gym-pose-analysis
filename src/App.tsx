@@ -259,7 +259,8 @@ function App() {
 [작성 가이드라인]
 - 현장에서 회원이 빠르게 브리핑을 받을 수 있도록, 내용을 길게 쓰지 말고 각 섹션을 짧은 문장의 불릿 포인트 형태로 핵심만 정리해 주세요.
 - 각 불릿 포인트 앞에는 내용과 어울리는 이모지(아이콘)를 반드시 넣어주세요 (예: ✅, 💡, ⚠️, 📌 등).
-- 각도를 표시할 때 수학 기호(LaTeX 등, 예: $96^\\circ$)를 절대 사용하지 말고, 평문(예: 96도)으로 자연스럽게 표시해 주세요.
+- 각도를 표시할 때 수학 기호나 LaTeX(예: $96^\\circ$, 96° 등)를 절대 사용하지 말고, 반드시 '96도'와 같이 한국어 평문으로만 표시해 주세요.
+- 오타, 오자, 탈락(생략)된 글자가 전혀 없도록 문장과 글자를 세심하게 검토하여 정확한 완성형 한글 문장으로 작성해 주세요.
 - 반드시 위 3개의 소제목을 마크다운 h3(###) 태그로 시작해서 작성해 주세요.`
         : `전문 헬스 트레이너로서 첨부된 사진 속 회원의 '${currentModeLabel}' 자세를 분석해 주세요. 
 화면에 표시된 관절의 각도와 위치 가이드라인을 참고하여 다음 내용을 포함해 주세요:
@@ -270,7 +271,8 @@ function App() {
 [작성 가이드라인]
 - 현장에서 회원이 빠르게 브리핑을 받을 수 있도록, 내용을 길게 쓰지 말고 각 섹션을 짧은 문장의 불릿 포인트 형태로 핵심만 정리해 주세요.
 - 각 불릿 포인트 앞에는 내용과 어울리는 이모지(아이콘)를 반드시 넣어주세요 (예: ✅, 💡, ⚠️, 📌 등).
-- 각도를 표시할 때 수학 기호(LaTeX 등, 예: $96^\\circ$)를 절대 사용하지 말고, 평문(예: 96도)으로 자연스럽게 표시해 주세요.
+- 각도를 표시할 때 수학 기호나 LaTeX(예: $96^\\circ$, 96° 등)를 절대 사용하지 말고, 반드시 '96도'와 같이 한국어 평문으로만 표시해 주세요.
+- 오타, 오자, 탈락(생략)된 글자가 전혀 없도록 문장과 글자를 세심하게 검토하여 정확한 완성형 한글 문장으로 작성해 주세요.
 - 반드시 위 3개의 소제목을 마크다운 h3(###) 태그로 시작해서 작성해 주세요.`;
 
       const imageParts = framesToAnalyze.map(frame => ({
@@ -283,7 +285,20 @@ function App() {
       const model = genAI.getGenerativeModel({ model: targetModel });
       const result = await model.generateContent([prompt, ...imageParts]);
       const response = await result.response;
-      setAnalysisResult(response.text());
+      
+      const rawText = response.text() || '';
+      let cleanedText = rawText
+        .normalize('NFC')
+        .replace(/\$\\text\{([^}]+)\}\$/g, '$1')
+        .replace(/\\text\{([^}]+)\}/g, '$1')
+        .replace(/\$(\d+(?:\.\d+)?)\^\\circ\$/g, '$1도')
+        .replace(/\$(\d+(?:\.\d+)?)\^\circ\$/g, '$1도')
+        .replace(/\$(\d+(?:\.\d+)?)°\$/g, '$1도')
+        .replace(/(\d+(?:\.\d+)?)°/g, '$1도')
+        .replace(/\\circ/g, '도')
+        .replace(/\\/g, '');
+
+      setAnalysisResult(cleanedText);
     } catch (error: any) {
       console.error("AI Analysis Error:", error);
       const errorMessage = error?.message || '';
@@ -628,7 +643,7 @@ function App() {
                     <img src={currentScreenshot} alt="Captured Pose" className="w-full h-auto object-contain max-h-[40vh] mx-auto" />
                   </div>
                 ) : null}
-                <div className="text-white prose prose-invert max-w-none">
+                <div className="text-white prose prose-invert max-w-none break-keep leading-relaxed">
                   <ReactMarkdown
                     components={{
                       h3: ({node, ...props}) => <h3 className="bg-gradient-to-r from-purple-900/80 to-indigo-900/80 text-purple-200 px-4 py-3 rounded-xl text-lg md:text-xl font-extrabold mt-8 mb-4 shadow-lg border border-purple-500/30" {...props} />,

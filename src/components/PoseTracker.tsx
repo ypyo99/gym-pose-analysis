@@ -284,22 +284,52 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           const stream = recCanvas.captureStream(30);
           
           // 캠에서 오디오 트랙을 가져와서 캔버스 스트림에 합침
-          if (webcamRef.current && webcamRef.current.video && webcamRef.current.video.srcObject) {
-            const webcamStream = webcamRef.current.video.srcObject as MediaStream;
+          const webcamStream = (webcamRef.current?.stream || webcamRef.current?.video?.srcObject) as MediaStream | null;
+          if (webcamStream) {
             const audioTracks = webcamStream.getAudioTracks();
             if (audioTracks.length > 0) {
-              stream.addTrack(audioTracks[0]);
+              audioTracks.forEach(track => {
+                track.enabled = true;
+                stream.addTrack(track);
+              });
+            }
+          }
+
+          // 업로드된 동영상인 경우 동영상 요소에서 오디오 트랙 추출 및 합침
+          if (uploadedVideoRef.current) {
+            const videoEl = uploadedVideoRef.current as any;
+            try {
+              let videoStream: MediaStream | null = null;
+              if (typeof videoEl.captureStream === 'function') {
+                videoStream = videoEl.captureStream();
+              } else if (typeof videoEl.mozCaptureStream === 'function') {
+                videoStream = videoEl.mozCaptureStream();
+              }
+              if (videoStream) {
+                const videoAudioTracks = videoStream.getAudioTracks();
+                videoAudioTracks.forEach(track => {
+                  track.enabled = true;
+                  stream.addTrack(track);
+                });
+              }
+            } catch (err) {
+              console.warn("Uploaded video audio capture failed:", err);
             }
           }
           
-          let options: MediaRecorderOptions = { mimeType: 'video/webm' };
-          if (!MediaRecorder.isTypeSupported('video/webm')) {
-            if (MediaRecorder.isTypeSupported('video/mp4')) {
-              options = { mimeType: 'video/mp4' };
-            } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp8')) {
-              options = { mimeType: 'video/webm;codecs=vp8' };
-            } else {
-              options = {};
+          let options: MediaRecorderOptions = {};
+          const candidateTypes = [
+            'video/webm;codecs=vp9,opus',
+            'video/webm;codecs=vp8,opus',
+            'video/webm',
+            'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
+            'video/mp4'
+          ];
+
+          for (const type of candidateTypes) {
+            if (MediaRecorder.isTypeSupported(type)) {
+              options = { mimeType: type };
+              break;
             }
           }
 
@@ -909,6 +939,11 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
         {!imageSrc && !videoSrc && !isUploadMode && (
         <Webcam
           audio={true}
+          audioConstraints={{
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+          }}
           muted={true}
           key={facingMode}
           ref={webcamRef}
@@ -953,7 +988,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           src={videoSrc}
           autoPlay
           loop
-          muted
+          muted={false}
           playsInline
           controls
           onLoadedData={(e) => {
