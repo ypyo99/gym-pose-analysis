@@ -496,55 +496,55 @@ function App() {
       )}
 
       {/* Top Bar */}
-      <div className={`absolute top-0 left-0 w-full p-3 md:p-4 z-30 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent transition-opacity duration-300 ${showUI ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+      <div className={`absolute top-0 left-0 w-full p-3 pt-[max(0.75rem,env(safe-area-inset-top))] md:p-4 z-30 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent transition-opacity duration-300 ${showUI ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
         <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
           <img 
             src="/logo.jpg" 
             alt="PT Shop Logo" 
             onClick={() => setShowSettings(true)}
-            className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 object-cover rounded-lg shadow-lg opacity-90 hover:opacity-100 transition-opacity cursor-pointer active:scale-95" 
+            className="w-9 h-9 sm:w-12 sm:h-12 md:w-16 md:h-16 object-cover rounded-lg shadow-lg opacity-90 hover:opacity-100 transition-opacity cursor-pointer active:scale-95 shrink-0" 
           />
-          <div className="h-10 sm:h-12 md:h-16 flex items-center gap-1.5 sm:gap-2 md:gap-3 bg-black/60 backdrop-blur-md px-2.5 sm:px-3 md:px-4 rounded-lg border border-white/10 shadow-lg">
+          <div className="h-9 sm:h-12 md:h-16 flex items-center gap-1.5 sm:gap-2 md:gap-3 bg-black/60 backdrop-blur-md px-2 sm:px-3 md:px-4 rounded-lg border border-white/10 shadow-lg shrink-0">
             <Dumbbell className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7 text-cyan-400 shrink-0" />
             <div className="flex flex-col justify-center leading-none">
-              <span className="text-[10px] sm:text-xs md:text-sm font-black tracking-widest text-cyan-400 uppercase">
+              <span className="text-[9px] sm:text-xs md:text-sm font-black tracking-widest text-cyan-400 uppercase">
                 AI PT
               </span>
-              <span className="text-[11px] sm:text-sm md:text-base font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500 uppercase mt-0.5">
+              <span className="text-[10px] sm:text-sm md:text-base font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500 uppercase mt-0.5">
                 STUDIO
               </span>
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-2 md:gap-4 shrink-0">
           <input
             type="text"
             placeholder="회원 이름"
             value={memberName}
             onChange={(e) => setMemberName(e.target.value)}
-            className="w-24 sm:w-28 md:w-36 lg:w-48 px-3 py-1 sm:py-1.5 md:px-5 md:py-2 bg-black/60 backdrop-blur-md rounded-full text-white text-xs sm:text-sm md:text-xl font-bold border border-white/30 outline-none focus:bg-black/80 placeholder-gray-400 text-center shadow-md transition-all"
+            className="w-22 sm:w-28 md:w-36 lg:w-48 px-2.5 py-1 sm:py-1.5 md:px-5 md:py-2 bg-black/60 backdrop-blur-md rounded-full text-white text-xs sm:text-sm md:text-xl font-bold border border-white/30 outline-none focus:bg-black/80 placeholder-gray-400 text-center shadow-md transition-all"
           />
         </div>
       </div>
 
       {/* Mode Selection Tabs */}
-      <div className={`absolute top-16 sm:top-20 left-0 w-full z-40 flex justify-center px-2 sm:px-4 transition-opacity duration-300 ${showUI ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+      <div className={`absolute top-14 sm:top-18 md:top-20 left-0 w-full z-40 flex justify-center px-2 sm:px-4 transition-opacity duration-300 ${showUI ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
         <div className="flex bg-black/60 backdrop-blur-md rounded-full p-1 border border-white/20 shadow-lg">
           <button 
             onClick={() => handleModeSwitch('photo_capture')}
-            className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm md:text-base font-bold transition-colors ${appMode === 'photo_capture' ? 'bg-white text-black' : 'text-gray-300 hover:text-white'}`}
+            className={`px-2.5 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm md:text-base font-bold transition-colors whitespace-nowrap ${appMode === 'photo_capture' ? 'bg-white text-black' : 'text-gray-300 hover:text-white'}`}
           >
             사진 촬영
           </button>
           <button 
             onClick={() => handleModeSwitch('video_capture')}
-            className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm md:text-base font-bold transition-colors ${appMode === 'video_capture' ? 'bg-white text-black' : 'text-gray-300 hover:text-white'}`}
+            className={`px-2.5 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm md:text-base font-bold transition-colors whitespace-nowrap ${appMode === 'video_capture' ? 'bg-white text-black' : 'text-gray-300 hover:text-white'}`}
           >
             동영상 촬영
           </button>
           <button 
             onClick={() => handleModeSwitch('photo_upload')}
-            className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm md:text-base font-bold transition-colors ${appMode === 'photo_upload' ? 'bg-white text-black' : 'text-gray-300 hover:text-white'}`}
+            className={`px-2.5 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm md:text-base font-bold transition-colors whitespace-nowrap ${appMode === 'photo_upload' ? 'bg-white text-black' : 'text-gray-300 hover:text-white'}`}
           >
             업로드
           </button>
@@ -553,13 +553,13 @@ function App() {
 
       {/* Pose Selector Overlay */}
       {showPoseSelector && (
-        <div className={`absolute bottom-28 sm:bottom-36 md:bottom-40 left-0 w-full z-30 flex justify-center px-4 transition-opacity duration-300 ${showUI ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+        <div className={`absolute bottom-24 sm:bottom-32 md:bottom-36 left-0 w-full z-30 flex justify-center px-4 transition-opacity duration-300 ${showUI ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
           <div className="grid grid-cols-3 md:flex gap-2 md:gap-4 justify-center w-full max-w-sm md:max-w-2xl bg-black/80 backdrop-blur-md p-3 sm:p-4 rounded-3xl border border-white/20 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
             {MODE_CONFIGS.map((config) => (
               <button
                 key={config.id}
                 onClick={() => { setMode(config.id); setShowPoseSelector(false); }}
-                className={`py-2.5 sm:py-3 md:py-4 px-2 md:px-6 rounded-2xl font-bold text-xs sm:text-sm md:text-lg transition-all transform active:scale-95 whitespace-nowrap ${
+                className={`py-2 sm:py-3 md:py-4 px-2 md:px-6 rounded-2xl font-bold text-xs sm:text-sm md:text-lg transition-all transform active:scale-95 whitespace-nowrap ${
                   mode === config.id
                     ? `${config.color} text-white ${config.shadow}`
                     : 'bg-white/10 text-gray-300 hover:bg-white/20'
@@ -573,35 +573,35 @@ function App() {
       )}
 
       {/* Bottom Controls */}
-      <div className={`absolute bottom-0 left-0 w-full px-4 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] md:p-6 z-40 bg-gradient-to-t from-black via-black/80 to-transparent flex flex-col items-center justify-end min-h-[110px] sm:min-h-[130px] md:min-h-[150px] transition-opacity duration-300 ${showUI ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+      <div className={`absolute bottom-0 left-0 w-full px-3 pt-3 pb-[max(1.75rem,env(safe-area-inset-bottom))] sm:pb-6 md:pb-8 z-40 bg-gradient-to-t from-black via-black/85 to-transparent flex flex-col items-center justify-end transition-opacity duration-300 ${showUI ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
         
         {/* Photo Capture Mode Controls */}
         {appMode === 'photo_capture' && (
-          <div className="flex items-center justify-center gap-4 md:gap-6 w-full px-2 md:px-8">
+          <div className="flex items-center justify-center gap-3 sm:gap-4 md:gap-6 w-full px-2 md:px-8">
             {!currentScreenshot ? (
               <>
-                <div className="fixed right-2 sm:right-4 top-1/2 -translate-y-1/2 flex flex-col items-center gap-2 sm:gap-3 md:gap-4 z-50">
-                  <button onClick={() => setShowPoseSelector(p => !p)} className={`shrink-0 px-3 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center font-bold ${showPoseSelector ? 'bg-purple-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="운동 종목 선택">
-                    <span className="text-xs sm:text-sm md:text-lg whitespace-nowrap">{MODE_CONFIGS.find(m => m.id === mode)?.label}</span>
+                <div className="fixed right-2 sm:right-4 top-24 sm:top-28 bottom-24 sm:bottom-28 my-auto max-h-[60vh] flex flex-col justify-center items-center gap-2 sm:gap-3 z-50">
+                  <button onClick={() => setShowPoseSelector(p => !p)} className={`shrink-0 px-2.5 py-1.5 sm:px-3.5 sm:py-2.5 md:px-5 md:py-3.5 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center font-bold ${showPoseSelector ? 'bg-purple-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="운동 종목 선택">
+                    <span className="text-xs sm:text-sm md:text-base whitespace-nowrap">{MODE_CONFIGS.find(m => m.id === mode)?.label}</span>
                   </button>
-                  <button onClick={() => setShowGrid(!showGrid)} className={`shrink-0 p-2.5 sm:p-3.5 md:p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="그리드"><Grid3X3 className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" /></button>
-                  <button onClick={() => setViewMode(v => v === '2d' ? '3d' : '2d')} className={`shrink-0 p-2.5 sm:p-3.5 md:p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="골격 표시 (3D)"><PersonStanding className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" /></button>
+                  <button onClick={() => setShowGrid(!showGrid)} className={`shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="그리드"><Grid3X3 className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
+                  <button onClick={() => setViewMode(v => v === '2d' ? '3d' : '2d')} className={`shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="골격 표시 (3D)"><PersonStanding className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
                 </div>
                 <div className="flex items-center justify-center w-full gap-3 sm:gap-4">
-                  <button onClick={handleCapturePhoto} className="p-3.5 sm:p-4 md:p-5 rounded-full bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-transform active:scale-90 hover:bg-red-600 flex items-center justify-center" title="촬영"><Camera className="w-6 h-6 md:w-8 md:h-8 text-white fill-current" /></button>
-                  <button onClick={handleResetCamera} className="p-3 sm:p-3.5 md:p-4 rounded-full bg-black/60 hover:bg-black/80 border border-white/40 shadow-lg text-white transition-transform active:scale-95 flex items-center justify-center" title="카메라 리셋"><RotateCcw className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" /></button>
+                  <button onClick={handleCapturePhoto} className="p-3 sm:p-3.5 md:p-4.5 rounded-full bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-transform active:scale-90 hover:bg-red-600 flex items-center justify-center" title="촬영"><Camera className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white fill-current" /></button>
+                  <button onClick={handleResetCamera} className="p-2.5 sm:p-3 md:p-3.5 rounded-full bg-black/60 hover:bg-black/80 border border-white/40 shadow-lg text-white transition-transform active:scale-95 flex items-center justify-center" title="카메라 리셋"><RotateCcw className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" /></button>
                 </div>
               </>
             ) : (
-              <div className="fixed right-2 sm:right-4 top-1/2 -translate-y-1/2 flex flex-col items-center gap-2 sm:gap-3 md:gap-4 z-50">
-                <button onClick={() => setShowPoseSelector(p => !p)} className={`shrink-0 px-3 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center font-bold ${showPoseSelector ? 'bg-purple-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="운동 종목 선택">
-                  <span className="text-xs sm:text-sm md:text-lg whitespace-nowrap">{MODE_CONFIGS.find(m => m.id === mode)?.label}</span>
+              <div className="fixed right-2 sm:right-4 top-24 sm:top-28 bottom-24 sm:bottom-28 my-auto max-h-[60vh] flex flex-col justify-center items-center gap-2 sm:gap-3 z-50">
+                <button onClick={() => setShowPoseSelector(p => !p)} className={`shrink-0 px-2.5 py-1.5 sm:px-3.5 sm:py-2.5 md:px-5 md:py-3.5 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center font-bold ${showPoseSelector ? 'bg-purple-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="운동 종목 선택">
+                  <span className="text-xs sm:text-sm md:text-base whitespace-nowrap">{MODE_CONFIGS.find(m => m.id === mode)?.label}</span>
                 </button>
-                <button onClick={handleAnalyze} className="shrink-0 p-3 sm:p-4 md:p-6 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center text-white hover:opacity-90"><Sparkles className="w-5 h-5 sm:w-7 sm:h-7 md:w-8 md:h-8" /></button>
-                <button onClick={handleDownloadScreenshot} className="shrink-0 p-2.5 sm:p-3.5 md:p-4 rounded-full bg-blue-600 border border-white/40 shadow-lg transition-transform active:scale-95 hover:bg-blue-700 text-white flex items-center justify-center" title="다운로드"><Download className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" /></button>
-                <button onClick={() => setShowGrid(!showGrid)} className={`shrink-0 p-2.5 sm:p-3.5 md:p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="그리드"><Grid3X3 className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" /></button>
-                <button onClick={() => setViewMode(v => v === '2d' ? '3d' : '2d')} className={`shrink-0 p-2.5 sm:p-3.5 md:p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="골격 표시 (3D)"><PersonStanding className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" /></button>
-                <button onClick={handleExit} className="shrink-0 p-2.5 sm:p-3.5 md:p-4 rounded-full bg-gray-600 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center hover:bg-gray-700 text-white" title="취소"><X className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" /></button>
+                <button onClick={handleAnalyze} className="shrink-0 p-2.5 sm:p-3.5 md:p-5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center text-white hover:opacity-90"><Sparkles className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" /></button>
+                <button onClick={handleDownloadScreenshot} className="shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full bg-blue-600 border border-white/40 shadow-lg transition-transform active:scale-95 hover:bg-blue-700 text-white flex items-center justify-center" title="다운로드"><Download className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
+                <button onClick={() => setShowGrid(!showGrid)} className={`shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="그리드"><Grid3X3 className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
+                <button onClick={() => setViewMode(v => v === '2d' ? '3d' : '2d')} className={`shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="골격 표시 (3D)"><PersonStanding className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
+                <button onClick={handleExit} className="shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full bg-gray-600 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center hover:bg-gray-700 text-white" title="취소"><X className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
               </div>
             )}
           </div>
@@ -609,33 +609,33 @@ function App() {
 
         {/* Video Capture Mode Controls */}
         {appMode === 'video_capture' && (
-          <div className="flex items-center justify-center gap-4 md:gap-6 w-full px-2 md:px-8">
+          <div className="flex items-center justify-center gap-3 sm:gap-4 md:gap-6 w-full px-2 md:px-8">
             {!recordedVideoUrl ? (
               recordingState === 'recording' ? (
                 <div className="flex items-center justify-center w-full">
-                  <button onClick={stopRecording} className="p-3.5 sm:p-4 md:p-5 rounded-full bg-red-600 shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-transform active:scale-90 animate-pulse hover:bg-red-700" title="정지"><Square className="w-6 h-6 md:w-8 md:h-8 text-white fill-current" /></button>
+                  <button onClick={stopRecording} className="p-3 sm:p-3.5 md:p-4.5 rounded-full bg-red-600 shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-transform active:scale-90 animate-pulse hover:bg-red-700" title="정지"><Square className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white fill-current" /></button>
                 </div>
               ) : (
                 <>
-                  <div className="fixed right-2 sm:right-4 top-1/2 -translate-y-1/2 flex flex-col items-center gap-2 sm:gap-3 md:gap-4 z-50">
-                    <button onClick={() => setShowPoseSelector(p => !p)} className={`shrink-0 px-3 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center font-bold ${showPoseSelector ? 'bg-purple-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="운동 종목 선택">
-                      <span className="text-xs sm:text-sm md:text-lg whitespace-nowrap">{MODE_CONFIGS.find(m => m.id === mode)?.label}</span>
+                  <div className="fixed right-2 sm:right-4 top-24 sm:top-28 bottom-24 sm:bottom-28 my-auto max-h-[60vh] flex flex-col justify-center items-center gap-2 sm:gap-3 z-50">
+                    <button onClick={() => setShowPoseSelector(p => !p)} className={`shrink-0 px-2.5 py-1.5 sm:px-3.5 sm:py-2.5 md:px-5 md:py-3.5 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center font-bold ${showPoseSelector ? 'bg-purple-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="운동 종목 선택">
+                      <span className="text-xs sm:text-sm md:text-base whitespace-nowrap">{MODE_CONFIGS.find(m => m.id === mode)?.label}</span>
                     </button>
-                    <button onClick={() => setShowGrid(!showGrid)} className={`shrink-0 p-2.5 sm:p-3.5 md:p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="그리드"><Grid3X3 className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" /></button>
-                    <button onClick={() => setViewMode(v => v === '2d' ? '3d' : '2d')} className={`shrink-0 p-2.5 sm:p-3.5 md:p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="골격 표시 (3D)"><PersonStanding className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" /></button>
+                    <button onClick={() => setShowGrid(!showGrid)} className={`shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="그리드"><Grid3X3 className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
+                    <button onClick={() => setViewMode(v => v === '2d' ? '3d' : '2d')} className={`shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="골격 표시 (3D)"><PersonStanding className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
                   </div>
                   <div className="flex items-center justify-center w-full gap-3 sm:gap-4">
-                    <button onClick={startRecordingFlow} disabled={recordingState === 'countdown'} className={`p-3.5 sm:p-4 md:p-5 rounded-full ${recordingState === 'countdown' ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600'} shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-transform active:scale-90 flex items-center justify-center`} title="녹화"><Video className="w-6 h-6 md:w-8 md:h-8 text-white fill-current" /></button>
-                    <button onClick={handleResetCamera} disabled={recordingState === 'countdown'} className="p-3 sm:p-3.5 md:p-4 rounded-full bg-black/60 hover:bg-black/80 border border-white/40 shadow-lg text-white transition-transform active:scale-95 flex items-center justify-center" title="카메라 리셋"><RotateCcw className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" /></button>
+                    <button onClick={startRecordingFlow} disabled={recordingState === 'countdown'} className={`p-3 sm:p-3.5 md:p-4.5 rounded-full ${recordingState === 'countdown' ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600'} shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-transform active:scale-90 flex items-center justify-center`} title="녹화"><Video className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white fill-current" /></button>
+                    <button onClick={handleResetCamera} disabled={recordingState === 'countdown'} className="p-2.5 sm:p-3 md:p-3.5 rounded-full bg-black/60 hover:bg-black/80 border border-white/40 shadow-lg text-white transition-transform active:scale-95 flex items-center justify-center" title="카메라 리셋"><RotateCcw className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" /></button>
                   </div>
                 </>
               )
             ) : (
-              <div className="fixed right-2 sm:right-4 top-1/2 -translate-y-1/2 flex flex-col items-center gap-2 sm:gap-3 md:gap-4 z-50">
-                <button onClick={() => setShowPoseSelector(p => !p)} className={`shrink-0 px-3 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center font-bold ${showPoseSelector ? 'bg-purple-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="운동 종목 선택">
-                  <span className="text-xs sm:text-sm md:text-lg whitespace-nowrap">{MODE_CONFIGS.find(m => m.id === mode)?.label}</span>
+              <div className="fixed right-2 sm:right-4 top-24 sm:top-28 bottom-24 sm:bottom-28 my-auto max-h-[60vh] flex flex-col justify-center items-center gap-2 sm:gap-3 z-50">
+                <button onClick={() => setShowPoseSelector(p => !p)} className={`shrink-0 px-2.5 py-1.5 sm:px-3.5 sm:py-2.5 md:px-5 md:py-3.5 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center font-bold ${showPoseSelector ? 'bg-purple-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="운동 종목 선택">
+                  <span className="text-xs sm:text-sm md:text-base whitespace-nowrap">{MODE_CONFIGS.find(m => m.id === mode)?.label}</span>
                 </button>
-                <button onClick={handleAnalyze} className="shrink-0 p-3 sm:p-4 md:p-6 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center text-white hover:opacity-90"><Sparkles className="w-5 h-5 sm:w-7 sm:h-7 md:w-8 md:h-8" /></button>
+                <button onClick={handleAnalyze} className="shrink-0 p-2.5 sm:p-3.5 md:p-5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center text-white hover:opacity-90"><Sparkles className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" /></button>
                 <button onClick={() => {
                    const link = document.createElement('a');
                    const now = new Date();
@@ -655,10 +655,10 @@ function App() {
                    link.href = recordedVideoUrl;
                    link.click();
                    alert(`저장되었습니다!\n\n파일명: ${filename}`);
-                }} className="shrink-0 p-2.5 sm:p-3.5 md:p-4 rounded-full bg-blue-600 border border-white/40 shadow-lg transition-transform active:scale-95 hover:bg-blue-700 text-white flex items-center justify-center" title="다운로드"><Download className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" /></button>
-                <button onClick={() => setShowGrid(!showGrid)} className={`shrink-0 p-2.5 sm:p-3.5 md:p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="그리드"><Grid3X3 className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" /></button>
-                <button onClick={() => setViewMode(v => v === '2d' ? '3d' : '2d')} className={`shrink-0 p-2.5 sm:p-3.5 md:p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="골격 표시 (3D)"><PersonStanding className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" /></button>
-                <button onClick={handleExit} className="shrink-0 p-2.5 sm:p-3.5 md:p-4 rounded-full bg-gray-600 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center hover:bg-gray-700 text-white" title="취소"><X className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" /></button>
+                }} className="shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full bg-blue-600 border border-white/40 shadow-lg transition-transform active:scale-95 hover:bg-blue-700 text-white flex items-center justify-center" title="다운로드"><Download className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
+                <button onClick={() => setShowGrid(!showGrid)} className={`shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="그리드"><Grid3X3 className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
+                <button onClick={() => setViewMode(v => v === '2d' ? '3d' : '2d')} className={`shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="골격 표시 (3D)"><PersonStanding className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
+                <button onClick={handleExit} className="shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full bg-gray-600 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center hover:bg-gray-700 text-white" title="취소"><X className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
               </div>
             )}
           </div>
@@ -666,23 +666,23 @@ function App() {
 
         {/* Photo Upload Mode Controls */}
         {appMode === 'photo_upload' && (
-          <div className="flex items-center justify-center gap-4 md:gap-6 w-full">
+          <div className="flex items-center justify-center gap-3 sm:gap-4 md:gap-6 w-full">
             {!uploadedImage && !uploadedVideo ? (
               <button 
                 onClick={() => {
                   triggerHaptic(50);
                   fileInputRef.current?.click();
                 }} 
-                className="px-5 py-3 sm:px-6 sm:py-3.5 md:px-7 md:py-4 rounded-full bg-blue-600 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center gap-2 sm:gap-2.5 text-white font-bold text-sm sm:text-base md:text-lg hover:bg-blue-700"
+                className="px-4 py-2.5 sm:px-6 sm:py-3.5 md:px-7 md:py-4 rounded-full bg-blue-600 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center gap-2 sm:gap-2.5 text-white font-bold text-xs sm:text-base md:text-lg hover:bg-blue-700"
               >
-                <Upload className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" /> 앨범에서 사진/동영상 선택
+                <Upload className="w-4 h-4 sm:w-6 sm:h-6 md:w-7 md:h-7" /> 앨범에서 사진/동영상 선택
               </button>
             ) : (
-              <div className="fixed right-2 sm:right-4 top-1/2 -translate-y-1/2 flex flex-col items-center gap-2 sm:gap-3 md:gap-4 z-50">
-                <button onClick={() => setShowPoseSelector(p => !p)} className={`shrink-0 px-3 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center font-bold ${showPoseSelector ? 'bg-purple-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="운동 종목 선택">
-                  <span className="text-xs sm:text-sm md:text-lg whitespace-nowrap">{MODE_CONFIGS.find(m => m.id === mode)?.label}</span>
+              <div className="fixed right-2 sm:right-4 top-24 sm:top-28 bottom-24 sm:bottom-28 my-auto max-h-[60vh] flex flex-col justify-center items-center gap-2 sm:gap-3 z-50">
+                <button onClick={() => setShowPoseSelector(p => !p)} className={`shrink-0 px-2.5 py-1.5 sm:px-3.5 sm:py-2.5 md:px-5 md:py-3.5 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center font-bold ${showPoseSelector ? 'bg-purple-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="운동 종목 선택">
+                  <span className="text-xs sm:text-sm md:text-base whitespace-nowrap">{MODE_CONFIGS.find(m => m.id === mode)?.label}</span>
                 </button>
-                <button onClick={handleAnalyze} className="shrink-0 p-3 sm:p-4 md:p-6 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center text-white hover:opacity-90"><Sparkles className="w-5 h-5 sm:w-7 sm:h-7 md:w-8 md:h-8" /></button>
+                <button onClick={handleAnalyze} className="shrink-0 p-2.5 sm:p-3.5 md:p-5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center text-white hover:opacity-90"><Sparkles className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" /></button>
                 <button onClick={() => {
                   const shot = trackerRef.current?.getScreenshot();
                   if (shot) {
@@ -706,10 +706,10 @@ function App() {
                     link.click();
                     alert(`저장되었습니다!\n\n파일명: ${filename}`);
                   }
-                }} className="shrink-0 p-2.5 sm:p-3.5 md:p-4 rounded-full bg-blue-600 border border-white/40 shadow-lg transition-transform active:scale-95 hover:bg-blue-700 text-white flex items-center justify-center" title="다운로드"><Download className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" /></button>
-                <button onClick={() => setShowGrid(!showGrid)} className={`shrink-0 p-2.5 sm:p-3.5 md:p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="그리드"><Grid3X3 className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" /></button>
-                <button onClick={() => setViewMode(v => v === '2d' ? '3d' : '2d')} className={`shrink-0 p-2.5 sm:p-3.5 md:p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="골격 표시 (3D)"><PersonStanding className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" /></button>
-                <button onClick={handleExit} className="shrink-0 p-2.5 sm:p-3.5 md:p-4 rounded-full bg-gray-600 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center hover:bg-gray-700 text-white" title="취소 (사진 다시 선택)"><X className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" /></button>
+                }} className="shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full bg-blue-600 border border-white/40 shadow-lg transition-transform active:scale-95 hover:bg-blue-700 text-white flex items-center justify-center" title="다운로드"><Download className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
+                <button onClick={() => setShowGrid(!showGrid)} className={`shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="그리드"><Grid3X3 className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
+                <button onClick={() => setViewMode(v => v === '2d' ? '3d' : '2d')} className={`shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="골격 표시 (3D)"><PersonStanding className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
+                <button onClick={handleExit} className="shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full bg-gray-600 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center hover:bg-gray-700 text-white" title="취소 (사진 다시 선택)"><X className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
               </div>
             )}
           </div>
