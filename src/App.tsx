@@ -67,7 +67,7 @@ function App() {
 
   useEffect(() => {
     const savedKey = localStorage.getItem('gemini_api_key');
-    if (savedKey) setApiKeyInput(savedKey);
+    if (savedKey) setApiKeyInput('••••••••••••••••••••••••••••••••');
 
     const loadInitialCost = async () => {
       const monthKey = getCostStorageKey().replace('ai_cost_', ''); // e.g., '2026_08' -> '2026-08'
@@ -151,7 +151,9 @@ function App() {
 
   const handleSaveSettings = () => {
     triggerHaptic(50);
-    localStorage.setItem('gemini_api_key', apiKeyInput);
+    if (apiKeyInput && apiKeyInput !== '••••••••••••••••••••••••••••••••') {
+      localStorage.setItem('gemini_api_key', apiKeyInput);
+    }
     setShowSettings(false);
   };
 
@@ -977,6 +979,16 @@ function App() {
                 type="password"
                 value={apiKeyInput}
                 onChange={(e) => setApiKeyInput(e.target.value)}
+                onFocus={() => {
+                  if (apiKeyInput === '••••••••••••••••••••••••••••••••') {
+                    setApiKeyInput('');
+                  }
+                }}
+                onBlur={() => {
+                  if (apiKeyInput === '' && localStorage.getItem('gemini_api_key')) {
+                    setApiKeyInput('••••••••••••••••••••••••••••••••');
+                  }
+                }}
                 onCopy={(e) => e.preventDefault()}
                 onCut={(e) => e.preventDefault()}
                 onContextMenu={(e) => e.preventDefault()}
