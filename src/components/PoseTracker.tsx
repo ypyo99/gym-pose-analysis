@@ -835,6 +835,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
     let isProcessing = false;
     let lastProcessingStartTime = 0;
     let lastSendTime = 0;
+    let lastSuccessFrameTime = Date.now();
 
     if (!processingCanvasRef.current) {
       const canvas = document.createElement('canvas');
@@ -860,12 +861,44 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
 
     pose.onResults((results: Results) => {
       if (isComponentMounted) {
+        lastSuccessFrameTime = Date.now();
         onResultsRef.current(results);
       }
     });
 
+    let processFrameFunc: (() => void) | null = null;
+
+    // Autonomous Watchdog Monitor to automatically unfreeze hung camera pipelines
+    const watchdogTimer = setInterval(() => {
+      if (!isComponentMounted || isUploadMode || imageSrc || videoSrc) return;
+      const now = Date.now();
+      const timeSinceLastFrame = now - lastSuccessFrameTime;
+
+      // If no pose frame was successfully processed for more than 1200ms while webcam is active
+      if (timeSinceLastFrame > 1200) {
+        console.warn(`[Watchdog] Camera/Pose freeze detected (${timeSinceLastFrame}ms). Triggering automatic recovery...`);
+        isProcessing = false; // Release any hung lock
+
+        const video = webcamRef.current?.video;
+        if (video) {
+          if (video.paused && !document.hidden) {
+            video.play().catch(e => console.warn("[Watchdog] Video play retry error:", e));
+          }
+        }
+
+        // Restart requestAnimationFrame loop if stalled
+        cancelAnimationFrame(animationFrameId);
+        if (processFrameFunc) {
+          animationFrameId = requestAnimationFrame(processFrameFunc);
+        }
+
+        lastSuccessFrameTime = now;
+      }
+    }, 500);
+
     const handleVisibilityChange = () => {
       isProcessing = false;
+      lastSuccessFrameTime = Date.now();
       if (document.visibilityState === 'visible') {
         const video = webcamRef.current?.video;
         if (video && video.paused) {
@@ -988,6 +1021,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           }
         }
       };
+      processFrameFunc = processFrame;
       processFrame();
     } else {
       setFeedback('');
@@ -995,6 +1029,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
 
     return () => {
       isComponentMounted = false;
+      clearInterval(watchdogTimer);
       cancelAnimationFrame(animationFrameId);
       isProcessing = false;
       try {
