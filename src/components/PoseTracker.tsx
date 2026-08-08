@@ -1139,7 +1139,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
 
       <canvas
         ref={canvasRef}
-        className={`absolute w-full h-full z-20 pointer-events-none ${imageSrc || videoSrc ? 'object-contain' : 'object-cover'} ${facingMode === 'user' && !imageSrc && !videoSrc ? '-scale-x-100' : ''} ${viewMode === '2d' && (imageSrc || videoSrc) ? 'bg-black' : ''}`}
+        className={`absolute w-full h-full z-20 pointer-events-none ${imageSrc || videoSrc ? 'object-contain' : 'object-cover'} ${facingMode === 'user' && !imageSrc && !videoSrc ? '-scale-x-100' : ''}`}
       />
       </div>
     </div>
