@@ -3,7 +3,7 @@ import PoseTracker, { type PoseTrackerRef } from './components/PoseTracker';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import ReactMarkdown from 'react-markdown';
 import * as htmlToImage from 'html-to-image';
-import { Sparkles, Grid3X3, Camera, Settings, PersonStanding, Download, Dumbbell, Video, Square, X, Upload, RefreshCcw } from 'lucide-react';
+import { Sparkles, Grid3X3, Camera, Settings, PersonStanding, Download, Dumbbell, Video, Square, X, Upload } from 'lucide-react';
 
 export type AppMode = 'photo_capture' | 'video_capture' | 'photo_upload';
 export type ExerciseMode = 'squat' | 'deadlift' | 'turtle' | 'asymmetry' | 'plank';
@@ -22,7 +22,7 @@ function App() {
   const [memberName, setMemberName] = useState<string>('');
   const [showGrid, setShowGrid] = useState<boolean>(false);
   const [viewMode, setViewMode] = useState<'2d' | '3d'>('2d');
-  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
+  const facingMode = 'environment';
   const [showUI, setShowUI] = useState<boolean>(true);
   
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -576,9 +576,6 @@ function App() {
                   <button onClick={() => setShowPoseSelector(p => !p)} className={`shrink-0 px-3 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center font-bold ${showPoseSelector ? 'bg-purple-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="운동 종목 선택">
                     <span className="text-xs sm:text-sm md:text-lg whitespace-nowrap">{MODE_CONFIGS.find(m => m.id === mode)?.label}</span>
                   </button>
-                  <button onClick={() => setFacingMode(prev => prev === 'user' ? 'environment' : 'user')} className="shrink-0 p-2.5 sm:p-3.5 md:p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 bg-black/60 text-white hover:bg-black/80 flex items-center justify-center" title="카메라 전환">
-                    <RefreshCcw className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" />
-                  </button>
                   <button onClick={() => setShowGrid(!showGrid)} className={`shrink-0 p-2.5 sm:p-3.5 md:p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="그리드"><Grid3X3 className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" /></button>
                   <button onClick={() => setViewMode(v => v === '2d' ? '3d' : '2d')} className={`shrink-0 p-2.5 sm:p-3.5 md:p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="골격 표시 (3D)"><PersonStanding className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" /></button>
                 </div>
@@ -614,9 +611,6 @@ function App() {
                   <div className="fixed right-2 sm:right-4 top-1/2 -translate-y-1/2 flex flex-col items-center gap-2 sm:gap-3 md:gap-4 z-50">
                     <button onClick={() => setShowPoseSelector(p => !p)} className={`shrink-0 px-3 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center font-bold ${showPoseSelector ? 'bg-purple-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="운동 종목 선택">
                       <span className="text-xs sm:text-sm md:text-lg whitespace-nowrap">{MODE_CONFIGS.find(m => m.id === mode)?.label}</span>
-                    </button>
-                    <button onClick={() => setFacingMode(prev => prev === 'user' ? 'environment' : 'user')} className="shrink-0 p-2.5 sm:p-3.5 md:p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 bg-black/60 text-white hover:bg-black/80 flex items-center justify-center" title="카메라 전환">
-                      <RefreshCcw className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" />
                     </button>
                     <button onClick={() => setShowGrid(!showGrid)} className={`shrink-0 p-2.5 sm:p-3.5 md:p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="그리드"><Grid3X3 className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" /></button>
                     <button onClick={() => setViewMode(v => v === '2d' ? '3d' : '2d')} className={`shrink-0 p-2.5 sm:p-3.5 md:p-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="골격 표시 (3D)"><PersonStanding className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" /></button>
