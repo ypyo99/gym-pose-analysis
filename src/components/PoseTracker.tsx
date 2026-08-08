@@ -804,17 +804,23 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
     return () => cancelAnimationFrame(animId);
   }, [viewMode]);
 
-  // Re-render static image canvas overlays when viewMode, mode, or grid changes
+  // Clear canvas & previous frame references immediately when sources or modes change
   useEffect(() => {
-    if (imageSrc && lastResultsRef.current) {
-      onResults(lastResultsRef.current);
+    if (canvasRef.current) {
+      const canvasCtx = canvasRef.current.getContext('2d');
+      if (canvasCtx) {
+        canvasCtx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+      }
     }
-  }, [viewMode, mode, showGrid, imageSrc, onResults]);
+    lastImageRef.current = null;
+    lastResultsRef.current = null;
+  }, [imageSrc, videoSrc, isUploadMode, facingMode]);
 
   useEffect(() => {
     let isComponentMounted = true;
     let animationFrameId: number;
     let isProcessing = false;
+    let lastProcessingStartTime = 0;
 
     const pose = new Pose({
       locateFile: (file: string) => {
@@ -837,8 +843,8 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
     });
 
     const handleVisibilityChange = () => {
+      isProcessing = false;
       if (document.visibilityState === 'visible') {
-        isProcessing = false;
         const video = webcamRef.current?.video;
         if (video && video.paused) {
           video.play().catch(e => console.warn("Video play error:", e));
@@ -864,9 +870,15 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
         if (!isComponentMounted) return;
         animationFrameId = requestAnimationFrame(processVideoFrame);
 
+        // Stuck processing lock timeout recovery (1.5s)
+        if (isProcessing && Date.now() - lastProcessingStartTime > 1500) {
+          isProcessing = false;
+        }
+
         const video = uploadedVideoRef.current;
         if (video && video.readyState >= 2 && !isProcessing) {
           isProcessing = true;
+          lastProcessingStartTime = Date.now();
           lastImageRef.current = video;
           try {
             await pose.send({ image: video });
@@ -882,19 +894,30 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       const processFrame = async () => {
         if (!isComponentMounted) return;
         
-        // 탭 전환 등에서 루프가 끊기지 않도록 다음 프레임 예약 위치 변경
         animationFrameId = requestAnimationFrame(processFrame);
 
+        // Stuck processing lock timeout recovery (1.5s)
+        if (isProcessing && Date.now() - lastProcessingStartTime > 1500) {
+          isProcessing = false;
+        }
+
         const video = webcamRef.current?.video;
-        if (video && video.readyState >= 2 && !isProcessing) {
-          isProcessing = true;
-          lastImageRef.current = video;
-          try {
-            await pose.send({ image: video });
-          } catch (error) {
-            console.warn("Pose send error:", error);
-          } finally {
-            isProcessing = false;
+        if (video) {
+          if (video.paused && !document.hidden) {
+            video.play().catch(() => {});
+          }
+
+          if (video.readyState >= 2 && !isProcessing) {
+            isProcessing = true;
+            lastProcessingStartTime = Date.now();
+            lastImageRef.current = video;
+            try {
+              await pose.send({ image: video });
+            } catch (error) {
+              console.warn("Pose send error:", error);
+            } finally {
+              isProcessing = false;
+            }
           }
         }
       };
@@ -906,7 +929,10 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
     return () => {
       isComponentMounted = false;
       cancelAnimationFrame(animationFrameId);
-      pose.close();
+      isProcessing = false;
+      try {
+        pose.close().catch(() => {});
+      } catch (e) {}
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [onResults, facingMode, imageSrc, videoSrc, isUploadMode]);
