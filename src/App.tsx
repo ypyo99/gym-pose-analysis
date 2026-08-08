@@ -5,16 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import * as htmlToImage from 'html-to-image';
 import { Sparkles, Grid3X3, Camera, Settings, PersonStanding, Download, Dumbbell, Video, Square, X, Upload, Power } from 'lucide-react';
 
-// Custom Camera Reset SVG icon - camera with circular refresh arrow on lens
-const CameraResetIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    {/* Camera body */}
-    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-    {/* Refresh arrow circling the lens */}
-    <path d="M16 13a4 4 0 1 1-.88-2.5" strokeWidth="2" />
-    <path d="M16 8v2.5h-2.5" strokeWidth="2" />
-  </svg>
-);
+
 
 export type AppMode = 'photo_capture' | 'video_capture' | 'photo_upload';
 export type ExerciseMode = 'squat' | 'deadlift' | 'turtle' | 'asymmetry' | 'plank';
@@ -663,7 +654,7 @@ function App() {
                 </div>
                 <div className="flex items-center justify-center gap-3 sm:gap-4">
                   <button onClick={handleCapturePhoto} className="p-3 sm:p-3.5 md:p-4.5 rounded-full bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-transform active:scale-90 hover:bg-red-600 flex items-center justify-center" title="촬영"><Camera className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white fill-current" /></button>
-                  <button onClick={handleResetCamera} className="p-2.5 sm:p-3 md:p-3.5 rounded-full bg-black/60 hover:bg-black/80 border border-white/40 shadow-lg text-white transition-transform active:scale-95 flex items-center justify-center" title="카메라 초기화"><CameraResetIcon className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" /></button>
+                  <button onClick={handleResetCamera} className="px-2.5 py-1.5 sm:px-3 sm:py-2 md:px-3.5 md:py-2.5 rounded-full bg-black/60 hover:bg-black/80 border border-white/40 shadow-lg text-white transition-transform active:scale-95 flex items-center justify-center" title="카메라 초기화"><span className="text-[10px] sm:text-xs md:text-sm font-bold whitespace-nowrap">초기화</span></button>
                 </div>
               </>
             ) : (
@@ -700,7 +691,7 @@ function App() {
                   </div>
                   <div className="flex items-center justify-center gap-3 sm:gap-4">
                     <button onClick={startRecordingFlow} disabled={recordingState === 'countdown'} className={`p-3 sm:p-3.5 md:p-4.5 rounded-full ${recordingState === 'countdown' ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600'} shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-transform active:scale-90 flex items-center justify-center`} title="녹화"><Video className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white fill-current" /></button>
-                    <button onClick={handleResetCamera} disabled={recordingState === 'countdown'} className="p-2.5 sm:p-3 md:p-3.5 rounded-full bg-black/60 hover:bg-black/80 border border-white/40 shadow-lg text-white transition-transform active:scale-95 flex items-center justify-center" title="카메라 초기화"><CameraResetIcon className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" /></button>
+                    <button onClick={handleResetCamera} disabled={recordingState === 'countdown'} className="px-2.5 py-1.5 sm:px-3 sm:py-2 md:px-3.5 md:py-2.5 rounded-full bg-black/60 hover:bg-black/80 border border-white/40 shadow-lg text-white transition-transform active:scale-95 flex items-center justify-center" title="카메라 초기화"><span className="text-[10px] sm:text-xs md:text-sm font-bold whitespace-nowrap">초기화</span></button>
                   </div>
                 </>
               )
