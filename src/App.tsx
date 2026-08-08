@@ -88,6 +88,7 @@ function App() {
   };
 
   const handleSaveReport = async () => {
+    triggerHaptic(60);
     if (!reportRef.current) return;
     try {
       const dataUrl = await htmlToImage.toPng(reportRef.current, {
@@ -231,6 +232,7 @@ function App() {
   };
 
   const handleDownloadScreenshot = () => {
+    triggerHaptic(60);
     if (!currentScreenshot) return;
     const link = document.createElement('a');
     
