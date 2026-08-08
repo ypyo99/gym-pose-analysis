@@ -30,6 +30,7 @@ export interface PoseTrackerRef {
   startRecording: () => void;
   stopRecording: () => Promise<{ blob: Blob | null, frames: string[] }>;
   resetCamera: () => void;
+  destroy: () => void;
 }
 
 const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGrid = false, showUI = true, facingMode = 'environment', imageSrc = null, videoSrc = null, isUploadMode = false, isRecordedPlayback = false, isCapturedPlayback = false, viewMode = '2d', onBackgroundClick }, ref) => {
@@ -418,6 +419,20 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
         setFeedbackColor('text-blue-400');
         setCameraResetKey(prev => prev + 1);
         setTimeout(() => setFeedback(''), 1500);
+      },
+      destroy: () => {
+        if (webcamRef.current && webcamRef.current.video && webcamRef.current.video.srcObject) {
+          const stream = webcamRef.current.video.srcObject as MediaStream;
+          if (stream && stream.getTracks) {
+            stream.getTracks().forEach(track => track.stop());
+          }
+        }
+        if (canvasRef.current) {
+          const ctx = canvasRef.current.getContext('2d');
+          if (ctx) ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+        }
+        lastImageRef.current = null;
+        lastResultsRef.current = null;
       }
     };
   });

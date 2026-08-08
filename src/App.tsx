@@ -3,7 +3,7 @@ import PoseTracker, { type PoseTrackerRef } from './components/PoseTracker';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import ReactMarkdown from 'react-markdown';
 import * as htmlToImage from 'html-to-image';
-import { Sparkles, Grid3X3, Camera, Settings, PersonStanding, Download, Dumbbell, Video, Square, X, Upload, RotateCcw } from 'lucide-react';
+import { Sparkles, Grid3X3, Camera, Settings, PersonStanding, Download, Dumbbell, Video, Square, X, Upload, RotateCcw, Power } from 'lucide-react';
 
 export type AppMode = 'photo_capture' | 'video_capture' | 'photo_upload';
 export type ExerciseMode = 'squat' | 'deadlift' | 'turtle' | 'asymmetry' | 'plank';
@@ -24,6 +24,7 @@ function App() {
   const [viewMode, setViewMode] = useState<'2d' | '3d'>('2d');
   const facingMode = 'environment';
   const [showUI, setShowUI] = useState<boolean>(true);
+  const [isAppTerminated, setIsAppTerminated] = useState<boolean>(false);
   
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [uploadedVideo, setUploadedVideo] = useState<string | null>(null);
@@ -153,6 +154,45 @@ function App() {
     if (trackerRef.current) {
       trackerRef.current.resetCamera();
     }
+  };
+
+  const handleAppExit = () => {
+    if (!confirm("프로그램을 종료하고 카메라 및 메모리를 완전히 해제하시겠습니까?")) return;
+    
+    triggerHaptic([80, 50, 80]);
+    
+    if (trackerRef.current) {
+      try {
+        trackerRef.current.destroy();
+      } catch (e) {}
+    }
+
+    if (recordedVideoUrl) {
+      try {
+        URL.revokeObjectURL(recordedVideoUrl);
+      } catch (e) {}
+    }
+    if (uploadedImage) {
+      setUploadedImage(null);
+    }
+    if (uploadedVideo) {
+      try {
+        URL.revokeObjectURL(uploadedVideo);
+      } catch (e) {}
+    }
+
+    try {
+      if ((window as any).__globalAudioCtx) {
+        (window as any).__globalAudioCtx.close().catch(console.warn);
+        (window as any).__globalAudioCtx = null;
+      }
+    } catch (e) {}
+
+    try {
+      window.close();
+    } catch (e) {}
+
+    setIsAppTerminated(true);
   };
 
   const getAudioContext = (): AudioContext | null => {
@@ -454,6 +494,28 @@ function App() {
       setIsAnalyzing(false);
     }
   };
+
+  if (isAppTerminated) {
+    return (
+      <div className="relative w-full h-[100dvh] h-screen bg-black flex flex-col items-center justify-center p-6 text-center font-sans">
+        <div className="bg-gray-900 border border-white/20 p-8 rounded-3xl max-w-md shadow-2xl flex flex-col items-center gap-4">
+          <div className="p-4 rounded-full bg-red-500/20 text-red-400 border border-red-500/30">
+            <Power className="w-12 h-12" />
+          </div>
+          <h1 className="text-2xl font-black text-white">프로그램이 종료되었습니다</h1>
+          <p className="text-gray-400 text-sm leading-relaxed">
+            카메라 장치 및 시스템 메모리가 완전히 해제되었습니다.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-2 px-6 py-3 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold shadow-lg hover:opacity-90 active:scale-95 transition-all"
+          >
+            프로그램 다시 시작
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full h-[100dvh] h-screen overflow-hidden bg-gray-900 font-sans touch-none">
@@ -857,6 +919,15 @@ function App() {
           </div>
         </div>
       )}
+
+      {/* Floating Program Exit Button (Bottom Right) */}
+      <button 
+        onClick={handleAppExit}
+        className={`fixed right-3 sm:right-5 bottom-3 sm:bottom-5 z-50 p-2.5 sm:p-3 md:p-3.5 rounded-full bg-red-600/90 hover:bg-red-700 text-white border border-white/40 shadow-[0_0_15px_rgba(239,68,68,0.6)] active:scale-95 transition-transform flex items-center justify-center pointer-events-auto ${showUI ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        title="프로그램 종료 (메모리 완전 해제)"
+      >
+        <Power className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
+      </button>
     </div>
   );
 }
