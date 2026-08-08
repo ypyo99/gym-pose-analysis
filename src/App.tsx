@@ -248,7 +248,7 @@ function App() {
     triggerHaptic(60);
     playFeedbackSound('capture');
     if (trackerRef.current) {
-      const shot = trackerRef.current.getCleanScreenshot() || trackerRef.current.getScreenshot();
+      const shot = trackerRef.current.getScreenshot() || trackerRef.current.getCleanScreenshot();
       if (shot) setCurrentScreenshot(shot);
     }
   };
