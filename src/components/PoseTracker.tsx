@@ -1013,11 +1013,11 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       onPointerDown={handlePointerDown}
       onPointerUp={handlePointerUp}
     >
-      {/* Feedback Overlay */}
+      {/* Feedback Overlay - Attached directly below Mode Selection Bar */}
       {feedback && (
-        <div className={`absolute top-36 md:top-40 left-0 w-full flex justify-center z-20 pointer-events-none px-4 transition-opacity duration-300 ${showUI ? 'opacity-100' : 'opacity-0'}`}>
-          <div className="bg-black/70 px-5 py-3 md:px-8 md:py-4 rounded-3xl backdrop-blur-md border border-white/20 shadow-[0_10px_40px_rgba(0,0,0,0.8)] max-w-full text-center">
-            <h1 className={`text-xl md:text-3xl lg:text-4xl font-extrabold tracking-wide drop-shadow-md whitespace-pre-wrap ${feedbackColor}`}>
+        <div className={`absolute top-28 sm:top-32 left-0 w-full flex justify-center z-30 pointer-events-none px-3 transition-all duration-300 ${showUI ? 'opacity-100' : 'opacity-0'}`}>
+          <div className="bg-black/75 px-4 py-2 sm:px-6 sm:py-2.5 rounded-full backdrop-blur-md border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.7)] max-w-[92%] sm:max-w-md text-center flex items-center justify-center">
+            <h1 className={`text-xs sm:text-sm md:text-base font-extrabold tracking-wide drop-shadow-md whitespace-pre-wrap ${feedbackColor}`}>
               {feedback}
             </h1>
           </div>
