@@ -654,9 +654,11 @@ function App() {
                   <button onClick={() => setShowGrid(!showGrid)} className={`shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="그리드"><Grid3X3 className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
                   <button onClick={() => setViewMode(v => v === '2d' ? '3d' : '2d')} className={`shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="골격 표시 (3D)"><PersonStanding className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
                 </div>
-                <div className="flex items-center justify-center gap-3 sm:gap-4">
-                  <button onClick={handleCapturePhoto} className="p-3 sm:p-3.5 md:p-4.5 rounded-full bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-transform active:scale-90 hover:bg-red-600 flex items-center justify-center" title="촬영"><Camera className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white fill-current" /></button>
-                  <button onClick={handleResetCamera} className="px-2.5 py-1.5 sm:px-3 sm:py-2 md:px-3.5 md:py-2.5 rounded-full bg-black/60 hover:bg-black/80 border border-white/40 shadow-lg text-white transition-transform active:scale-95 flex items-center justify-center" title="카메라 초기화"><span className="text-[10px] sm:text-xs md:text-sm font-bold whitespace-nowrap">초기화</span></button>
+                <div className="flex items-center justify-center w-full relative">
+                  <button onClick={handleCapturePhoto} className="relative z-10 p-3 sm:p-3.5 md:p-4.5 rounded-full bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-transform active:scale-90 hover:bg-red-600 flex items-center justify-center" title="촬영"><Camera className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white fill-current" /></button>
+                  <div className="absolute left-1/2 top-1/2 -translate-y-1/2 ml-10 sm:ml-12 md:ml-16">
+                    <button onClick={handleResetCamera} className="px-2.5 py-1.5 sm:px-3 sm:py-2 md:px-3.5 md:py-2.5 rounded-full bg-black/60 hover:bg-black/80 border border-white/40 shadow-lg text-white transition-transform active:scale-95 flex items-center justify-center" title="카메라 초기화"><span className="text-[10px] sm:text-xs md:text-sm font-bold whitespace-nowrap">초기화</span></button>
+                  </div>
                 </div>
               </>
             ) : (
@@ -691,9 +693,11 @@ function App() {
                     <button onClick={() => setShowGrid(!showGrid)} className={`shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="그리드"><Grid3X3 className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
                     <button onClick={() => setViewMode(v => v === '2d' ? '3d' : '2d')} className={`shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="골격 표시 (3D)"><PersonStanding className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
                   </div>
-                  <div className="flex items-center justify-center gap-3 sm:gap-4">
-                    <button onClick={startRecordingFlow} disabled={recordingState === 'countdown'} className={`p-3 sm:p-3.5 md:p-4.5 rounded-full ${recordingState === 'countdown' ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600'} shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-transform active:scale-90 flex items-center justify-center`} title="녹화"><Video className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white fill-current" /></button>
-                    <button onClick={handleResetCamera} disabled={recordingState === 'countdown'} className="px-2.5 py-1.5 sm:px-3 sm:py-2 md:px-3.5 md:py-2.5 rounded-full bg-black/60 hover:bg-black/80 border border-white/40 shadow-lg text-white transition-transform active:scale-95 flex items-center justify-center" title="카메라 초기화"><span className="text-[10px] sm:text-xs md:text-sm font-bold whitespace-nowrap">초기화</span></button>
+                  <div className="flex items-center justify-center w-full relative">
+                    <button onClick={startRecordingFlow} disabled={recordingState === 'countdown'} className={`relative z-10 p-3 sm:p-3.5 md:p-4.5 rounded-full ${recordingState === 'countdown' ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600'} shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-transform active:scale-90 flex items-center justify-center`} title="녹화"><Video className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white fill-current" /></button>
+                    <div className="absolute left-1/2 top-1/2 -translate-y-1/2 ml-10 sm:ml-12 md:ml-16">
+                      <button onClick={handleResetCamera} disabled={recordingState === 'countdown'} className="px-2.5 py-1.5 sm:px-3 sm:py-2 md:px-3.5 md:py-2.5 rounded-full bg-black/60 hover:bg-black/80 border border-white/40 shadow-lg text-white transition-transform active:scale-95 flex items-center justify-center" title="카메라 초기화"><span className="text-[10px] sm:text-xs md:text-sm font-bold whitespace-nowrap">초기화</span></button>
+                    </div>
                   </div>
                 </>
               )
