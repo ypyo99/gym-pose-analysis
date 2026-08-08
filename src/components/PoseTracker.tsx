@@ -528,11 +528,15 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       const isTurtleMode = mode === 'turtle';
       const isRightFacing = isTurtleMode ? ((results.poseLandmarks[8]?.visibility || 0) >= (results.poseLandmarks[7]?.visibility || 0)) : true;
 
-      // Create a copy for drawing, hiding facial landmarks (0-10) for a cleaner UI
+      // Create a copy for drawing, hiding facial landmarks for a cleaner UI
       // and hiding fingers (17-22) and feet/toes (29-32)
       const landmarksToDraw = results.poseLandmarks.map((lm, index) => {
-        // Face except ears (0-6)
-        if (index >= 0 && index <= 6) {
+        // In Turtle Neck mode, hide ALL face & ear landmarks (0-10) for standard skeleton drawing
+        if (isTurtleMode && index >= 0 && index <= 10) {
+          return { ...lm, visibility: 0 };
+        }
+        // Face except ears (0-6) for non-turtle modes
+        if (!isTurtleMode && index >= 0 && index <= 6) {
           return { ...lm, visibility: 0 };
         }
         // Hands/fingers & feet/toes
