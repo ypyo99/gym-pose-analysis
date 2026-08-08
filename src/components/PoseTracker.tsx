@@ -941,10 +941,10 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           lastImageRef.current = video;
           try {
             if (procCanvas) {
-              const vw = video.videoWidth || 640;
-              const vh = video.videoHeight || 360;
-              const targetW = 640;
-              const targetH = Math.round((vh / vw) * 640);
+              const vw = video.videoWidth || 1280;
+              const vh = video.videoHeight || 720;
+              const targetW = 1280;
+              const targetH = Math.round((vh / vw) * 1280);
               if (procCanvas.width !== targetW || procCanvas.height !== targetH) {
                 procCanvas.width = targetW;
                 procCanvas.height = targetH;
@@ -995,10 +995,10 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
             lastImageRef.current = video;
             try {
               if (procCanvas) {
-                const vw = video.videoWidth || 960;
-                const vh = video.videoHeight || 540;
-                const targetW = 960;
-                const targetH = Math.round((vh / vw) * 960);
+                const vw = video.videoWidth || 1280;
+                const vh = video.videoHeight || 720;
+                const targetW = 1280;
+                const targetH = Math.round((vh / vw) * 1280);
                 if (procCanvas.width !== targetW || procCanvas.height !== targetH) {
                   procCanvas.width = targetW;
                   procCanvas.height = targetH;
@@ -1079,8 +1079,8 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           className={`absolute w-full h-full object-cover z-0 ${viewMode === '3d' ? 'opacity-0' : 'opacity-100'}`}
           videoConstraints={{
             facingMode: 'environment',
-            width: { ideal: 1920 },
-            height: { ideal: 1080 },
+            width: { ideal: 3840, min: 1920 },
+            height: { ideal: 2160, min: 1080 },
             frameRate: { ideal: 30, max: 30 },
             // @ts-ignore
             advanced: [{ zoom: 0.6 }]
