@@ -29,7 +29,7 @@ export interface PoseTrackerRef {
   stopRecording: () => Promise<{ blob: Blob | null, frames: string[] }>;
 }
 
-const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGrid = false, showUI = true, facingMode = 'user', imageSrc = null, videoSrc = null, isUploadMode = false, viewMode = '2d', onBackgroundClick }, ref) => {
+const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGrid = false, showUI = true, facingMode = 'environment', imageSrc = null, videoSrc = null, isUploadMode = false, viewMode = '2d', onBackgroundClick }, ref) => {
   const webcamRef = useRef<Webcam>(null);
   const uploadedVideoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);

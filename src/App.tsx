@@ -22,7 +22,7 @@ function App() {
   const [memberName, setMemberName] = useState<string>('');
   const [showGrid, setShowGrid] = useState<boolean>(false);
   const [viewMode, setViewMode] = useState<'2d' | '3d'>('2d');
-  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
   const [showUI, setShowUI] = useState<boolean>(true);
   
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
