@@ -658,9 +658,9 @@ function App() {
       {/* API Cost Tracker Badge */}
       <div className={`absolute top-[max(0.75rem,env(safe-area-inset-top))] left-1/2 -translate-x-1/2 z-40 pointer-events-none flex justify-center transition-opacity duration-300 ${showUI ? 'opacity-100' : 'opacity-0'}`}>
         <div className="bg-black/70 backdrop-blur-md px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border border-white/20 shadow-lg flex items-center gap-2">
-          <span className="text-[10px] sm:text-xs text-gray-300">건별 비용: <strong className="text-white font-mono">₩{lastRequestCost !== null ? (lastRequestCost < 1 ? lastRequestCost.toFixed(2) : lastRequestCost.toFixed(0)) : '0'}</strong></span>
+          <strong className="text-white font-mono text-[11px] sm:text-sm">{lastRequestCost !== null ? (lastRequestCost < 1 ? lastRequestCost.toFixed(2) : lastRequestCost.toFixed(0)) : '0'}</strong>
           <div className="w-[1px] h-3 bg-white/30"></div>
-          <span className="text-[10px] sm:text-xs text-gray-300">이달 누적: <strong className="text-white font-mono">₩{monthlyCost < 1 ? monthlyCost.toFixed(2) : monthlyCost.toFixed(0)}</strong></span>
+          <strong className="text-white font-mono text-[11px] sm:text-sm">{monthlyCost < 1 ? monthlyCost.toFixed(2) : monthlyCost.toFixed(0)}</strong>
         </div>
       </div>
 
