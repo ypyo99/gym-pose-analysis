@@ -18,6 +18,7 @@ interface PoseTrackerProps {
   videoSrc?: string | null;
   isUploadMode?: boolean;
   isRecordedPlayback?: boolean;
+  isCapturedPlayback?: boolean;
   viewMode?: '2d' | '3d';
   onBackgroundClick?: () => void;
 }
@@ -31,7 +32,7 @@ export interface PoseTrackerRef {
   resetCamera: () => void;
 }
 
-const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGrid = false, showUI = true, facingMode = 'environment', imageSrc = null, videoSrc = null, isUploadMode = false, isRecordedPlayback = false, viewMode = '2d', onBackgroundClick }, ref) => {
+const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGrid = false, showUI = true, facingMode = 'environment', imageSrc = null, videoSrc = null, isUploadMode = false, isRecordedPlayback = false, isCapturedPlayback = false, viewMode = '2d', onBackgroundClick }, ref) => {
   const webcamRef = useRef<Webcam>(null);
   const uploadedVideoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -871,7 +872,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
     }
     lastImageRef.current = null;
     lastResultsRef.current = null;
-  }, [imageSrc, videoSrc, isUploadMode, isRecordedPlayback, facingMode]);
+  }, [imageSrc, videoSrc, isUploadMode, isRecordedPlayback, isCapturedPlayback, facingMode]);
 
   useEffect(() => {
     let isComponentMounted = true;
@@ -914,7 +915,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
 
     // Autonomous Watchdog Monitor to automatically unfreeze hung camera pipelines
     const watchdogTimer = setInterval(() => {
-      if (!isComponentMounted || isUploadMode || imageSrc || videoSrc || isRecordedPlayback) return;
+      if (!isComponentMounted || isUploadMode || imageSrc || videoSrc || isRecordedPlayback || isCapturedPlayback) return;
       const now = Date.now();
       const timeSinceLastFrame = now - lastSuccessFrameTime;
 
@@ -952,7 +953,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    if (imageSrc) {
+    if (imageSrc && !isCapturedPlayback) {
       const img = new Image();
       img.onload = async () => {
         if (!isComponentMounted) return;
@@ -964,7 +965,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
         }
       };
       img.src = imageSrc;
-    } else if (videoSrc && !isRecordedPlayback) {
+    } else if (videoSrc && !isRecordedPlayback && !isCapturedPlayback) {
       const processVideoFrame = async () => {
         if (!isComponentMounted) return;
         animationFrameId = requestAnimationFrame(processVideoFrame);
@@ -1011,7 +1012,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
         }
       };
       processVideoFrame();
-    } else if (!isUploadMode && !isRecordedPlayback) {
+    } else if (!isUploadMode && !isRecordedPlayback && !isCapturedPlayback) {
       const processFrame = async () => {
         if (!isComponentMounted) return;
         
@@ -1081,7 +1082,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       } catch (e) {}
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [facingMode, imageSrc, videoSrc, isUploadMode, isRecordedPlayback, cameraResetKey]);
+  }, [facingMode, imageSrc, videoSrc, isUploadMode, isRecordedPlayback, isCapturedPlayback, cameraResetKey]);
 
   return (
     <div 
