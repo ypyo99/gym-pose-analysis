@@ -16,6 +16,7 @@
     "@mediapipe/pose": "^0.5.1675469404",
     "@react-three/drei": "^10.7.8",
     "@react-three/fiber": "^9.7.0",
+    "@supabase/supabase-js": "^2.112.2",
     "@types/three": "^0.185.4",
     "html-to-image": "^1.11.13",
     "lucide-react": "^1.28.0",

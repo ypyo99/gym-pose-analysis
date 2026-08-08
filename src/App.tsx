@@ -4,8 +4,25 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import ReactMarkdown from 'react-markdown';
 import * as htmlToImage from 'html-to-image';
 import { Sparkles, Grid3X3, Camera, Settings, PersonStanding, Download, Dumbbell, Video, Square, X, Upload, Power } from 'lucide-react';
+import { supabase, isSupabaseConfigured } from './lib/supabase';
 
+const EXCHANGE_RATE_KRW = 1350;
+const PRICING = {
+  'gemini-1.5-flash': { input: 0.075, output: 0.30 },
+  'gemini-1.5-pro': { input: 3.50, output: 10.50 }
+};
 
+const calculateCostKRW = (model: string, inputTokens: number, outputTokens: number) => {
+  const modelKey = model.toLowerCase().includes('pro') ? 'gemini-1.5-pro' : 'gemini-1.5-flash';
+  const rates = PRICING[modelKey as keyof typeof PRICING];
+  const costUSD = (inputTokens / 1000000) * rates.input + (outputTokens / 1000000) * rates.output;
+  return costUSD * EXCHANGE_RATE_KRW;
+};
+
+const getCostStorageKey = () => {
+  const now = new Date();
+  return `ai_cost_${now.getFullYear()}_${String(now.getMonth() + 1).padStart(2, '0')}`;
+};
 
 export type AppMode = 'photo_capture' | 'video_capture' | 'photo_upload';
 export type ExerciseMode = 'squat' | 'deadlift' | 'turtle' | 'asymmetry' | 'plank';
@@ -45,10 +62,43 @@ function App() {
   const trackerRef = useRef<PoseTrackerRef>(null);
   const reportRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [monthlyCost, setMonthlyCost] = useState<number>(0);
+  const [lastRequestCost, setLastRequestCost] = useState<number | null>(null);
 
   useEffect(() => {
     const savedKey = localStorage.getItem('gemini_api_key');
     if (savedKey) setApiKeyInput(savedKey);
+
+    const loadInitialCost = async () => {
+      const monthKey = getCostStorageKey().replace('ai_cost_', ''); // e.g., '2026_08' -> '2026-08'
+      const monthId = monthKey.replace('_', '-');
+      
+      let cost = 0;
+      const savedMonthlyCost = localStorage.getItem(getCostStorageKey());
+      if (savedMonthlyCost) cost = parseFloat(savedMonthlyCost);
+
+      if (isSupabaseConfigured()) {
+        try {
+          const { data, error } = await supabase
+            .from('monthly_costs')
+            .select('total_cost')
+            .eq('month', monthId)
+            .single();
+          if (error && error.code !== 'PGRST116') { // PGRST116 is the code for 'No rows found'
+            console.error('Supabase query error:', error);
+          }
+            
+          if (data) {
+            cost = data.total_cost;
+            localStorage.setItem(getCostStorageKey(), cost.toString());
+          }
+        } catch (e) {
+          console.error('Failed to load cost from Supabase:', e);
+        }
+      }
+      setMonthlyCost(cost);
+    };
+    loadInitialCost();
 
     const savedAppMode = localStorage.getItem('appMode') as AppMode;
     if (savedAppMode && ['photo_capture', 'video_capture', 'photo_upload'].includes(savedAppMode)) {
@@ -472,6 +522,29 @@ function App() {
       const result = await model.generateContent([prompt, ...imageParts]);
       const response = await result.response;
       
+      const usage = response.usageMetadata;
+      if (usage) {
+        const actualCost = calculateCostKRW(targetModel, usage.promptTokenCount || 0, usage.candidatesTokenCount || 0);
+        setLastRequestCost(actualCost);
+        
+        setMonthlyCost(prev => {
+          const next = prev + actualCost;
+          localStorage.setItem(getCostStorageKey(), next.toString());
+          
+          if (isSupabaseConfigured()) {
+            const monthId = getCostStorageKey().replace('ai_cost_', '').replace('_', '-');
+            supabase
+              .from('monthly_costs')
+              .upsert({ month: monthId, total_cost: next })
+              .then(({ error }) => {
+                if (error) console.error('Failed to update Supabase cost:', error);
+              });
+          }
+          
+          return next;
+        });
+      }
+      
       const rawText = response.text() || '';
       let cleanedText = rawText
         .normalize('NFC')
@@ -561,6 +634,15 @@ function App() {
           </div>
         </div>
       )}
+
+      {/* API Cost Tracker Badge */}
+      <div className={`absolute top-[max(0.75rem,env(safe-area-inset-top))] left-1/2 -translate-x-1/2 z-40 pointer-events-none flex justify-center transition-opacity duration-300 ${showUI ? 'opacity-100' : 'opacity-0'}`}>
+        <div className="bg-black/70 backdrop-blur-md px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border border-white/20 shadow-lg flex items-center gap-2">
+          <span className="text-[10px] sm:text-xs text-gray-300">건별 예상: <strong className="text-white font-mono">₩{lastRequestCost !== null ? (lastRequestCost < 1 ? lastRequestCost.toFixed(2) : lastRequestCost.toFixed(0)) : '0'}</strong></span>
+          <div className="w-[1px] h-3 bg-white/30"></div>
+          <span className="text-[10px] sm:text-xs text-gray-300">이달 누적: <strong className="text-white font-mono">₩{monthlyCost < 1 ? monthlyCost.toFixed(2) : monthlyCost.toFixed(0)}</strong></span>
+        </div>
+      </div>
 
       {/* Top Bar */}
       <div className={`absolute top-0 left-0 w-full p-3 pt-[max(0.75rem,env(safe-area-inset-top))] md:p-4 z-30 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent transition-opacity duration-300 ${showUI ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
