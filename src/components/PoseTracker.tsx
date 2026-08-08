@@ -46,6 +46,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
   const capturedFramesRef = useRef<string[]>([]);
   const recordingCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const recordingAnimFrameRef = useRef<number | null>(null);
+  const processingCanvasRef = useRef<HTMLCanvasElement | null>(null);
   
   const touchStartZoom = useRef<number>(1);
   const initialPinchDistance = useRef<number | null>(null);
@@ -833,6 +834,15 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
     let animationFrameId: number;
     let isProcessing = false;
     let lastProcessingStartTime = 0;
+    let lastSendTime = 0;
+
+    if (!processingCanvasRef.current) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 640;
+      canvas.height = 360;
+      processingCanvasRef.current = canvas;
+    }
+    const procCanvas = processingCanvasRef.current;
 
     const pose = new Pose({
       locateFile: (file: string) => {
@@ -882,18 +892,40 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
         if (!isComponentMounted) return;
         animationFrameId = requestAnimationFrame(processVideoFrame);
 
-        // Stuck processing lock timeout recovery (1.5s)
-        if (isProcessing && Date.now() - lastProcessingStartTime > 1500) {
+        const now = Date.now();
+        // Stuck processing lock timeout recovery (800ms)
+        if (isProcessing && now - lastProcessingStartTime > 800) {
           isProcessing = false;
         }
 
         const video = uploadedVideoRef.current;
         if (video && video.readyState >= 2 && !isProcessing) {
+          if (now - lastSendTime < 33) return; // ~30 FPS limit
+
           isProcessing = true;
-          lastProcessingStartTime = Date.now();
+          lastProcessingStartTime = now;
+          lastSendTime = now;
           lastImageRef.current = video;
           try {
-            await pose.send({ image: video });
+            if (procCanvas) {
+              const vw = video.videoWidth || 640;
+              const vh = video.videoHeight || 360;
+              const targetW = 640;
+              const targetH = Math.round((vh / vw) * 640);
+              if (procCanvas.width !== targetW || procCanvas.height !== targetH) {
+                procCanvas.width = targetW;
+                procCanvas.height = targetH;
+              }
+              const pctx = procCanvas.getContext('2d');
+              if (pctx) {
+                pctx.drawImage(video, 0, 0, targetW, targetH);
+                await pose.send({ image: procCanvas });
+              } else {
+                await pose.send({ image: video });
+              }
+            } else {
+              await pose.send({ image: video });
+            }
           } catch (error) {
             console.warn("Pose send error for uploaded video:", error);
           } finally {
@@ -908,8 +940,9 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
         
         animationFrameId = requestAnimationFrame(processFrame);
 
-        // Stuck processing lock timeout recovery (1.5s)
-        if (isProcessing && Date.now() - lastProcessingStartTime > 1500) {
+        const now = Date.now();
+        // Stuck processing lock timeout recovery (800ms)
+        if (isProcessing && now - lastProcessingStartTime > 800) {
           isProcessing = false;
         }
 
@@ -919,12 +952,34 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
             video.play().catch(() => {});
           }
 
+          // Throttle FPS to ~30 FPS to prevent WebGL GPU stalls during rapid camera movement
+          if (now - lastSendTime < 33) return;
+
           if (video.readyState >= 2 && !isProcessing) {
             isProcessing = true;
-            lastProcessingStartTime = Date.now();
+            lastProcessingStartTime = now;
+            lastSendTime = now;
             lastImageRef.current = video;
             try {
-              await pose.send({ image: video });
+              if (procCanvas) {
+                const vw = video.videoWidth || 640;
+                const vh = video.videoHeight || 360;
+                const targetW = 640;
+                const targetH = Math.round((vh / vw) * 640);
+                if (procCanvas.width !== targetW || procCanvas.height !== targetH) {
+                  procCanvas.width = targetW;
+                  procCanvas.height = targetH;
+                }
+                const pctx = procCanvas.getContext('2d');
+                if (pctx) {
+                  pctx.drawImage(video, 0, 0, targetW, targetH);
+                  await pose.send({ image: procCanvas });
+                } else {
+                  await pose.send({ image: video });
+                }
+              } else {
+                await pose.send({ image: video });
+              }
             } catch (error) {
               console.warn("Pose send error:", error);
             } finally {
