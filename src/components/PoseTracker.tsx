@@ -260,6 +260,13 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
                 recCtx.fillStyle = '#111827';
                 recCtx.fillRect(0, 0, outW, outH);
 
+                // Draw live video camera frame first
+                if (lastImageRef.current) {
+                  try {
+                    recCtx.drawImage(lastImageRef.current as any, srcX, srcY, srcW, srcH, 0, 0, outW, outH);
+                  } catch (e) {}
+                }
+
                 if (viewMode === '2d') {
                   if (canvasRef.current) {
                     recCtx.drawImage(canvasRef.current, srcX, srcY, srcW, srcH, 0, 0, outW, outH);
