@@ -58,21 +58,35 @@ function App() {
         ctx.resume().catch(console.warn);
       }
     };
+
+    const handleGlobalPointerDown = (e: PointerEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+      const clickable = target.closest('button, a, [role="button"], input[type="button"], input[type="submit"], .cursor-pointer');
+      if (clickable) {
+        triggerHaptic(40);
+      }
+    };
+
     window.addEventListener('touchstart', unlockAudio, { passive: true });
     window.addEventListener('click', unlockAudio, { passive: true });
+    window.addEventListener('pointerdown', handleGlobalPointerDown, { passive: true });
     return () => {
       window.removeEventListener('touchstart', unlockAudio);
       window.removeEventListener('click', unlockAudio);
+      window.removeEventListener('pointerdown', handleGlobalPointerDown);
     };
   }, []);
 
   const handleModeSwitch = (newMode: AppMode) => {
+    triggerHaptic(40);
     setAppMode(newMode);
     localStorage.setItem('appMode', newMode);
     handleExit();
   };
 
   const handleExit = () => {
+    triggerHaptic(40);
     setCurrentScreenshot(null);
     setRecordedVideoUrl(null);
     setRecordedFrames([]);
@@ -83,6 +97,7 @@ function App() {
   };
 
   const handleSaveSettings = () => {
+    triggerHaptic(50);
     localStorage.setItem('gemini_api_key', apiKeyInput);
     setShowSettings(false);
   };
