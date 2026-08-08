@@ -856,7 +856,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       smoothLandmarks: true,
       minDetectionConfidence: 0.5,
       minTrackingConfidence: 0.5,
-      selfieMode: !imageSrc && !videoSrc && facingMode === 'user', // Mirror only for user camera, not photos/videos
+      selfieMode: false, // Keep false to avoid WebGL double-mirroring shader conflicts on front camera
     });
 
     pose.onResults((results: Results) => {
@@ -1079,8 +1079,8 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           className={`absolute w-full h-full object-cover z-0 ${viewMode === '3d' ? 'opacity-0' : 'opacity-100'}`}
           videoConstraints={{
             facingMode: facingMode,
-            width: { ideal: 1920 },
-            height: { ideal: 1080 },
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
             // @ts-ignore
             advanced: [{ zoom: 0.6 }]
           }}
