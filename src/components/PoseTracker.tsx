@@ -908,10 +908,10 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
     });
 
     pose.setOptions({
-      modelComplexity: 0, // Lite mode (3x faster, optimized for mobile browsers to prevent overheating & camera stalls)
+      modelComplexity: 1, // Full model for improved accuracy (changed from 0)
       smoothLandmarks: true,
-      minDetectionConfidence: 0.5,
-      minTrackingConfidence: 0.5,
+      minDetectionConfidence: 0.7, // Increased for more accurate detection
+      minTrackingConfidence: 0.7, // Increased for more accurate tracking
       selfieMode: false, // Keep false to avoid WebGL double-mirroring shader conflicts on front camera
     });
 
@@ -1134,12 +1134,12 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           mirrored={facingMode === 'user'}
           className={`absolute w-full h-full object-cover z-0 ${viewMode === '3d' ? 'opacity-0' : 'opacity-100'}`}
           videoConstraints={{
-            facingMode: 'environment',
+            facingMode: facingMode,
             width: { ideal: 3840, min: 1920 },
             height: { ideal: 2160, min: 1080 },
             frameRate: { ideal: 30, max: 30 },
             // @ts-ignore
-            advanced: [{ zoom: 0.6 }]
+            advanced: facingMode === 'environment' ? [{ zoom: 0.6 }] : []
           }}
           onUserMedia={(stream) => {
             const track = stream.getVideoTracks()[0];
