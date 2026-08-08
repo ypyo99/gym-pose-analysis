@@ -647,7 +647,15 @@ function App() {
         {appMode === 'photo_upload' && (
           <div className="flex items-center justify-center gap-4 md:gap-6 w-full">
             {!uploadedImage && !uploadedVideo ? (
-              <button onClick={() => fileInputRef.current?.click()} className="px-5 py-3 sm:px-6 sm:py-3.5 md:px-7 md:py-4 rounded-full bg-blue-600 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center gap-2 sm:gap-2.5 text-white font-bold text-sm sm:text-base md:text-lg hover:bg-blue-700"><Upload className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" /> 앨범에서 사진/동영상 선택</button>
+              <button 
+                onClick={() => {
+                  triggerHaptic(50);
+                  fileInputRef.current?.click();
+                }} 
+                className="px-5 py-3 sm:px-6 sm:py-3.5 md:px-7 md:py-4 rounded-full bg-blue-600 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center gap-2 sm:gap-2.5 text-white font-bold text-sm sm:text-base md:text-lg hover:bg-blue-700"
+              >
+                <Upload className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" /> 앨범에서 사진/동영상 선택
+              </button>
             ) : (
               <div className="fixed right-2 sm:right-4 top-1/2 -translate-y-1/2 flex flex-col items-center gap-2 sm:gap-3 md:gap-4 z-50">
                 <button onClick={() => setShowPoseSelector(p => !p)} className={`shrink-0 px-3 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center font-bold ${showPoseSelector ? 'bg-purple-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="운동 종목 선택">
