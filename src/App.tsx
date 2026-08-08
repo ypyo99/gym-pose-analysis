@@ -3,7 +3,7 @@ import PoseTracker, { type PoseTrackerRef } from './components/PoseTracker';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import ReactMarkdown from 'react-markdown';
 import * as htmlToImage from 'html-to-image';
-import { Sparkles, Grid3X3, Camera, Settings, PersonStanding, Download, Dumbbell, Video, Square, X, Upload, RefreshCw, Power } from 'lucide-react';
+import { Sparkles, Grid3X3, Camera, Settings, PersonStanding, Download, Dumbbell, Video, Square, X, Upload, SwitchCamera, Power } from 'lucide-react';
 
 export type AppMode = 'photo_capture' | 'video_capture' | 'photo_upload';
 export type ExerciseMode = 'squat' | 'deadlift' | 'turtle' | 'asymmetry' | 'plank';
@@ -652,12 +652,7 @@ function App() {
                 </div>
                 <div className="flex items-center justify-center gap-3 sm:gap-4">
                   <button onClick={handleCapturePhoto} className="p-3 sm:p-3.5 md:p-4.5 rounded-full bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-transform active:scale-90 hover:bg-red-600 flex items-center justify-center" title="촬영"><Camera className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white fill-current" /></button>
-                  <button onClick={handleResetCamera} className="p-2.5 sm:p-3 md:p-3.5 rounded-full bg-black/60 hover:bg-black/80 border border-white/40 shadow-lg text-white transition-transform active:scale-95 flex items-center justify-center" title="카메라 리셋">
-                    <div className="relative flex items-center justify-center">
-                      <Camera className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
-                      <RefreshCw className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-3.5 md:h-3.5 text-cyan-400 absolute -top-1 -right-1.5 bg-black/90 rounded-full p-0.5 border border-cyan-400/80" />
-                    </div>
-                  </button>
+                  <button onClick={handleResetCamera} className="p-2.5 sm:p-3 md:p-3.5 rounded-full bg-black/60 hover:bg-black/80 border border-white/40 shadow-lg text-white transition-transform active:scale-95 flex items-center justify-center" title="카메라 리셋"><SwitchCamera className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" /></button>
                 </div>
               </>
             ) : (
@@ -694,12 +689,7 @@ function App() {
                   </div>
                   <div className="flex items-center justify-center gap-3 sm:gap-4">
                     <button onClick={startRecordingFlow} disabled={recordingState === 'countdown'} className={`p-3 sm:p-3.5 md:p-4.5 rounded-full ${recordingState === 'countdown' ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600'} shadow-[0_0_20px_rgba(239,68,68,0.5)] transition-transform active:scale-90 flex items-center justify-center`} title="녹화"><Video className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white fill-current" /></button>
-                    <button onClick={handleResetCamera} disabled={recordingState === 'countdown'} className="p-2.5 sm:p-3 md:p-3.5 rounded-full bg-black/60 hover:bg-black/80 border border-white/40 shadow-lg text-white transition-transform active:scale-95 flex items-center justify-center" title="카메라 리셋">
-                      <div className="relative flex items-center justify-center">
-                        <Camera className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
-                        <RefreshCw className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-3.5 md:h-3.5 text-cyan-400 absolute -top-1 -right-1.5 bg-black/90 rounded-full p-0.5 border border-cyan-400/80" />
-                      </div>
-                    </button>
+                    <button onClick={handleResetCamera} disabled={recordingState === 'countdown'} className="p-2.5 sm:p-3 md:p-3.5 rounded-full bg-black/60 hover:bg-black/80 border border-white/40 shadow-lg text-white transition-transform active:scale-95 flex items-center justify-center" title="카메라 리셋"><SwitchCamera className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" /></button>
                   </div>
                 </>
               )
