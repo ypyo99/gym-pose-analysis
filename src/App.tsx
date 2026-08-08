@@ -74,8 +74,6 @@ function App() {
       const monthId = monthKey.replace('_', '-');
 
       let cost = 0;
-      const savedMonthlyCost = localStorage.getItem(getCostStorageKey());
-      if (savedMonthlyCost) cost = parseFloat(savedMonthlyCost);
 
       if (isSupabaseConfigured()) {
         try {
@@ -84,18 +82,25 @@ function App() {
             .select('total_cost')
             .eq('month', monthId)
             .single();
+            
           if (error && error.code !== 'PGRST116') { // PGRST116 is the code for 'No rows found'
             console.error('Supabase query error:', error);
           }
 
-          if (data) {
+          if (data && typeof data.total_cost === 'number') {
             cost = data.total_cost;
-            localStorage.setItem(getCostStorageKey(), cost.toString());
+          } else {
+            cost = 0;
           }
+          localStorage.setItem(getCostStorageKey(), cost.toString());
         } catch (e) {
           console.error('Failed to load cost from Supabase:', e);
         }
+      } else {
+        const savedMonthlyCost = localStorage.getItem(getCostStorageKey());
+        if (savedMonthlyCost) cost = parseFloat(savedMonthlyCost);
       }
+      
       setMonthlyCost(cost);
     };
     loadInitialCost();
