@@ -461,6 +461,7 @@ function App() {
           imageSrc={appMode === 'photo_upload' ? uploadedImage : (appMode === 'photo_capture' && currentScreenshot ? currentScreenshot : null)} 
           videoSrc={appMode === 'photo_upload' ? uploadedVideo : (appMode === 'video_capture' && recordedVideoUrl ? recordedVideoUrl : null)}
           isUploadMode={appMode === 'photo_upload' || (appMode === 'video_capture' && !!recordedVideoUrl) || (appMode === 'photo_capture' && !!currentScreenshot)}
+          isRecordedPlayback={appMode === 'video_capture' && !!recordedVideoUrl}
           viewMode={viewMode}
           onBackgroundClick={() => {
             setShowPoseSelector(false);
