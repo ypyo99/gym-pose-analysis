@@ -44,7 +44,7 @@ function App() {
   const facingMode = 'environment';
   const [showUI, setShowUI] = useState<boolean>(true);
   const [isAppTerminated, setIsAppTerminated] = useState<boolean>(false);
-  
+
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [uploadedVideo, setUploadedVideo] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
@@ -52,7 +52,7 @@ function App() {
   const [currentScreenshot, setCurrentScreenshot] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [apiKeyInput, setApiKeyInput] = useState<string>('');
-  
+
   const [recordingState, setRecordingState] = useState<'idle' | 'countdown' | 'recording'>('idle');
 
   const [recordedFrames, setRecordedFrames] = useState<string[]>([]);
@@ -72,7 +72,7 @@ function App() {
     const loadInitialCost = async () => {
       const monthKey = getCostStorageKey().replace('ai_cost_', ''); // e.g., '2026_08' -> '2026-08'
       const monthId = monthKey.replace('_', '-');
-      
+
       let cost = 0;
       const savedMonthlyCost = localStorage.getItem(getCostStorageKey());
       if (savedMonthlyCost) cost = parseFloat(savedMonthlyCost);
@@ -87,7 +87,7 @@ function App() {
           if (error && error.code !== 'PGRST116') { // PGRST116 is the code for 'No rows found'
             console.error('Supabase query error:', error);
           }
-            
+
           if (data) {
             cost = data.total_cost;
             localStorage.setItem(getCostStorageKey(), cost.toString());
@@ -165,12 +165,12 @@ function App() {
       });
       const link = document.createElement('a');
       const now = new Date();
-      const dateStr = now.getFullYear().toString().slice(-2) + 
-                      String(now.getMonth() + 1).padStart(2, '0') + 
-                      String(now.getDate()).padStart(2, '0');
-      const timeStr = String(now.getHours()).padStart(2, '0') + 
-                      String(now.getMinutes()).padStart(2, '0') + 
-                      String(now.getSeconds()).padStart(2, '0');
+      const dateStr = now.getFullYear().toString().slice(-2) +
+        String(now.getMonth() + 1).padStart(2, '0') +
+        String(now.getDate()).padStart(2, '0');
+      const timeStr = String(now.getHours()).padStart(2, '0') +
+        String(now.getMinutes()).padStart(2, '0') +
+        String(now.getSeconds()).padStart(2, '0');
       const formatMemberName = (raw: string) => {
         const trimmed = (raw || '').trim();
         if (!trimmed || trimmed === '회원') return '회원님';
@@ -210,19 +210,19 @@ function App() {
 
   const handleAppExit = () => {
     if (!confirm("프로그램을 종료하고 카메라 및 메모리를 완전히 해제하시겠습니까?")) return;
-    
+
     triggerHaptic([80, 50, 80]);
-    
+
     if (trackerRef.current) {
       try {
         trackerRef.current.destroy();
-      } catch (e) {}
+      } catch (e) { }
     }
 
     if (recordedVideoUrl) {
       try {
         URL.revokeObjectURL(recordedVideoUrl);
-      } catch (e) {}
+      } catch (e) { }
     }
     if (uploadedImage) {
       setUploadedImage(null);
@@ -230,7 +230,7 @@ function App() {
     if (uploadedVideo) {
       try {
         URL.revokeObjectURL(uploadedVideo);
-      } catch (e) {}
+      } catch (e) { }
     }
 
     try {
@@ -238,11 +238,11 @@ function App() {
         (window as any).__globalAudioCtx.close().catch(console.warn);
         (window as any).__globalAudioCtx = null;
       }
-    } catch (e) {}
+    } catch (e) { }
 
     try {
       window.close();
-    } catch (e) {}
+    } catch (e) { }
 
     setIsAppTerminated(true);
   };
@@ -270,7 +270,7 @@ function App() {
     try {
       const ctx = getAudioContext();
       if (!ctx) return;
-      
+
       if (ctx.state === 'suspended') {
         ctx.resume().catch(console.warn);
       }
@@ -349,14 +349,14 @@ function App() {
     triggerHaptic(60);
     if (!currentScreenshot) return;
     const link = document.createElement('a');
-    
+
     const now = new Date();
-    const dateStr = now.getFullYear().toString().slice(-2) + 
-                    String(now.getMonth() + 1).padStart(2, '0') + 
-                    String(now.getDate()).padStart(2, '0');
-    const timeStr = String(now.getHours()).padStart(2, '0') + 
-                    String(now.getMinutes()).padStart(2, '0') + 
-                    String(now.getSeconds()).padStart(2, '0');
+    const dateStr = now.getFullYear().toString().slice(-2) +
+      String(now.getMonth() + 1).padStart(2, '0') +
+      String(now.getDate()).padStart(2, '0');
+    const timeStr = String(now.getHours()).padStart(2, '0') +
+      String(now.getMinutes()).padStart(2, '0') +
+      String(now.getSeconds()).padStart(2, '0');
     const formatMemberName = (raw: string) => {
       const trimmed = (raw || '').trim();
       if (!trimmed || trimmed === '회원') return '회원님';
@@ -366,7 +366,7 @@ function App() {
     };
     const name = formatMemberName(memberName);
     const currentModeLabel = MODE_CONFIGS.find(m => m.id === mode)?.label || mode;
-    
+
     const filename = `${name}-${currentModeLabel}-캡처-${dateStr}-${timeStr}.jpg`;
     link.download = filename;
     link.href = currentScreenshot;
@@ -381,7 +381,7 @@ function App() {
     setRecordedVideoUrl(null);
     setCurrentScreenshot(null);
     setShowPoseSelector(false);
-    
+
     setRecordingState('recording');
     if (trackerRef.current) {
       trackerRef.current.startRecording();
@@ -427,7 +427,7 @@ function App() {
 
   const handleAnalyze = async () => {
     if (!trackerRef.current) return;
-    
+
     let framesToAnalyze: string[] = [];
     if (appMode === 'video_capture' && recordedFrames.length > 0) {
       framesToAnalyze = [...recordedFrames];
@@ -449,7 +449,7 @@ function App() {
     const savedKey = localStorage.getItem('gemini_api_key');
     const envKey = import.meta.env.VITE_GEMINI_API_KEY;
     const apiKey = savedKey || (envKey !== 'your_gemini_api_key_here' ? envKey : null);
-    
+
     if (!apiKey) {
       alert("좌측 상단 로고를 클릭하여 Gemini API Key를 설정해주세요.");
       return;
@@ -463,12 +463,12 @@ function App() {
       try {
         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
         const data = await res.json();
-        
+
         if (data && data.models) {
           const availableModels = data.models.map((m: any) => m.name.replace('models/', ''));
           const preferredModels = ["gemini-flash-latest", "gemini-3.5-flash", "gemini-3.1-flash", "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-pro-latest"];
           const found = preferredModels.find(m => availableModels.includes(m));
-          
+
           if (found) targetModel = found;
           else {
             const fallback = availableModels.find((m: string) => m.startsWith("gemini") && m.includes("flash") && !m.includes("tts"));
@@ -482,8 +482,8 @@ function App() {
       const genAI = new GoogleGenerativeAI(apiKey);
       const currentModeLabel = MODE_CONFIGS.find(m => m.id === mode)?.label || mode;
       const isVideo = framesToAnalyze.length > 1;
-      
-      const prompt = isVideo 
+
+      const prompt = isVideo
         ? `전문 헬스 트레이너로서 첨부된 연속된 ${framesToAnalyze.length}장의 사진(동영상의 주요 장면) 속 회원의 '${currentModeLabel}' 자세를 분석해 주세요. 
 화면에 표시된 관절의 각도와 위치 가이드라인, 그리고 시간의 흐름에 따른 자세 변화를 종합적으로 참고하여 다음 내용을 포함해 주세요:
 ### 1. 현재 자세에서 잘된 점
@@ -521,16 +521,16 @@ function App() {
       const model = genAI.getGenerativeModel({ model: targetModel });
       const result = await model.generateContent([prompt, ...imageParts]);
       const response = await result.response;
-      
+
       const usage = response.usageMetadata;
       if (usage) {
         const actualCost = calculateCostKRW(targetModel, usage.promptTokenCount || 0, usage.candidatesTokenCount || 0);
         setLastRequestCost(actualCost);
-        
+
         setMonthlyCost(prev => {
           const next = prev + actualCost;
           localStorage.setItem(getCostStorageKey(), next.toString());
-          
+
           if (isSupabaseConfigured()) {
             const monthId = getCostStorageKey().replace('ai_cost_', '').replace('_', '-');
             supabase
@@ -540,11 +540,11 @@ function App() {
                 if (error) console.error('Failed to update Supabase cost:', error);
               });
           }
-          
+
           return next;
         });
       }
-      
+
       const rawText = response.text() || '';
       let cleanedText = rawText
         .normalize('NFC')
@@ -598,13 +598,13 @@ function App() {
     <div className="relative w-full h-[100dvh] h-screen overflow-hidden bg-gray-900 font-sans touch-none">
       {/* Pose Tracker Component */}
       <div className="absolute inset-0 z-0">
-        <PoseTracker 
-          ref={trackerRef} 
-          mode={mode} 
-          showGrid={showGrid} 
+        <PoseTracker
+          ref={trackerRef}
+          mode={mode}
+          showGrid={showGrid}
           showUI={showUI}
-          facingMode={facingMode} 
-          imageSrc={appMode === 'photo_upload' ? uploadedImage : (appMode === 'photo_capture' && currentScreenshot ? currentScreenshot : null)} 
+          facingMode={facingMode}
+          imageSrc={appMode === 'photo_upload' ? uploadedImage : (appMode === 'photo_capture' && currentScreenshot ? currentScreenshot : null)}
           videoSrc={appMode === 'photo_upload' ? uploadedVideo : (appMode === 'video_capture' && recordedVideoUrl ? recordedVideoUrl : null)}
           isUploadMode={appMode === 'photo_upload' || (appMode === 'video_capture' && !!recordedVideoUrl) || (appMode === 'photo_capture' && !!currentScreenshot)}
           isRecordedPlayback={appMode === 'video_capture' && !!recordedVideoUrl}
@@ -617,12 +617,12 @@ function App() {
         />
       </div>
 
-      <input 
-        type="file" 
-        accept="image/*,video/*" 
-        ref={fileInputRef} 
-        onChange={handleImageUpload} 
-        className="hidden" 
+      <input
+        type="file"
+        accept="image/*,video/*"
+        ref={fileInputRef}
+        onChange={handleImageUpload}
+        className="hidden"
       />
 
       {/* Viewing / Playback Badge */}
@@ -638,7 +638,7 @@ function App() {
       {/* API Cost Tracker Badge */}
       <div className={`absolute top-[max(0.75rem,env(safe-area-inset-top))] left-1/2 -translate-x-1/2 z-40 pointer-events-none flex justify-center transition-opacity duration-300 ${showUI ? 'opacity-100' : 'opacity-0'}`}>
         <div className="bg-black/70 backdrop-blur-md px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border border-white/20 shadow-lg flex items-center gap-2">
-          <span className="text-[10px] sm:text-xs text-gray-300">건별 예상: <strong className="text-white font-mono">₩{lastRequestCost !== null ? (lastRequestCost < 1 ? lastRequestCost.toFixed(2) : lastRequestCost.toFixed(0)) : '0'}</strong></span>
+          <span className="text-[10px] sm:text-xs text-gray-300">건별 비용: <strong className="text-white font-mono">₩{lastRequestCost !== null ? (lastRequestCost < 1 ? lastRequestCost.toFixed(2) : lastRequestCost.toFixed(0)) : '0'}</strong></span>
           <div className="w-[1px] h-3 bg-white/30"></div>
           <span className="text-[10px] sm:text-xs text-gray-300">이달 누적: <strong className="text-white font-mono">₩{monthlyCost < 1 ? monthlyCost.toFixed(2) : monthlyCost.toFixed(0)}</strong></span>
         </div>
@@ -647,11 +647,11 @@ function App() {
       {/* Top Bar */}
       <div className={`absolute top-0 left-0 w-full p-3 pt-[max(0.75rem,env(safe-area-inset-top))] md:p-4 z-30 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent transition-opacity duration-300 ${showUI ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
         <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
-          <img 
-            src="/logo.jpg" 
-            alt="PT Shop Logo" 
+          <img
+            src="/logo.jpg"
+            alt="PT Shop Logo"
             onClick={() => setShowSettings(true)}
-            className="w-9 h-9 sm:w-12 sm:h-12 md:w-16 md:h-16 object-cover rounded-lg shadow-lg opacity-90 hover:opacity-100 transition-opacity cursor-pointer active:scale-95 shrink-0" 
+            className="w-9 h-9 sm:w-12 sm:h-12 md:w-16 md:h-16 object-cover rounded-lg shadow-lg opacity-90 hover:opacity-100 transition-opacity cursor-pointer active:scale-95 shrink-0"
           />
           <div className="h-9 sm:h-12 md:h-16 flex items-center gap-1.5 sm:gap-2 md:gap-3 bg-black/60 backdrop-blur-md px-2 sm:px-3 md:px-4 rounded-lg border border-white/10 shadow-lg shrink-0">
             <Dumbbell className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7 text-cyan-400 shrink-0" />
@@ -679,19 +679,19 @@ function App() {
       {/* Mode Selection Tabs */}
       <div className={`absolute top-14 sm:top-18 md:top-20 left-0 w-full z-40 flex justify-center px-2 sm:px-4 transition-opacity duration-300 ${showUI ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
         <div className="flex bg-black/60 backdrop-blur-md rounded-full p-1 border border-white/20 shadow-lg">
-          <button 
+          <button
             onClick={() => handleModeSwitch('photo_capture')}
             className={`px-2.5 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm md:text-base font-bold transition-colors whitespace-nowrap ${appMode === 'photo_capture' ? 'bg-white text-black' : 'text-gray-300 hover:text-white'}`}
           >
             사진 촬영
           </button>
-          <button 
+          <button
             onClick={() => handleModeSwitch('video_capture')}
             className={`px-2.5 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm md:text-base font-bold transition-colors whitespace-nowrap ${appMode === 'video_capture' ? 'bg-white text-black' : 'text-gray-300 hover:text-white'}`}
           >
             동영상 촬영
           </button>
-          <button 
+          <button
             onClick={() => handleModeSwitch('photo_upload')}
             className={`px-2.5 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm md:text-base font-bold transition-colors whitespace-nowrap ${appMode === 'photo_upload' ? 'bg-white text-black' : 'text-gray-300 hover:text-white'}`}
           >
@@ -708,11 +708,10 @@ function App() {
               <button
                 key={config.id}
                 onClick={() => { setMode(config.id); setShowPoseSelector(false); }}
-                className={`py-2 sm:py-3 md:py-4 px-2 md:px-6 rounded-2xl font-bold text-xs sm:text-sm md:text-lg transition-all transform active:scale-95 whitespace-nowrap ${
-                  mode === config.id
+                className={`py-2 sm:py-3 md:py-4 px-2 md:px-6 rounded-2xl font-bold text-xs sm:text-sm md:text-lg transition-all transform active:scale-95 whitespace-nowrap ${mode === config.id
                     ? `${config.color} text-white ${config.shadow}`
                     : 'bg-white/10 text-gray-300 hover:bg-white/20'
-                }`}
+                  }`}
               >
                 {config.label}
               </button>
@@ -723,7 +722,7 @@ function App() {
 
       {/* Bottom Controls */}
       <div className={`absolute bottom-0 left-0 w-full px-3 pt-3 pb-[max(1.75rem,env(safe-area-inset-bottom))] sm:pb-6 md:pb-8 z-40 bg-gradient-to-t from-black via-black/85 to-transparent flex flex-col items-center justify-end transition-opacity duration-300 ${showUI ? 'opacity-100' : 'opacity-0'}`}>
-        
+
         {/* Photo Capture Mode Controls */}
         {appMode === 'photo_capture' && (
           <div className="flex items-center justify-center gap-3 sm:gap-4 md:gap-6 w-full px-2 md:px-8">
@@ -790,24 +789,24 @@ function App() {
                 </button>
                 <button onClick={handleAnalyze} className="shrink-0 p-2.5 sm:p-3.5 md:p-5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center text-white hover:opacity-90"><Sparkles className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" /></button>
                 <button onClick={() => {
-                   const link = document.createElement('a');
-                   const now = new Date();
-                   const dateStr = now.getFullYear().toString().slice(-2) + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
-                   const timeStr = String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0') + String(now.getSeconds()).padStart(2, '0');
-                   const formatMemberName = (raw: string) => {
-                     const trimmed = (raw || '').trim();
-                     if (!trimmed || trimmed === '회원') return '회원님';
-                     if (trimmed.endsWith('회원님')) return trimmed;
-                     if (trimmed.endsWith('회원')) return `${trimmed}님`;
-                     return `${trimmed} 회원님`;
-                   };
-                   const name = formatMemberName(memberName);
-                   const currentModeLabel = MODE_CONFIGS.find(m => m.id === mode)?.label || mode;
-                   const filename = `${name}-${currentModeLabel}-영상-${dateStr}-${timeStr}.webm`;
-                   link.download = filename;
-                   link.href = recordedVideoUrl;
-                   link.click();
-                   alert(`저장되었습니다!\n\n파일명: ${filename}`);
+                  const link = document.createElement('a');
+                  const now = new Date();
+                  const dateStr = now.getFullYear().toString().slice(-2) + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
+                  const timeStr = String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0') + String(now.getSeconds()).padStart(2, '0');
+                  const formatMemberName = (raw: string) => {
+                    const trimmed = (raw || '').trim();
+                    if (!trimmed || trimmed === '회원') return '회원님';
+                    if (trimmed.endsWith('회원님')) return trimmed;
+                    if (trimmed.endsWith('회원')) return `${trimmed}님`;
+                    return `${trimmed} 회원님`;
+                  };
+                  const name = formatMemberName(memberName);
+                  const currentModeLabel = MODE_CONFIGS.find(m => m.id === mode)?.label || mode;
+                  const filename = `${name}-${currentModeLabel}-영상-${dateStr}-${timeStr}.webm`;
+                  link.download = filename;
+                  link.href = recordedVideoUrl;
+                  link.click();
+                  alert(`저장되었습니다!\n\n파일명: ${filename}`);
                 }} className="shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full bg-blue-600 border border-white/40 shadow-lg transition-transform active:scale-95 hover:bg-blue-700 text-white flex items-center justify-center" title="다운로드"><Download className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
                 <button onClick={() => setShowGrid(!showGrid)} className={`shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${showGrid ? 'bg-blue-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="그리드"><Grid3X3 className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
                 <button onClick={() => setViewMode(v => v === '2d' ? '3d' : '2d')} className={`shrink-0 p-2 sm:p-3 md:p-3.5 rounded-full border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center justify-center ${viewMode === '3d' ? 'bg-orange-500/80 text-white' : 'bg-black/60 text-white hover:bg-black/80'}`} title="골격 표시 (3D)"><PersonStanding className="w-4 h-4 sm:w-5 sm:h-5 md:w-7 md:h-7" /></button>
@@ -821,11 +820,11 @@ function App() {
         {appMode === 'photo_upload' && (
           <div className="flex items-center justify-center gap-3 sm:gap-4 md:gap-6 w-full">
             {!uploadedImage && !uploadedVideo ? (
-              <button 
+              <button
                 onClick={() => {
                   triggerHaptic(50);
                   fileInputRef.current?.click();
-                }} 
+                }}
                 className="px-4 py-2.5 sm:px-6 sm:py-3.5 md:px-7 md:py-4 rounded-full bg-blue-600 border border-white/40 shadow-lg transition-transform active:scale-95 flex items-center gap-2 sm:gap-2.5 text-white font-bold text-xs sm:text-base md:text-lg hover:bg-blue-700"
               >
                 <Upload className="w-4 h-4 sm:w-6 sm:h-6 md:w-7 md:h-7" /> 앨범에서 사진/동영상 선택
@@ -869,9 +868,9 @@ function App() {
         )}
 
         {/* Global Program Exit Button */}
-        <button 
-          onClick={handleAppExit} 
-          className="absolute right-3 sm:right-6 bottom-[max(1.75rem,env(safe-area-inset-bottom))] sm:bottom-6 md:bottom-8 p-2.5 sm:p-3 md:p-3.5 rounded-full bg-red-600/90 hover:bg-red-700 text-white border border-white/40 shadow-[0_0_15px_rgba(239,68,68,0.6)] active:scale-95 transition-transform flex items-center justify-center shrink-0 z-50 pointer-events-auto" 
+        <button
+          onClick={handleAppExit}
+          className="absolute right-3 sm:right-6 bottom-[max(1.75rem,env(safe-area-inset-bottom))] sm:bottom-6 md:bottom-8 p-2.5 sm:p-3 md:p-3.5 rounded-full bg-red-600/90 hover:bg-red-700 text-white border border-white/40 shadow-[0_0_15px_rgba(239,68,68,0.6)] active:scale-95 transition-transform flex items-center justify-center shrink-0 z-50 pointer-events-auto"
           title="프로그램 종료 (메모리 해제)"
         >
           <Power className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
@@ -894,26 +893,26 @@ function App() {
       {/* AI Analysis Result Modal */}
       {analysisResult && (
         <div className="absolute inset-0 z-50 flex items-center justify-center p-4 md:p-8 bg-black/70 backdrop-blur-md" onClick={() => setAnalysisResult(null)}>
-          <div 
+          <div
             className="bg-gray-900 border border-white/20 rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-3 md:p-6 border-b border-white/10 flex justify-between items-center bg-black/30 gap-2 overflow-hidden">
               <h2 className="text-sm sm:text-lg md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 flex items-center gap-1.5 md:gap-2 whitespace-nowrap truncate">
-                <Sparkles className="w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8 text-purple-400 shrink-0" /> 
+                <Sparkles className="w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8 text-purple-400 shrink-0" />
                 <span className="truncate">AI 자세 분석 리포트</span>
                 <span className="text-xs sm:text-base md:text-lg text-purple-200/70 font-medium shrink-0 ml-0.5 md:ml-1">
                   ({MODE_CONFIGS.find(c => c.id === mode)?.label})
                 </span>
               </h2>
               <div className="flex gap-1.5 md:gap-2 shrink-0">
-                <button 
+                <button
                   onClick={handleSaveReport}
                   className="px-3 md:px-4 py-1 md:py-1.5 rounded-full bg-purple-600 text-white font-bold text-xs md:text-sm hover:bg-purple-700 transition-colors shadow-lg whitespace-nowrap shrink-0"
                 >
                   저장
                 </button>
-                <button 
+                <button
                   onClick={() => setAnalysisResult(null)}
                   className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors shrink-0"
                 >
@@ -924,9 +923,9 @@ function App() {
             <div className="p-0 overflow-y-auto custom-scrollbar flex-1 bg-gray-900">
               <div ref={reportRef} className="p-4 md:p-6 bg-gray-900 flex flex-col gap-6">
                 <div className="flex items-center justify-center gap-2 md:gap-3 pb-2 md:pb-4 border-b border-white/10">
-                  <Sparkles className="w-6 h-6 md:w-8 md:h-8 text-purple-400 shrink-0" /> 
+                  <Sparkles className="w-6 h-6 md:w-8 md:h-8 text-purple-400 shrink-0" />
                   <h2 className="text-xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 text-center">
-                    AI 자세 분석 리포트 
+                    AI 자세 분석 리포트
                     <span className="text-base md:text-xl text-purple-200/70 font-bold ml-2">
                       ({MODE_CONFIGS.find(c => c.id === mode)?.label})
                     </span>
@@ -949,9 +948,9 @@ function App() {
                 <div className="text-white prose prose-invert max-w-none break-keep leading-relaxed">
                   <ReactMarkdown
                     components={{
-                      h3: ({node, ...props}) => <h3 className="bg-gradient-to-r from-purple-900/80 to-indigo-900/80 text-purple-200 px-4 py-3 rounded-xl text-lg md:text-xl font-extrabold mt-8 mb-4 shadow-lg border border-purple-500/30" {...props} />,
-                      h2: ({node, ...props}) => <h2 className="bg-gradient-to-r from-purple-900/80 to-indigo-900/80 text-purple-200 px-4 py-3 rounded-xl text-lg md:text-xl font-extrabold mt-8 mb-4 shadow-lg border border-purple-500/30" {...props} />,
-                      h1: ({node, ...props}) => <h1 className="bg-gradient-to-r from-purple-900/80 to-indigo-900/80 text-purple-200 px-4 py-3 rounded-xl text-lg md:text-xl font-extrabold mt-8 mb-4 shadow-lg border border-purple-500/30" {...props} />
+                      h3: ({ node, ...props }) => <h3 className="bg-gradient-to-r from-purple-900/80 to-indigo-900/80 text-purple-200 px-4 py-3 rounded-xl text-lg md:text-xl font-extrabold mt-8 mb-4 shadow-lg border border-purple-500/30" {...props} />,
+                      h2: ({ node, ...props }) => <h2 className="bg-gradient-to-r from-purple-900/80 to-indigo-900/80 text-purple-200 px-4 py-3 rounded-xl text-lg md:text-xl font-extrabold mt-8 mb-4 shadow-lg border border-purple-500/30" {...props} />,
+                      h1: ({ node, ...props }) => <h1 className="bg-gradient-to-r from-purple-900/80 to-indigo-900/80 text-purple-200 px-4 py-3 rounded-xl text-lg md:text-xl font-extrabold mt-8 mb-4 shadow-lg border border-purple-500/30" {...props} />
                     }}
                   >
                     {analysisResult}
@@ -978,16 +977,19 @@ function App() {
                 type="password"
                 value={apiKeyInput}
                 onChange={(e) => setApiKeyInput(e.target.value)}
+                onCopy={(e) => e.preventDefault()}
+                onCut={(e) => e.preventDefault()}
+                onContextMenu={(e) => e.preventDefault()}
                 placeholder="AI Studio에서 발급받은 API Key 입력"
-                className="w-full px-4 py-3 bg-black/50 border border-white/20 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 transition-colors"
+                className="w-full px-4 py-3 bg-black/50 border border-white/20 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 transition-colors select-none"
               />
               <p className="text-xs text-gray-400 mt-2">
                 입력하신 키는 브라우저 로컬 스토리지에만 안전하게 저장됩니다.
               </p>
               <div className="mt-3">
-                <a 
-                  href="https://aistudio.google.com/app/apikey" 
-                  target="_blank" 
+                <a
+                  href="https://aistudio.google.com/app/apikey"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center text-sm text-purple-400 hover:text-purple-300 underline underline-offset-4"
                 >
