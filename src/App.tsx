@@ -788,13 +788,7 @@ function App() {
         </button>
       </div>
 
-      {/* Recording Indicator */}
-      {recordingState === 'recording' && (
-        <div className={`absolute top-24 right-6 z-40 flex items-center gap-2 bg-black/50 px-4 py-2 rounded-full border border-red-500/50 backdrop-blur-md pointer-events-none transition-opacity duration-300 ${showUI ? 'opacity-100' : 'opacity-0'}`}>
-          <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-          <span className="text-white font-bold text-sm md:text-base">REC</span>
-        </div>
-      )}
+
 
       {/* AI Analyzing Loading Modal */}
       {isAnalyzing && (
