@@ -393,19 +393,19 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
             
             const frames = capturedFramesRef.current;
             const keyFrames: string[] = [];
-            if (frames.length > 0) {
-              const numFrames = Math.min(3, frames.length);
-              if (numFrames === 1) {
-                keyFrames.push(frames[0]);
-              } else {
-                for (let i = 0; i < numFrames; i++) {
-                  const idx = Math.floor(i * (frames.length - 1) / (numFrames - 1));
-                  keyFrames.push(frames[idx]);
-                }
+            
+            if (frames.length >= 3) {
+              for (let i = 0; i < 3; i++) {
+                const idx = Math.floor(i * (frames.length - 1) / 2);
+                keyFrames.push(frames[idx]);
               }
+            } else if (frames.length === 2) {
+              keyFrames.push(frames[0], frames[1], frames[1]);
+            } else if (frames.length === 1) {
+              keyFrames.push(frames[0], frames[0], frames[0]);
             } else {
                const current = createCompositeImage('image/jpeg', 0.4);
-               if (current) keyFrames.push(current);
+               if (current) keyFrames.push(current, current, current);
             }
             
             resolve({ blob, frames: keyFrames });
