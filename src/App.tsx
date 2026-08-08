@@ -109,7 +109,85 @@ function App() {
     }
   };
 
+  const triggerHaptic = (pattern: number | number[] = 50) => {
+    try {
+      if ('vibrate' in navigator && typeof navigator.vibrate === 'function') {
+        navigator.vibrate(pattern);
+      }
+    } catch (e) {
+      console.warn('Haptic vibration failed:', e);
+    }
+  };
+
+  const playFeedbackSound = (type: 'capture' | 'record_start' | 'record_stop') => {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const now = ctx.currentTime;
+
+      if (type === 'capture') {
+        // High bright ding / shutter sound (1046Hz to 1567Hz)
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1046.5, now);
+        osc.frequency.exponentialRampToValueAtTime(1567.98, now + 0.08);
+
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.18);
+      } else if (type === 'record_start') {
+        // Record Start: Double pleasant chime tone
+        const osc1 = ctx.createOscillator();
+        const gain1 = ctx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(880, now);
+        gain1.gain.setValueAtTime(0.35, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+        osc1.connect(gain1);
+        gain1.connect(ctx.destination);
+        osc1.start(now);
+        osc1.stop(now + 0.12);
+
+        const osc2 = ctx.createOscillator();
+        const gain2 = ctx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(1318.5, now + 0.1);
+        gain2.gain.setValueAtTime(0.4, now + 0.1);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+        osc2.connect(gain2);
+        gain2.connect(ctx.destination);
+        osc2.start(now + 0.1);
+        osc2.stop(now + 0.28);
+      } else if (type === 'record_stop') {
+        // Record Stop: Descending finish tone
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1318.5, now);
+        osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.15);
+
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.2);
+      }
+    } catch (e) {
+      console.warn('Feedback sound failed:', e);
+    }
+  };
+
   const handleCapturePhoto = () => {
+    triggerHaptic(60);
+    playFeedbackSound('capture');
     if (trackerRef.current) {
       const shot = trackerRef.current.getCleanScreenshot() || trackerRef.current.getScreenshot();
       if (shot) setCurrentScreenshot(shot);
@@ -145,6 +223,8 @@ function App() {
   };
 
   const startRecordingFlow = () => {
+    triggerHaptic([40, 30, 40]);
+    playFeedbackSound('record_start');
     setRecordedFrames([]);
     setRecordedVideoUrl(null);
     setCurrentScreenshot(null);
@@ -157,6 +237,8 @@ function App() {
   };
 
   const stopRecording = async () => {
+    triggerHaptic(80);
+    playFeedbackSound('record_stop');
     setRecordingState('idle');
     if (trackerRef.current) {
       const { blob, frames } = await trackerRef.current.stopRecording();
