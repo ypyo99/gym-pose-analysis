@@ -258,11 +258,16 @@ function App() {
       }
     } catch (e) { }
 
+    setIsAppTerminated(true);
+
     try {
       window.close();
     } catch (e) { }
 
-    setIsAppTerminated(true);
+    // 강제로 브라우저 메모리에서 앱을 해제하기 위해 about:blank로 이동
+    setTimeout(() => {
+      window.location.replace('about:blank');
+    }, 1500); // 사용자에게 종료 화면을 잠시 보여준 후 메모리 완전 해제
   };
 
   const getAudioContext = (): AudioContext | null => {
