@@ -301,10 +301,28 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           if (webcamStream) {
             const audioTracks = webcamStream.getAudioTracks();
             if (audioTracks.length > 0) {
-              audioTracks.forEach(track => {
-                track.enabled = true;
-                stream.addTrack(track);
-              });
+              try {
+                // Web Audio API를 사용하여 볼륨(Gain) 증폭 (거치대에서 멀리 떨어져 촬영하는 헬스장 환경 고려)
+                const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+                const audioCtx = new AudioCtx();
+                const source = audioCtx.createMediaStreamSource(new MediaStream(audioTracks));
+                const gainNode = audioCtx.createGain();
+                gainNode.gain.value = 2.5; // 볼륨 2.5배 증폭
+                
+                const destination = audioCtx.createMediaStreamDestination();
+                source.connect(gainNode);
+                gainNode.connect(destination);
+                
+                destination.stream.getAudioTracks().forEach(track => {
+                  stream.addTrack(track);
+                });
+              } catch (e) {
+                console.warn("Audio gain boost failed, falling back to original tracks:", e);
+                audioTracks.forEach(track => {
+                  track.enabled = true;
+                  stream.addTrack(track);
+                });
+              }
             }
           }
 
@@ -1146,7 +1164,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           audioConstraints={{
             echoCancellation: false,
             noiseSuppression: false,
-            autoGainControl: false,
+            autoGainControl: true,
           }}
           muted={true}
           key={`${facingMode}_${cameraResetKey}`}
