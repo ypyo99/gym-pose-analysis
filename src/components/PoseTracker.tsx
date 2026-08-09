@@ -446,13 +446,33 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
     const videoWidth = (results.image as any).videoWidth || (results.image as any).naturalWidth || results.image.width;
     const videoHeight = (results.image as any).videoHeight || (results.image as any).naturalHeight || results.image.height;
 
+    // Filter out false positives (e.g. inanimate objects) by checking core landmark visibility
+    let isValidPose = false;
+    if (results.poseLandmarks) {
+      const coreLandmarks = [11, 12, 23, 24]; // Shoulders and hips
+      let visibleCoreCount = 0;
+      for (const idx of coreLandmarks) {
+        if ((results.poseLandmarks[idx]?.visibility || 0) > 0.5) {
+          visibleCoreCount++;
+        }
+      }
+      // Require at least one shoulder or hip to be clearly visible
+      if (visibleCoreCount >= 1) {
+        isValidPose = true;
+      }
+    }
+
     // Save 3D landmarks for 3D viewer
-    if (results.poseWorldLandmarks) {
+    if (isValidPose && results.poseWorldLandmarks) {
       setWorldLandmarks(results.poseWorldLandmarks);
       setPoseLandmarksData({ landmarks: results.poseLandmarks, width: videoWidth, height: videoHeight });
     } else {
       setWorldLandmarks(null);
       setPoseLandmarksData(null);
+      if (!isValidPose) {
+        results.poseLandmarks = undefined as any;
+        results.poseWorldLandmarks = undefined as any;
+      }
     }
 
     if (canvasRef.current.width !== videoWidth) {
@@ -910,8 +930,8 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
     pose.setOptions({
       modelComplexity: 1, // Full model for improved accuracy (changed from 0)
       smoothLandmarks: true,
-      minDetectionConfidence: 0.7, // Increased for more accurate detection
-      minTrackingConfidence: 0.7, // Increased for more accurate tracking
+      minDetectionConfidence: 0.85, // Increased further to prevent false positives on inanimate objects
+      minTrackingConfidence: 0.85, // Increased further to prevent false positives on inanimate objects
       selfieMode: false, // Keep false to avoid WebGL double-mirroring shader conflicts on front camera
     });
 
