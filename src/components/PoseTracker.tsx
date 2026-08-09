@@ -1168,6 +1168,8 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
             autoGainControl: true,
           }}
           muted={true}
+          playsInline={true}
+          disablePictureInPicture={true}
           key={`${facingMode}_${cameraResetKey}`}
           ref={webcamRef}
           mirrored={facingMode === 'user'}
