@@ -66,8 +66,9 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
       const dx = Math.abs(e.clientX - pointerDownPos.current.x);
       const dy = Math.abs(e.clientY - pointerDownPos.current.y);
       const dist = Math.sqrt(dx * dx + dy * dy);
-      // Only toggle UI if pointer movement is less than 5px (tap/click, not drag/rotate)
-      if (dist < 5 && onBackgroundClick) {
+      // Only toggle UI if pointer movement is less than 30px (tap/click, not drag/rotate)
+      // Increased from 5 to 30 to fix taps not registering in landscape mode on mobile
+      if (dist < 30 && onBackgroundClick) {
         onBackgroundClick();
       }
     }
