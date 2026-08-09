@@ -341,7 +341,7 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
 
           for (const type of candidateTypes) {
             if (MediaRecorder.isTypeSupported(type)) {
-              options = { mimeType: type };
+              options = { mimeType: type, audioBitsPerSecond: 128000, videoBitsPerSecond: 2500000 };
               break;
             }
           }
@@ -1144,9 +1144,9 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
         <Webcam
           audio={true}
           audioConstraints={{
-            echoCancellation: true,
-            noiseSuppression: true,
-            autoGainControl: true,
+            echoCancellation: false,
+            noiseSuppression: false,
+            autoGainControl: false,
           }}
           muted={true}
           key={`${facingMode}_${cameraResetKey}`}
