@@ -41,7 +41,7 @@ function App() {
   const [memberName, setMemberName] = useState<string>('');
   const [showGrid, setShowGrid] = useState<boolean>(false);
   const [viewMode, setViewMode] = useState<'2d' | '3d'>('2d');
-  const [facingMode, setFacingMode] = useState<'user' | 'environment'>(
+  const [facingMode] = useState<'user' | 'environment'>(
     /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? 'environment' : 'user'
   );
   const [showUI, setShowUI] = useState<boolean>(true);
