@@ -1214,8 +1214,8 @@ const PoseTracker = forwardRef<PoseTrackerRef, PoseTrackerProps>(({ mode, showGr
           autoPlay
           loop
           muted={false}
-          playsInline
-          controls
+          playsInline={true}
+          disablePictureInPicture={true}
           onLoadedData={(e) => {
             (e.target as HTMLVideoElement).play().catch(err => console.warn("Video play error:", err));
           }}
